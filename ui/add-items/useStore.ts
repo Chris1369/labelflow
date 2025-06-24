@@ -23,7 +23,6 @@ interface AddItemsActions {
   deleteBoundingBox: (id: string) => void;
   setLabelForBox: (id: string, label: string) => void;
   resetCapture: () => void;
-  saveAllItems: () => void;
 }
 
 const createInitialBox = (): BoundingBox => ({
@@ -115,31 +114,6 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
         showSaveButton: false,
         isCapturing: false,
       });
-    },
-
-    saveAllItems: () => {
-      const { boundingBoxes, capturedImageUri } = get();
-      const completedBoxes = boundingBoxes.filter((box) => box.isComplete);
-
-      console.log(
-        "Saving items:",
-        JSON.stringify(
-          {
-            image: capturedImageUri,
-            items: completedBoxes.map((box) => ({
-              label: box.label,
-              position: [
-                box.centerX.toFixed(4), // X center as percentage
-                box.centerY.toFixed(4), // Y center as percentage
-                box.width.toFixed(4), // Width as percentage
-                box.height.toFixed(4), // Height as percentage
-              ],
-            })),
-          },
-          null,
-          2
-        )
-      );
     },
   })
 );

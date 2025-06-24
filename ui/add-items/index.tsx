@@ -16,8 +16,10 @@ import { LabelBottomSheet, LabelBottomSheetRef } from "../../components/organism
 import { theme } from "../../types/theme";
 import { useAddItemsStore } from "./useStore";
 import { addItemsActions } from "./actions";
+import { useLocalSearchParams } from "expo-router";
 
 export const AddItemsScreen: React.FC = () => {
+  const { id: projectId } = useLocalSearchParams();
   const cameraRef = useRef<any>(null);
   const bottomSheetRef = useRef<LabelBottomSheetRef>(null);
   const [imageSize, setImageSize] = React.useState({ width: 0, height: 0 });
@@ -64,7 +66,7 @@ export const AddItemsScreen: React.FC = () => {
     if (!currentBoxId) return;
     const currentBox = boundingBoxes.find(box => box.id === currentBoxId);
     if (!currentBox) return;
-    
+
     const newRotation = currentBox.rotation + (direction === "right" ? 15 : -15);
     useAddItemsStore.getState().updateBoundingBox(currentBoxId, { rotation: newRotation });
   };
@@ -75,7 +77,7 @@ export const AddItemsScreen: React.FC = () => {
       bottomSheetRef.current?.open();
     } else {
       // Save all items
-      addItemsActions.saveAllItems();
+      addItemsActions.saveAllItems(projectId as string);
     }
   };
 
@@ -116,7 +118,6 @@ export const AddItemsScreen: React.FC = () => {
       </View>
     );
   }
-
   if (capturedImageUri) {
     return (
       <View style={styles.container}>
@@ -148,7 +149,7 @@ export const AddItemsScreen: React.FC = () => {
             />
             {/* Label display */}
             {box.label && (
-              <View 
+              <View
                 style={[
                   styles.labelBadge,
                   {
@@ -204,11 +205,11 @@ export const AddItemsScreen: React.FC = () => {
                   style={{ transform: [{ scaleX: -1 }] }}
                 />
               </TouchableOpacity>
-              
+
               <Text style={styles.rotationText}>
                 {boundingBoxes.find(b => b.id === currentBoxId)?.rotation || 0}°
               </Text>
-              
+
               <TouchableOpacity
                 style={styles.rotationButton}
                 onPress={() => handleRotate("right")}

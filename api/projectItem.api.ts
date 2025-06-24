@@ -38,6 +38,18 @@ class ProjectItemAPI extends BaseAPI<
     }
   }
 
+  async addProjectItems(formData: FormData): Promise<void> {
+    try {
+      await axiosInstance.post(`${this.basePath}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
   async uploadImage(projectId: string, formData: FormData): Promise<string> {
     try {
       const response = await axiosInstance.post(

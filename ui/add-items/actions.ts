@@ -1,6 +1,8 @@
 import { Camera } from 'expo-camera';
 import { useAddItemsStore } from './useStore';
 import { Alert } from 'react-native';
+import { projectItemAPI } from '@/api/projectItem.api';
+import { router } from 'expo-router';
 
 export const addItemsActions = {
   requestCameraPermission: async () => {
@@ -65,9 +67,30 @@ export const addItemsActions = {
     return false;
   },
 
-  saveAllItems: () => {
-    useAddItemsStore.getState().saveAllItems();
-    // TODO: Navigate back or show success message
+  saveAllItems: async (projectId: string) => {
+    const { boundingBoxes, capturedImageUri } = useAddItemsStore.getState();
+    const completedBoxes = boundingBoxes.filter((box) => box.isComplete);
+
+    const formData = new FormData();
+    formData.append("file", {
+      uri: capturedImageUri,
+      name: "image.jpg",
+      type: "image/jpeg",
+    } as any);
+    formData.append("projectId", projectId);
+    formData.append("labels", JSON.stringify(completedBoxes.map((box) => ({
+      name: box.label,
+      position: [
+        box.centerX.toFixed(4), // X center as percentage
+        box.centerY.toFixed(4), // Y center as percentage
+        box.width.toFixed(4), // Width as percentage
+        box.height.toFixed(4), // Height as percentage
+      ],
+    }))));
+
+    await projectItemAPI.addProjectItems(formData);
+    // retour back
+    router.back();
   },
 
   updateBoxPosition: (centerX: number, centerY: number) => {
