@@ -1,7 +1,7 @@
-import axiosInstance from './axiosInstance';
-import { handleApiResponse, handleApiError } from './responseHelper';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StorageKeys } from '@/helpers/StorageKeys';
+import axiosInstance from "./axiosInstance";
+import { handleApiResponse, handleApiError } from "./responseHelper";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StorageKeys } from "@/helpers/StorageKeys";
 import {
   LoginRequest,
   RegisterRequest,
@@ -12,10 +12,10 @@ import {
   RefreshTokenRequest,
   RefreshTokenResponse,
   User,
-} from '@/types/auth';
+} from "@/types/auth";
 
 class AuthAPI {
-  private readonly basePath = '/auth';
+  private readonly basePath = "/auth";
 
   async login(data: LoginRequest): Promise<AuthResponse> {
     try {
@@ -29,7 +29,7 @@ class AuthAPI {
         [StorageKeys.REFRESH_TOKEN, authData.tokens.refreshToken],
         [StorageKeys.USER_DATA, JSON.stringify(authData.user)],
       ]);
-      
+
       return authData;
     } catch (error) {
       throw handleApiError(error);
@@ -38,16 +38,19 @@ class AuthAPI {
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
     try {
-      const response = await axiosInstance.post(`${this.basePath}/register`, data);
+      const response = await axiosInstance.post(
+        `${this.basePath}/register`,
+        data
+      );
       const authData = handleApiResponse<AuthResponse>(response);
-      
+
       // Store tokens and user data
       await AsyncStorage.multiSet([
         [StorageKeys.ACCESS_TOKEN, authData.tokens.accessToken],
         [StorageKeys.REFRESH_TOKEN, authData.tokens.refreshToken],
         [StorageKeys.USER_DATA, JSON.stringify(authData.user)],
       ]);
-      
+
       return authData;
     } catch (error) {
       throw handleApiError(error);
@@ -56,7 +59,10 @@ class AuthAPI {
 
   async forgotPassword(data: ForgotPasswordRequest): Promise<void> {
     try {
-      const response = await axiosInstance.post(`${this.basePath}/forgot-password`, data);
+      const response = await axiosInstance.post(
+        `${this.basePath}/forgot-password`,
+        data
+      );
       handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
@@ -64,8 +70,12 @@ class AuthAPI {
   }
 
   async resetPassword(data: ResetPasswordRequest): Promise<void> {
+    console.log("resetPassword", data);
     try {
-      const response = await axiosInstance.post(`${this.basePath}/reset-password`, data);
+      const response = await axiosInstance.post(
+        `${this.basePath}/reset-password`,
+        data
+      );
       handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
@@ -74,7 +84,10 @@ class AuthAPI {
 
   async verifyOTP(data: VerifyOTPRequest): Promise<void> {
     try {
-      const response = await axiosInstance.post(`${this.basePath}/verify-otp`, data);
+      const response = await axiosInstance.post(
+        `${this.basePath}/verify-otp`,
+        data
+      );
       handleApiResponse(response);
     } catch (error) {
       throw handleApiError(error);
@@ -83,7 +96,10 @@ class AuthAPI {
 
   async refreshToken(data: RefreshTokenRequest): Promise<RefreshTokenResponse> {
     try {
-      const response = await axiosInstance.post(`${this.basePath}/refresh`, data);
+      const response = await axiosInstance.post(
+        `${this.basePath}/refresh`,
+        data
+      );
       return handleApiResponse<RefreshTokenResponse>(response);
     } catch (error) {
       throw handleApiError(error);
@@ -115,12 +131,15 @@ class AuthAPI {
 
   async updateProfile(data: Partial<User>): Promise<User> {
     try {
-      const response = await axiosInstance.put(`${this.basePath}/profile`, data);
+      const response = await axiosInstance.put(
+        `${this.basePath}/profile`,
+        data
+      );
       const user = handleApiResponse<User>(response);
-      
+
       // Update stored user data
       await AsyncStorage.setItem(StorageKeys.USER_DATA, JSON.stringify(user));
-      
+
       return user;
     } catch (error) {
       throw handleApiError(error);

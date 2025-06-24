@@ -2,7 +2,7 @@ export const environment = process.env.APP_VARIANT || "development";
 const IS_DEV = environment === "development";
 const IS_STAGING = environment === "staging";
 const IS_PRODUCTION = environment === "production";
-const IP = "172.20.10.5";
+const IP = "192.168.1.230";
 
 interface EnvironmentValues {
   name: string;
@@ -21,7 +21,7 @@ export function getEnvironmentValues(): EnvironmentValues {
       icon: "./assets/icon.png", // Using existing icon for now
       adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
       package: "com.labeltool.dev",
-      BASE_URL: `http://${IP}:8080/`,
+      BASE_URL: `http://${IP}:3000/`,
       VERSION: "v1.0",
       PROJECT_NAME: "labelflow-api",
     };

@@ -1,26 +1,32 @@
-import axios, { AxiosInstance } from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getEnvironmentConfig } from '@/helpers/environment';
-import { StorageKeys } from '@/helpers/StorageKeys';
+import axios, { AxiosInstance } from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StorageKeys } from "@/helpers/StorageKeys";
+import { getEnvironmentValues } from "@/app.config";
 
-const { apiUrl, version, projectName } = getEnvironmentConfig();
+const { BASE_URL, VERSION, PROJECT_NAME } = getEnvironmentValues();
+
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: apiUrl+version+'/'+projectName,
+  baseURL: `${BASE_URL}${VERSION}/${PROJECT_NAME}`,
   timeout: 30000,
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
 });
 
 // Request interceptor
 axiosInstance.interceptors.request.use(
   async (config) => {
+    console.log(
+      "BASE_URL",
+      `${BASE_URL}${VERSION}/${PROJECT_NAME}${config.url}`
+    );
+
     const token = await AsyncStorage.getItem(StorageKeys.ACCESS_TOKEN);
-    
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
@@ -33,23 +39,31 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
+
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      
+
       try {
-        const refreshToken = await AsyncStorage.getItem(StorageKeys.REFRESH_TOKEN);
-        
+        const refreshToken = await AsyncStorage.getItem(
+          StorageKeys.REFRESH_TOKEN
+        );
+
         if (refreshToken) {
-          const response = await axios.post(`${apiUrl}/auth/refresh`, {
-            refreshToken,
-          });
-          
+          const response = await axios.post(
+            `${BASE_URL}${VERSION}/${PROJECT_NAME}/auth/refresh`,
+            {
+              refreshToken,
+            }
+          );
+
           const { accessToken, refreshToken: newRefreshToken } = response.data;
-          
+
           await AsyncStorage.setItem(StorageKeys.ACCESS_TOKEN, accessToken);
-          await AsyncStorage.setItem(StorageKeys.REFRESH_TOKEN, newRefreshToken);
-          
+          await AsyncStorage.setItem(
+            StorageKeys.REFRESH_TOKEN,
+            newRefreshToken
+          );
+
           originalRequest.headers.Authorization = `Bearer ${accessToken}`;
           return axiosInstance(originalRequest);
         }
@@ -60,11 +74,11 @@ axiosInstance.interceptors.response.use(
           StorageKeys.REFRESH_TOKEN,
           StorageKeys.USER_DATA,
         ]);
-        
+
         // TODO: Navigate to login screen
       }
     }
-    
+
     return Promise.reject(error);
   }
 );
