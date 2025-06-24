@@ -2,7 +2,7 @@ import { AxiosError, AxiosResponse } from 'axios';
 import { ApiResponse, ApiError } from '@/types/api';
 
 export const handleApiResponse = <T = any>(response: AxiosResponse<ApiResponse<T>>): T => {
-  if (response.data.success && response.data.data) {
+  if (response.data.data) {
     return response.data.data;
   }
   
