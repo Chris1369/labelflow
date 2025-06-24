@@ -20,9 +20,9 @@ export function getEnvironmentValues(): EnvironmentValues {
       icon: "./assets/icon.png", // Using existing icon for now
       adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
       package: "com.labeltool.dev",
-      BASE_URL: "http://localhost:3000/",
+      BASE_URL: "http://localhost:8080/",
       VERSION: "v1.0",
-      PROJECT_NAME: "labeltool-api-dev",
+      PROJECT_NAME: "labelflow-api",
     };
   }
   if (IS_STAGING) {
@@ -33,7 +33,7 @@ export function getEnvironmentValues(): EnvironmentValues {
       package: "com.labeltool.staging",
       BASE_URL: "https://staging-api.labeltool.com/",
       VERSION: "v1.0",
-      PROJECT_NAME: "labeltool-api-staging",
+      PROJECT_NAME: "labelflow-api",
     };
   }
   // Production
@@ -44,20 +44,20 @@ export function getEnvironmentValues(): EnvironmentValues {
     package: "com.labeltool.app",
     BASE_URL: "https://api.labeltool.com/",
     VERSION: "v1.0",
-    PROJECT_NAME: "labeltool-api",
+    PROJECT_NAME: "labelflow-api",
   };
 }
 
 export default {
   expo: {
     name: getEnvironmentValues().name,
-    slug: "labeltool-app",
+    slug: "labelflow",
     version: "1.0.0",
     orientation: "portrait",
     icon: getEnvironmentValues().icon,
     userInterfaceStyle: "light",
     newArchEnabled: true,
-    scheme: "labeltool-app",
+    scheme: "labelflow",
     splash: {
       image: "./assets/splash-icon.png",
       resizeMode: "contain",
@@ -70,8 +70,10 @@ export default {
         usesNonExemptEncryption: false,
       },
       infoPlist: {
-        NSCameraUsageDescription: "Cette app a besoin d'acc�der � votre cam�ra pour capturer des images � labelliser.",
-        NSPhotoLibraryUsageDescription: "Cette app a besoin d'acc�der � votre galerie photo pour importer des images.",
+        NSCameraUsageDescription:
+          "Cette app a besoin d'acc�der � votre cam�ra pour capturer des images � labelliser.",
+        NSPhotoLibraryUsageDescription:
+          "Cette app a besoin d'acc�der � votre galerie photo pour importer des images.",
       },
     },
     android: {
@@ -95,9 +97,7 @@ export default {
       enabled: !IS_DEV,
       fallbackToCacheTimeout: 30000,
     },
-    assetBundlePatterns: [
-      "**/*"
-    ],
+    assetBundlePatterns: ["**/*"],
     extra: {
       router: {
         origin: false,

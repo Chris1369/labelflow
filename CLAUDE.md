@@ -27,6 +27,7 @@
 - **Framework** : Expo avec expo-router
 - **State Management** : Zustand (PAS de useState)
 - **Navigation** : expo-router
+- **Imports** : Utilisation des alias avec `@/` (configuré dans tsconfig.json)
 
 ## Règles de développement
 
@@ -50,6 +51,10 @@ create<State & Actions>((set, get) => ({
 - `index.tsx` : Uniquement l'UI, pas de logique ni de state
 - `actions.ts` : Toute la logique métier
 - `useStore.ts` : Gestion de l'état avec Zustand
+
+### 3.1 Imports
+- **Toujours utiliser les alias `@/`** pour les imports (ex: `import { theme } from '@/types/theme'`)
+- Ne jamais utiliser les imports relatifs `../` ou `../../`
 
 ### 4. Thème et couleurs
 - Primary : `#FF7557`
@@ -144,6 +149,40 @@ const { apiUrl, environment, version } = getEnvironmentConfig();
 - `npx expo start -c` : Démarrer avec cache nettoyé
 - `APP_VARIANT=staging npm start` : Démarrer en environnement staging
 - `APP_VARIANT=production npm start` : Démarrer en environnement production
+
+## Architecture API
+
+### Structure des dossiers /api
+- **axiosInstance.ts** : Configuration axios avec intercepteurs pour auth
+- **responseHelper.ts** : Gestion standardisée des réponses et erreurs
+- **baseAPI.ts** : Classe abstraite pour les opérations CRUD standard
+- **auth.api.ts** : API d'authentification
+- Autres APIs suivent le pattern : `[feature].api.ts`
+
+### Pattern API standard
+Chaque API suit généralement cette structure :
+- `create` : POST - Créer une ressource
+- `getAll` : GET - Récupérer toutes les ressources (avec pagination)
+- `getOne` : GET - Récupérer une ressource par ID
+- `update` : PUT - Mettre à jour une ressource
+- `delete` : DELETE - Supprimer une ressource
+- `other` : Pour les cas spéciaux
+
+### StorageKeys
+Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
+- Préfixe : `@labeltool:`
+- Auth : tokens, user data
+- App : settings, préférences
+- Cache : données mises en cache
+
+### Types
+- **auth.ts** : Types pour l'authentification (User, LoginRequest, etc.)
+- **api.ts** : Types génériques API (ApiResponse, PaginatedResponse, etc.)
+
+### Gestion des erreurs
+- Intercepteur axios pour le refresh token automatique
+- `handleApiError` pour formater les erreurs de manière cohérente
+- Logout automatique si refresh token échoue
 
 ## Notes importantes
 - Toujours créer des fichiers de types

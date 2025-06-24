@@ -1,25 +1,26 @@
 import { create } from 'zustand';
-import { SignInForm, AuthError } from '@/types/auth';
+import { SignUpForm, AuthError } from '@/types/auth';
 
-interface SignInState {
-  form: SignInForm;
+interface SignUpState {
+  form: SignUpForm;
   isLoading: boolean;
   error: AuthError | null;
 }
 
-interface SignInActions {
-  setFormField: (field: keyof SignInForm, value: string) => void;
+interface SignUpActions {
+  setFormField: (field: keyof SignUpForm, value: string) => void;
   setError: (error: AuthError | null) => void;
   setLoading: (isLoading: boolean) => void;
   resetForm: () => void;
 }
 
-const initialForm: SignInForm = {
+const initialForm: SignUpForm = {
   email: '',
   password: '',
+  name: '',
 };
 
-export const useSignInStore = create<SignInState & SignInActions>((set, get) => ({
+export const useSignUpStore = create<SignUpState & SignUpActions>((set, get) => ({
   form: initialForm,
   isLoading: false,
   error: null,

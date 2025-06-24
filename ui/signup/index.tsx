@@ -12,14 +12,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Button, Input } from '@/components/atoms';
 import { theme } from '@/types/theme';
-import { useSignInStore } from './useStore';
-import { signInActions } from './actions';
+import { useSignUpStore } from './useStore';
+import { signUpActions } from './actions';
 import { useAuth } from '@/contexts/AuthContext';
-import { router } from 'expo-router';
 
-export const SignInScreen: React.FC = () => {
-  const { form, isLoading, error, setError, setLoading } = useSignInStore();
-  const { login } = useAuth();
+export const SignUpScreen: React.FC = () => {
+  const { form, isLoading, error, setError, setLoading } = useSignUpStore();
+  const { register } = useAuth();
 
   return (
     <SafeAreaView style={styles.container}>
@@ -32,55 +31,58 @@ export const SignInScreen: React.FC = () => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.header}>
-            <Text style={styles.title}>Welcome Back</Text>
-            <Text style={styles.subtitle}>Sign in to continue</Text>
+            <Text style={styles.title}>Create Account</Text>
+            <Text style={styles.subtitle}>Sign up to get started</Text>
           </View>
 
           <View style={styles.form}>
             <Input
+              label="Name"
+              type="text"
+              icon="person"
+              placeholder="Enter your name"
+              value={form.name}
+              onChangeText={signUpActions.handleNameChange}
+              error={error?.code === 'name' ? error.message : undefined}
+            />
+
+            <Input
               label="Email"
               type="email"
-              icon="mail-outline"
+              icon="mail"
               placeholder="Enter your email"
               value={form.email}
-              onChangeText={signInActions.handleEmailChange}
+              onChangeText={signUpActions.handleEmailChange}
               error={error?.code === 'email' ? error.message : undefined}
             />
 
             <Input
               label="Password"
               type="password"
-              icon="lock-closed-outline"
-              placeholder="Enter your password"
+              icon="lock-closed"
+              placeholder="Create a password"
               value={form.password}
-              onChangeText={signInActions.handlePasswordChange}
+              onChangeText={signUpActions.handlePasswordChange}
               error={error?.code === 'password' ? error.message : undefined}
             />
-
-            <TouchableOpacity
-              style={styles.forgotPassword}
-              onPress={signInActions.handleForgotPassword}
-            >
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
 
             {error && !error.code && (
               <Text style={styles.errorText}>{error.message}</Text>
             )}
 
             <Button
-              title="Sign In"
+              title="Sign Up"
               onPress={async () => {
-                if (!signInActions.validateForm()) return;
+                if (!signUpActions.validateForm()) return;
                 
                 setLoading(true);
                 setError(null);
                 
                 try {
-                  await login(form.email, form.password);
+                  await register(form.email, form.password, form.name);
                 } catch (error: any) {
                   setError({
-                    message: error.response?.data?.message || 'Invalid email or password',
+                    message: error.response?.data?.message || 'Failed to create account',
                   });
                 } finally {
                   setLoading(false);
@@ -88,12 +90,12 @@ export const SignInScreen: React.FC = () => {
               }}
               loading={isLoading}
               size="large"
-              style={styles.signInButton}
+              style={styles.signUpButton}
             />
 
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Or continue with</Text>
+              <Text style={styles.dividerText}>Or sign up with</Text>
               <View style={styles.dividerLine} />
             </View>
 
@@ -102,7 +104,7 @@ export const SignInScreen: React.FC = () => {
                 title="Google"
                 onPress={() => {
                   // TODO: Implement Google OAuth
-                  setError({ message: 'Google sign-in not yet implemented' });
+                  setError({ message: 'Google sign-up not yet implemented' });
                 }}
                 variant="outline"
                 disabled={isLoading}
@@ -120,7 +122,7 @@ export const SignInScreen: React.FC = () => {
                 title="Apple"
                 onPress={() => {
                   // TODO: Implement Apple OAuth
-                  setError({ message: 'Apple sign-in not yet implemented' });
+                  setError({ message: 'Apple sign-up not yet implemented' });
                 }}
                 variant="outline"
                 disabled={isLoading}
@@ -138,11 +140,11 @@ export const SignInScreen: React.FC = () => {
 
           <TouchableOpacity 
             style={styles.footer}
-            onPress={() => router.push('/(auth)/signup')}
+            onPress={signUpActions.navigateToSignIn}
           >
             <Text style={styles.footerText}>
-              Don't have an account?{' '}
-              <Text style={styles.signUpLink}>Sign Up</Text>
+              Already have an account?{' '}
+              <Text style={styles.signInLink}>Sign In</Text>
             </Text>
           </TouchableOpacity>
         </ScrollView>
@@ -181,21 +183,14 @@ const styles = StyleSheet.create({
   form: {
     marginBottom: theme.spacing.xl,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: theme.spacing.lg,
-  },
-  forgotPasswordText: {
-    color: theme.colors.primary,
-    fontSize: theme.fontSize.sm,
-  },
   errorText: {
     color: theme.colors.error,
     fontSize: theme.fontSize.sm,
     marginBottom: theme.spacing.md,
     textAlign: 'center',
   },
-  signInButton: {
+  signUpButton: {
+    marginTop: theme.spacing.lg,
     marginBottom: theme.spacing.lg,
   },
   divider: {
@@ -230,7 +225,7 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.sm,
     color: theme.colors.textSecondary,
   },
-  signUpLink: {
+  signInLink: {
     color: theme.colors.primary,
     fontWeight: '600',
   },

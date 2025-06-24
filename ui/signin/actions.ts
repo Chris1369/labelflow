@@ -1,5 +1,4 @@
 import { useSignInStore } from './useStore';
-import { AuthProvider } from '../../types/auth';
 import { router } from 'expo-router';
 
 export const signInActions = {
@@ -9,34 +8,6 @@ export const signInActions = {
 
   handlePasswordChange: (password: string) => {
     useSignInStore.getState().setFormField('password', password);
-  },
-
-  handleSignIn: async () => {
-    const { form, signInWithEmail } = useSignInStore.getState();
-    
-    if (!form.email || !form.password) {
-      useSignInStore.getState().setError({
-        message: 'Please fill in all fields',
-      });
-      return;
-    }
-
-    await signInWithEmail();
-    
-    const { user } = useSignInStore.getState();
-    if (user) {
-      router.replace('/(main)/home');
-    }
-  },
-
-  handleSocialSignIn: async (provider: AuthProvider) => {
-    const { signInWithProvider } = useSignInStore.getState();
-    await signInWithProvider(provider);
-    
-    const { user } = useSignInStore.getState();
-    if (user) {
-      router.replace('/(main)/home');
-    }
   },
 
   handleForgotPassword: () => {
