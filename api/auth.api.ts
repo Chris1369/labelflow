@@ -20,16 +20,16 @@ class AuthAPI {
   async login(data: LoginRequest): Promise<AuthResponse> {
     try {
       const response = await axiosInstance.post(`${this.basePath}/login`, data);
-      const authData = handleApiResponse<AuthResponse>(response);
+      // const authData = handleApiResponse<AuthResponse>(response);
       
       // Store tokens and user data
       await AsyncStorage.multiSet([
-        [StorageKeys.ACCESS_TOKEN, authData.tokens.accessToken],
-        [StorageKeys.REFRESH_TOKEN, authData.tokens.refreshToken],
-        [StorageKeys.USER_DATA, JSON.stringify(authData.user)],
+        [StorageKeys.ACCESS_TOKEN, response.data.tokens.accessToken],
+        [StorageKeys.REFRESH_TOKEN, response.data.tokens.refreshToken],
+        [StorageKeys.USER_DATA, JSON.stringify(response.data.user)],
       ]);
       
-      return authData;
+      return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
@@ -38,16 +38,16 @@ class AuthAPI {
   async register(data: RegisterRequest): Promise<AuthResponse> {
     try {
       const response = await axiosInstance.post(`/users`, data);
-      const authData = handleApiResponse<AuthResponse>(response);
+      // const authData = handleApiResponse<AuthResponse>(response);
       
       // Store tokens and user data
       await AsyncStorage.multiSet([
-        [StorageKeys.ACCESS_TOKEN, authData.tokens.accessToken],
-        [StorageKeys.REFRESH_TOKEN, authData.tokens.refreshToken],
-        [StorageKeys.USER_DATA, JSON.stringify(authData.user)],
+        [StorageKeys.ACCESS_TOKEN, response.data.tokens.accessToken],
+        [StorageKeys.REFRESH_TOKEN, response.data.tokens.refreshToken],
+        [StorageKeys.USER_DATA, JSON.stringify(response.data.user)],
       ]);
       
-      return authData;
+      return response.data;
     } catch (error) {
       throw handleApiError(error);
     }
