@@ -5,20 +5,21 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Input } from '../../components/atoms';
-import { theme } from '../../types/theme';
+import { Input } from '@/components/atoms';
+import { theme } from '@/types/theme';
 import { useSelectTeamStore } from './useStore';
 import { selectTeamActions } from './actions';
-import { mockTeams, Team } from '../../mock/teams';
+import { Team } from '@/types/team';
 
 export const SelectTeamScreen: React.FC = () => {
-  const { filteredTeams, searchQuery } = useSelectTeamStore();
+  const { filteredTeams, searchQuery, isLoading, error } = useSelectTeamStore();
 
   useEffect(() => {
-    selectTeamActions.loadTeams(mockTeams);
+    useSelectTeamStore.getState().loadTeams();
     return () => {
       useSelectTeamStore.getState().resetSelection();
     };
@@ -33,11 +34,6 @@ export const SelectTeamScreen: React.FC = () => {
       <View style={styles.teamHeader}>
         <View style={styles.teamInfo}>
           <Text style={styles.teamName}>{item.name}</Text>
-          {item.isOwner && (
-            <View style={styles.ownerBadge}>
-              <Text style={styles.ownerText}>Propriétaire</Text>
-            </View>
-          )}
         </View>
         <Ionicons
           name="chevron-forward"
@@ -51,11 +47,11 @@ export const SelectTeamScreen: React.FC = () => {
       <View style={styles.teamStats}>
         <View style={styles.stat}>
           <Ionicons name="people" size={16} color={theme.colors.textSecondary} />
-          <Text style={styles.statText}>{item.memberCount} membres</Text>
+          <Text style={styles.statText}>{item.members?.length || 0} membres</Text>
         </View>
         <View style={styles.stat}>
           <Ionicons name="folder" size={16} color={theme.colors.textSecondary} />
-          <Text style={styles.statText}>{item.projectCount} projets</Text>
+          <Text style={styles.statText}>{item.projectId?.length || 0} projets</Text>
         </View>
         <View style={styles.stat}>
           <Ionicons name="calendar" size={16} color={theme.colors.textSecondary} />
@@ -93,15 +89,32 @@ export const SelectTeamScreen: React.FC = () => {
         />
       </View>
 
-      <FlatList
-        data={filteredTeams}
-        keyExtractor={(item) => item.id}
-        renderItem={renderTeam}
-        contentContainerStyle={styles.listContent}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        ListEmptyComponent={renderEmptyState}
-        showsVerticalScrollIndicator={false}
-      />
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Chargement des équipes...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => useSelectTeamStore.getState().loadTeams()}
+          >
+            <Text style={styles.retryText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredTeams}
+          keyExtractor={(item) => item.id}
+          renderItem={renderTeam}
+          contentContainerStyle={styles.listContent}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListEmptyComponent={renderEmptyState}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
 
     </SafeAreaView>
   );
@@ -205,6 +218,39 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   createButtonText: {
+    color: theme.colors.secondary,
+    fontSize: theme.fontSize.md,
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: theme.spacing.md,
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing.xl,
+  },
+  errorText: {
+    fontSize: theme.fontSize.md,
+    color: theme.colors.error,
+    textAlign: 'center',
+    marginBottom: theme.spacing.lg,
+  },
+  retryButton: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.md,
+  },
+  retryText: {
     color: theme.colors.secondary,
     fontSize: theme.fontSize.md,
     fontWeight: '600',

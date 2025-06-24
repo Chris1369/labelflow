@@ -24,10 +24,10 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
 
       const user: User = JSON.parse(userDataStr);
 
-      // Ajouter l'owner et initialiser les tableaux vides
+      // Ajouter l'ownerId et initialiser les tableaux vides
       const requestData = {
         ...data,
-        owner: user.id,
+        ownerId: user.id,
         projectId: data.projectId || [],
         members: data.members || [user.id], // Ajouter automatiquement le créateur comme membre
       };
@@ -48,11 +48,23 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
 
       const user: User = JSON.parse(userDataStr);
 
-      // Récupérer les teams où l'utilisateur est owner ou membre
-      const response = await axiosInstance.get(`${this.basePath}/my-teams`);
+      // Utiliser l'endpoint /teams/owner/:ownerId
+      const response = await axiosInstance.get(`${this.basePath}/owner/${user.id}`);
 
-      const result = handleApiResponse<Team[]>(response);
-      return result;
+      // La réponse peut avoir une structure paginée similaire aux projects
+      const result = handleApiResponse<{
+        teams?: Team[];
+        total?: number;
+        totalPage?: number;
+        page?: number;
+        limit?: number;
+      } | Team[]>(response);
+      
+      // Gérer les deux types de réponse possibles
+      if (Array.isArray(result)) {
+        return result;
+      }
+      return result.teams || [];
     } catch (error) {
       throw handleApiError(error);
     }
@@ -64,8 +76,20 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
         `${this.basePath}/owner/${ownerId}`
       );
 
-      const result = handleApiResponse<Team[]>(response);
-      return result;
+      // La réponse peut avoir une structure paginée similaire aux projects
+      const result = handleApiResponse<{
+        teams?: Team[];
+        total?: number;
+        totalPage?: number;
+        page?: number;
+        limit?: number;
+      } | Team[]>(response);
+      
+      // Gérer les deux types de réponse possibles
+      if (Array.isArray(result)) {
+        return result;
+      }
+      return result.teams || [];
     } catch (error) {
       throw handleApiError(error);
     }

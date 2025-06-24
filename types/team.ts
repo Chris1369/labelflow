@@ -5,7 +5,7 @@ export interface Team {
   description: string;
   projectId: string[]; // Array of Project IDs
   members: string[]; // Array of User IDs
-  owner: string; // User ID
+  ownerId: string; // User ID
   createdAt: string;
   updatedAt: string;
   __v?: number; // MongoDB version key
@@ -16,7 +16,7 @@ export interface CreateTeamRequest {
   description: string;
   projectId?: string[]; // Optional car peut être vide au début
   members?: string[]; // Optional car peut être vide au début
-  owner?: string; // Optional car on peut le récupérer du user connecté
+  ownerId?: string; // Optional car on peut le récupérer du user connecté
 }
 
 export interface UpdateTeamRequest {
@@ -42,7 +42,7 @@ export interface TeamInvitation {
   id: string;
   teamId: string;
   email: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  status: "pending" | "accepted" | "rejected";
   invitedBy: string;
   createdAt: string;
   expiresAt: string;

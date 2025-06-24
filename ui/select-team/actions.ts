@@ -1,12 +1,8 @@
 import { router } from 'expo-router';
 import { useSelectTeamStore } from './useStore';
-import { Team } from '../../mock/teams';
+import { Team } from '@/types/team';
 
 export const selectTeamActions = {
-  loadTeams: (teams: Team[]) => {
-    useSelectTeamStore.getState().setTeams(teams);
-  },
-
   searchTeams: (query: string) => {
     useSelectTeamStore.getState().setSearchQuery(query);
   },
