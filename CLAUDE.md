@@ -106,9 +106,44 @@ create<State & Actions>((set, get) => ({
      - Ajouter un nouveau label personnalisé
    - Console.log du label et des coordonnées (centerX, centerY, width, height, rotation)
 
+## Configuration multi-environnements
+
+### app.config.ts
+Le projet utilise `app.config.ts` au lieu de `app.json` pour permettre une configuration dynamique selon l'environnement :
+- **Development** : `APP_VARIANT=development` - Pour le développement local
+- **Staging** : `APP_VARIANT=staging` - Pour les tests pré-production
+- **Production** : `APP_VARIANT=production` - Pour l'environnement de production
+
+### Utilisation des environnements
+```bash
+# Development (par défaut)
+npm start
+
+# Staging
+APP_VARIANT=staging npm start
+
+# Production
+APP_VARIANT=production npm start
+```
+
+### Variables d'environnement disponibles
+- `BASE_URL` : URL de l'API selon l'environnement
+- `VERSION` : Version de l'API
+- `PROJECT_NAME` : Nom du projet API
+- Package names différents par environnement pour installer plusieurs versions
+
+### Accès aux variables dans le code
+```typescript
+import { getEnvironmentConfig } from '../helpers/environment';
+
+const { apiUrl, environment, version } = getEnvironmentConfig();
+```
+
 ## Commandes importantes
 - `npm start` : Démarrer le projet
 - `npx expo start -c` : Démarrer avec cache nettoyé
+- `APP_VARIANT=staging npm start` : Démarrer en environnement staging
+- `APP_VARIANT=production npm start` : Démarrer en environnement production
 
 ## Notes importantes
 - Toujours créer des fichiers de types

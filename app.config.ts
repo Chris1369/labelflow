@@ -1,0 +1,134 @@
+export const environment = process.env.APP_VARIANT || "development";
+const IS_DEV = environment === "development";
+const IS_STAGING = environment === "staging";
+const IS_PRODUCTION = environment === "production";
+
+interface EnvironmentValues {
+  name: string;
+  icon: string;
+  adaptiveIcon: string;
+  package: string;
+  BASE_URL: string;
+  VERSION: string;
+  PROJECT_NAME: string;
+}
+
+export function getEnvironmentValues(): EnvironmentValues {
+  if (IS_DEV) {
+    return {
+      name: "Labeltool Dev",
+      icon: "./assets/icon.png", // Using existing icon for now
+      adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
+      package: "com.labeltool.dev",
+      BASE_URL: "http://localhost:3000/",
+      VERSION: "v1.0",
+      PROJECT_NAME: "labeltool-api-dev",
+    };
+  }
+  if (IS_STAGING) {
+    return {
+      name: "Labeltool Staging",
+      icon: "./assets/icon.png", // Using existing icon for now
+      adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
+      package: "com.labeltool.staging",
+      BASE_URL: "https://staging-api.labeltool.com/",
+      VERSION: "v1.0",
+      PROJECT_NAME: "labeltool-api-staging",
+    };
+  }
+  // Production
+  return {
+    name: "Labeltool",
+    icon: "./assets/icon.png",
+    adaptiveIcon: "./assets/adaptive-icon.png",
+    package: "com.labeltool.app",
+    BASE_URL: "https://api.labeltool.com/",
+    VERSION: "v1.0",
+    PROJECT_NAME: "labeltool-api",
+  };
+}
+
+export default {
+  expo: {
+    name: getEnvironmentValues().name,
+    slug: "labeltool-app",
+    version: "1.0.0",
+    orientation: "portrait",
+    icon: getEnvironmentValues().icon,
+    userInterfaceStyle: "light",
+    newArchEnabled: true,
+    scheme: "labeltool-app",
+    splash: {
+      image: "./assets/splash-icon.png",
+      resizeMode: "contain",
+      backgroundColor: "#FF7557",
+    },
+    ios: {
+      supportsTablet: true,
+      bundleIdentifier: getEnvironmentValues().package,
+      config: {
+        usesNonExemptEncryption: false,
+      },
+      infoPlist: {
+        NSCameraUsageDescription: "Cette app a besoin d'acc�der � votre cam�ra pour capturer des images � labelliser.",
+        NSPhotoLibraryUsageDescription: "Cette app a besoin d'acc�der � votre galerie photo pour importer des images.",
+      },
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: getEnvironmentValues().adaptiveIcon,
+        backgroundColor: "#FF7557",
+      },
+      package: getEnvironmentValues().package,
+      permissions: [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+      ],
+      edgeToEdgeEnabled: true,
+    },
+    web: {
+      favicon: "./assets/favicon.png",
+      bundler: "metro",
+    },
+    updates: {
+      enabled: !IS_DEV,
+      fallbackToCacheTimeout: 30000,
+    },
+    assetBundlePatterns: [
+      "**/*"
+    ],
+    extra: {
+      router: {
+        origin: false,
+      },
+      eas: {
+        projectId: "your-project-id-here", // TODO: Replace with actual EAS project ID
+      },
+      environment: environment,
+      apiUrl: getEnvironmentValues().BASE_URL,
+      version: getEnvironmentValues().VERSION,
+    },
+    plugins: [
+      "expo-font",
+      "expo-router",
+      "expo-camera",
+      "expo-image-picker",
+      "expo-document-picker",
+      [
+        "expo-build-properties",
+        {
+          ios: {
+            deploymentTarget: "15.1",
+          },
+          android: {
+            compileSdkVersion: 34,
+            targetSdkVersion: 34,
+            minSdkVersion: 21,
+          },
+        },
+      ],
+    ],
+    owner: "labeltool", // TODO: Replace with actual owner
+  },
+};
