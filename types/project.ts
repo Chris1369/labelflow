@@ -1,22 +1,64 @@
 export interface Project {
   id: string;
+  _id?: string; // MongoDB ID
   name: string;
+  description: string;
+  items: string[]; // Array of ProjectItem IDs
+  ownerId: string;
+  createdAt: string;
+  updatedAt: string;
+  __v?: number; // MongoDB version key
+}
+
+export interface CreateProjectRequest {
+  name: string;
+  description: string;
+  ownerId?: string; // Optional car on peut le récupérer du user connecté
+}
+
+export interface UpdateProjectRequest {
+  name?: string;
   description?: string;
-  itemCount: number;
-  createdAt: Date;
-  updatedAt: Date;
+  items?: string[];
 }
 
 export interface ProjectItem {
   id: string;
   projectId: string;
-  imagePath: string;
-  boundingBox: {
+  image: string;
+  label: string;
+  position: {
     centerX: number;
     centerY: number;
     width: number;
     height: number;
     rotation: number;
-  };
-  createdAt: Date;
+  }[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProjectItemRequest {
+  projectId: string;
+  image: string;
+  label: string;
+  position: {
+    centerX: number;
+    centerY: number;
+    width: number;
+    height: number;
+    rotation: number;
+  }[];
+}
+
+export interface UpdateProjectItemRequest {
+  image?: string;
+  label?: string;
+  position?: {
+    centerX: number;
+    centerY: number;
+    width: number;
+    height: number;
+    rotation: number;
+  }[];
 }

@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { teamAPI } from '@/api/team.api';
+import { router } from 'expo-router';
 
 interface TeamMember {
   email: string;
@@ -23,6 +25,7 @@ interface CreateTeamActions {
   setIsCreating: (isCreating: boolean) => void;
   setError: (error: string | null) => void;
   resetForm: () => void;
+  createTeam: () => Promise<void>;
 }
 
 export const useCreateTeamStore = create<CreateTeamState & CreateTeamActions>((set, get) => ({
@@ -80,4 +83,40 @@ export const useCreateTeamStore = create<CreateTeamState & CreateTeamActions>((s
     isCreating: false,
     error: null,
   }),
+  
+  createTeam: async () => {
+    const { name, description, invitedMembers } = get();
+    
+    if (!name.trim() || !description.trim()) {
+      set({ error: 'Veuillez remplir tous les champs' });
+      return;
+    }
+    
+    set({ isCreating: true, error: null });
+    
+    try {
+      // Créer la team
+      const team = await teamAPI.create({
+        name: name.trim(),
+        description: description.trim(),
+      });
+      
+      // Si des membres ont été invités, envoyer les invitations
+      if (invitedMembers.length > 0) {
+        const emails = invitedMembers.map(member => member.email);
+        await teamAPI.inviteMembers(team.id, emails);
+      }
+      
+      // Réinitialiser le formulaire
+      get().resetForm();
+      
+      // Naviguer vers la team créée
+      router.push(`/(team)/${team.id}`);
+    } catch (error: any) {
+      set({ 
+        error: error.message || 'Erreur lors de la création de l\'équipe',
+        isCreating: false 
+      });
+    }
+  },
 }));

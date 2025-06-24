@@ -1,19 +1,21 @@
 import { create } from 'zustand';
-import { Project } from '../../types/project';
-import { mockProjects } from '../../mock/projects';
+import { Project } from '@/types/project';
+import { projectAPI } from '@/api/project.api';
 
 interface SelectProjectState {
   projects: Project[];
   filteredProjects: Project[];
   searchQuery: string;
   selectedProject: Project | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
 interface SelectProjectActions {
   setSearchQuery: (query: string) => void;
   filterProjects: () => void;
   selectProject: (project: Project) => void;
-  loadProjects: () => void;
+  loadProjects: () => Promise<void>;
 }
 
 export const useSelectProjectStore = create<SelectProjectState & SelectProjectActions>((set, get) => ({
@@ -21,6 +23,8 @@ export const useSelectProjectStore = create<SelectProjectState & SelectProjectAc
   filteredProjects: [],
   searchQuery: '',
   selectedProject: null,
+  isLoading: false,
+  error: null,
 
   setSearchQuery: (query) => {
     set({ searchQuery: query });
@@ -40,7 +44,26 @@ export const useSelectProjectStore = create<SelectProjectState & SelectProjectAc
     set({ selectedProject: project });
   },
 
-  loadProjects: () => {
-    set({ projects: mockProjects, filteredProjects: mockProjects });
+  loadProjects: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      // Utiliser getMyProjects pour récupérer uniquement les projets de l'utilisateur
+      const projects = await projectAPI.getMyProjects();
+      console.log('My projects:', projects);
+      
+      set({ 
+        projects: projects, 
+        filteredProjects: projects,
+        isLoading: false 
+      });
+    } catch (error: any) {
+      console.error('Error loading projects:', error);
+      set({ 
+        error: error.message || 'Failed to load projects',
+        isLoading: false,
+        projects: [],
+        filteredProjects: []
+      });
+    }
   },
 }));

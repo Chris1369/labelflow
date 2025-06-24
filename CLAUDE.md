@@ -178,11 +178,31 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
 ### Types
 - **auth.ts** : Types pour l'authentification (User, LoginRequest, etc.)
 - **api.ts** : Types génériques API (ApiResponse, PaginatedResponse, etc.)
+- **project.ts** : Types pour les projets et items (Project, ProjectItem, etc.)
 
 ### Gestion des erreurs
 - Intercepteur axios pour le refresh token automatique
 - `handleApiError` pour formater les erreurs de manière cohérente
 - Logout automatique si refresh token échoue
+
+### APIs disponibles
+- **auth.api.ts** : Authentification (login, register, logout, etc.)
+- **project.api.ts** : CRUD des projets + méthodes spécifiques
+- **projectItem.api.ts** : CRUD des items + upload, export, bulk operations
+
+### Règles de création d'API
+1. **Toujours étendre BaseAPI** pour les opérations CRUD standard
+2. **Nommer les fichiers** : `[feature].api.ts`
+3. **Structure du path** : `/[resource]` au pluriel (ex: `/projects`)
+4. **Méthodes personnalisées** : Ajouter après les méthodes héritées
+5. **Gestion d'erreurs** : Toujours utiliser `handleApiError` et `handleApiResponse`
+6. **Types** : Créer les interfaces Request/Response dans `types/[feature].ts`
+
+### Modèle de données côté API
+- Les IDs sont des `ObjectId` MongoDB côté serveur
+- Timestamps automatiques : `createdAt`, `updatedAt`
+- Relations : Les items sont référencés par ID dans les projets
+- Format de nom projet : `date-initials-company-index` (ex: 010225-DS-COMPANYNAME-001)
 
 ## Notes importantes
 - Toujours créer des fichiers de types

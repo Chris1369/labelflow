@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   View,
   Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../types/theme';
-import { projectActions } from './actions';
-import { useProjectStore } from './useStore';
-import { mockProjects } from '../../mock/projects';
-import { router } from 'expo-router';
+  ActivityIndicator,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "@/types/theme";
+import { projectActions } from "./actions";
+import { useProjectStore } from "./useStore";
+import { router } from "expo-router";
 
 interface ProjectMenuItem {
   id: string;
@@ -20,7 +20,7 @@ interface ProjectMenuItem {
   icon: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
   color?: string;
-  variant?: 'default' | 'warning' | 'danger';
+  variant?: "default" | "warning" | "danger";
 }
 
 interface ProjectScreenProps {
@@ -28,13 +28,11 @@ interface ProjectScreenProps {
 }
 
 export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
-  const { currentProject, isModalVisible, modalType } = useProjectStore();
+  const { currentProject, isModalVisible, modalType, isLoading, error } =
+    useProjectStore();
 
   useEffect(() => {
-    const project = mockProjects.find(p => p.id === projectId);
-    if (project) {
-      useProjectStore.getState().setCurrentProject(project);
-    }
+    useProjectStore.getState().loadProject(projectId);
   }, [projectId]);
 
   useEffect(() => {
@@ -45,58 +43,91 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
 
   const menuItems: ProjectMenuItem[] = [
     {
-      id: 'add-items',
-      title: 'Ajouter des items',
-      icon: 'camera',
+      id: "add-items",
+      title: "Ajouter des items",
+      icon: "camera",
       onPress: () => projectActions.handleAddItems(projectId),
       color: theme.colors.primary,
     },
     {
-      id: 'view-items',
-      title: 'Voir les items',
-      icon: 'images',
+      id: "view-items",
+      title: "Voir les items",
+      icon: "images",
       onPress: () => projectActions.handleViewItems(projectId),
     },
     {
-      id: 'export',
-      title: 'Exporter',
-      icon: 'download',
+      id: "export",
+      title: "Exporter",
+      icon: "download",
       onPress: () => projectActions.handleExport(projectId),
     },
     {
-      id: 'import',
-      title: 'Importer',
-      icon: 'cloud-upload',
+      id: "import",
+      title: "Importer",
+      icon: "cloud-upload",
       onPress: () => projectActions.handleImport(projectId),
     },
     {
-      id: 'reset',
-      title: 'Réinitialiser',
-      icon: 'refresh',
+      id: "reset",
+      title: "Réinitialiser",
+      icon: "refresh",
       onPress: projectActions.handleReset,
       color: theme.colors.warning,
-      variant: 'warning',
+      variant: "warning",
     },
     {
-      id: 'delete',
-      title: 'Supprimer',
-      icon: 'trash',
+      id: "delete",
+      title: "Supprimer",
+      icon: "trash",
       onPress: projectActions.handleDelete,
       color: theme.colors.error,
-      variant: 'danger',
+      variant: "danger",
     },
   ];
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size='large' color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Chargement du projet...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => useProjectStore.getState().loadProject(projectId)}
+          >
+            <Text style={styles.retryText}>Réessayer</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => router.replace("/(main)/select-project")}
+          >
+            <Text style={styles.backText}>Retour</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>{currentProject?.name || 'Projet'}</Text>
+          <Text style={styles.title}>{currentProject?.name || "Projet"}</Text>
           {currentProject?.description && (
             <Text style={styles.subtitle}>{currentProject.description}</Text>
           )}
           <Text style={styles.itemCount}>
-            {currentProject?.itemCount || 0} items
+            {currentProject?.items?.length || 0} items
           </Text>
         </View>
 
@@ -108,12 +139,12 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
               onPress={item.onPress}
               activeOpacity={0.7}
             >
-              <View 
+              <View
                 style={[
                   styles.iconContainer,
-                  item.color && { backgroundColor: item.color + '20' },
-                  item.variant === 'warning' && styles.warningContainer,
-                  item.variant === 'danger' && styles.dangerContainer,
+                  item.color && { backgroundColor: item.color + "20" },
+                  item.variant === "warning" && styles.warningContainer,
+                  item.variant === "danger" && styles.dangerContainer,
                 ]}
               >
                 <Ionicons
@@ -122,17 +153,19 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
                   color={item.color || theme.colors.primary}
                 />
               </View>
-              <Text style={[
-                styles.menuItemText,
-                item.variant === 'warning' && styles.warningText,
-                item.variant === 'danger' && styles.dangerText,
-              ]}>
+              <Text
+                style={[
+                  styles.menuItemText,
+                  item.variant === "warning" && styles.warningText,
+                  item.variant === "danger" && styles.dangerText,
+                ]}
+              >
                 {item.title}
               </Text>
             </TouchableOpacity>
           ))}
         </View>
-        
+
         <View style={styles.bottomSection}>
           <TouchableOpacity
             style={styles.exitButton}
@@ -157,13 +190,13 @@ const styles = StyleSheet.create({
     padding: theme.spacing.lg,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: theme.spacing.xl,
     marginBottom: theme.spacing.xxl,
   },
   title: {
     fontSize: theme.fontSize.xxl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -171,22 +204,22 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.sm,
-    textAlign: 'center',
+    textAlign: "center",
   },
   itemCount: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.primary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   menuGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     paddingHorizontal: theme.spacing.md,
   },
   menuItem: {
-    width: '47%',
-    alignItems: 'center',
+    width: "47%",
+    alignItems: "center",
     marginBottom: theme.spacing.xl,
   },
   iconContainer: {
@@ -194,8 +227,8 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: theme.borderRadius.lg,
     backgroundColor: theme.colors.backgroundSecondary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: theme.spacing.md,
     borderWidth: 1,
     borderColor: theme.colors.border,
@@ -209,8 +242,8 @@ const styles = StyleSheet.create({
   menuItemText: {
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
-    fontWeight: '500',
-    textAlign: 'center',
+    fontWeight: "500",
+    textAlign: "center",
   },
   warningText: {
     color: theme.colors.warning,
@@ -224,12 +257,54 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.xl,
   },
   exitButton: {
-    alignItems: 'center',
+    alignItems: "center",
     padding: theme.spacing.md,
   },
   exitButtonText: {
     color: theme.colors.textSecondary,
     fontSize: theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: theme.spacing.md,
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: theme.spacing.xl,
+  },
+  errorText: {
+    fontSize: theme.fontSize.md,
+    color: theme.colors.error,
+    textAlign: "center",
+    marginBottom: theme.spacing.lg,
+  },
+  retryButton: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.md,
+  },
+  retryText: {
+    color: theme.colors.secondary,
+    fontSize: theme.fontSize.md,
+    fontWeight: "600",
+  },
+  backButton: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+  },
+  backText: {
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSize.md,
   },
 });

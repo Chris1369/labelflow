@@ -14,10 +14,21 @@ export abstract class BaseAPI<T, CreateDTO = any, UpdateDTO = any> {
     }
   }
 
-  async getAll(params?: QueryParams): Promise<PaginatedResponse<T>> {
+  async getAll(params?: QueryParams): Promise<T[] | PaginatedResponse<T>> {
     try {
       const response = await axiosInstance.get(this.basePath, { params });
-      return handleApiResponse<PaginatedResponse<T>>(response);
+      return handleApiResponse<T[] | PaginatedResponse<T>>(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+  
+  async getAllFiltered(filters: Record<string, any>, params?: QueryParams): Promise<T[] | PaginatedResponse<T>> {
+    try {
+      const response = await axiosInstance.get(this.basePath, { 
+        params: { ...filters, ...params } 
+      });
+      return handleApiResponse<T[] | PaginatedResponse<T>>(response);
     } catch (error) {
       throw handleApiError(error);
     }

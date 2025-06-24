@@ -1,11 +1,14 @@
 import { create } from 'zustand';
-import { Team } from '../../mock/teams';
+import { Team } from '@/types/team';
+import { teamAPI } from '@/api/team.api';
 
 interface SelectTeamState {
   teams: Team[];
   filteredTeams: Team[];
   searchQuery: string;
   selectedTeam: Team | null;
+  isLoading: boolean;
+  error: string | null;
 }
 
 interface SelectTeamActions {
@@ -14,6 +17,7 @@ interface SelectTeamActions {
   filterTeams: () => void;
   selectTeam: (team: Team) => void;
   resetSelection: () => void;
+  loadTeams: () => Promise<void>;
 }
 
 export const useSelectTeamStore = create<SelectTeamState & SelectTeamActions>((set, get) => ({
@@ -21,6 +25,8 @@ export const useSelectTeamStore = create<SelectTeamState & SelectTeamActions>((s
   filteredTeams: [],
   searchQuery: '',
   selectedTeam: null,
+  isLoading: false,
+  error: null,
 
   setTeams: (teams) => {
     set({ teams, filteredTeams: teams });
@@ -50,4 +56,27 @@ export const useSelectTeamStore = create<SelectTeamState & SelectTeamActions>((s
   selectTeam: (team) => set({ selectedTeam: team }),
 
   resetSelection: () => set({ selectedTeam: null, searchQuery: '' }),
+  
+  loadTeams: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      // Utiliser getMyTeams pour récupérer les teams où l'utilisateur est membre ou owner
+      const teams = await teamAPI.getMyTeams();
+      console.log('My teams:', teams);
+      
+      set({ 
+        teams: teams, 
+        filteredTeams: teams,
+        isLoading: false 
+      });
+    } catch (error: any) {
+      console.error('Error loading teams:', error);
+      set({ 
+        error: error.message || 'Failed to load teams',
+        isLoading: false,
+        teams: [],
+        filteredTeams: []
+      });
+    }
+  },
 }));
