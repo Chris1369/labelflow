@@ -74,15 +74,15 @@ export const SignUpScreen: React.FC = () => {
               title="Sign Up"
               onPress={async () => {
                 if (!signUpActions.validateForm()) return;
-                
+
                 setLoading(true);
                 setError(null);
-                
+
                 try {
                   await register(form.email, form.password, form.name);
                 } catch (error: any) {
                   setError({
-                    message: error.response?.data?.message || 'Failed to create account',
+                    message: error.message || 'Failed to create account',
                   });
                 } finally {
                   setLoading(false);
@@ -138,7 +138,7 @@ export const SignUpScreen: React.FC = () => {
             </View>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.footer}
             onPress={signUpActions.navigateToSignIn}
           >

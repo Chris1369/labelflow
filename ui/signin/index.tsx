@@ -72,15 +72,15 @@ export const SignInScreen: React.FC = () => {
               title="Sign In"
               onPress={async () => {
                 if (!signInActions.validateForm()) return;
-                
+
                 setLoading(true);
                 setError(null);
-                
+
                 try {
                   await login(form.email, form.password);
                 } catch (error: any) {
                   setError({
-                    message: error.response?.data?.message || 'Invalid email or password',
+                    message: error.message || 'Invalid email or password',
                   });
                 } finally {
                   setLoading(false);
@@ -136,7 +136,7 @@ export const SignInScreen: React.FC = () => {
             </View>
           </View>
 
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.footer}
             onPress={() => router.push('/(auth)/signup')}
           >
