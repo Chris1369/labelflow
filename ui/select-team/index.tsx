@@ -107,7 +107,7 @@ export const SelectTeamScreen: React.FC = () => {
       ) : (
         <FlatList
           data={filteredTeams}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item._id || item.id}
           renderItem={renderTeam}
           contentContainerStyle={styles.listContent}
           ItemSeparatorComponent={() => <View style={styles.separator} />}

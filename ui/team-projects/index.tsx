@@ -9,11 +9,11 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Input, Button } from '../../components/atoms';
-import { theme } from '../../types/theme';
+import { Input, Button } from '@/components/atoms';
+import { theme } from '@/types/theme';
 import { useTeamProjectsStore } from './useStore';
 import { teamProjectsActions } from './actions';
-import { Project } from '../../mock/projects';
+import { Project } from '@/types/project';
 
 interface TeamProjectsScreenProps {
   teamId: string;
@@ -21,23 +21,27 @@ interface TeamProjectsScreenProps {
 
 export const TeamProjectsScreen: React.FC<TeamProjectsScreenProps> = ({ teamId }) => {
   const {
+    allProjects,
     filteredProjects,
     selectedProjects,
     searchQuery,
+    isLoading,
     isUpdating,
+    error,
   } = useTeamProjectsStore();
 
   useEffect(() => {
-    teamProjectsActions.loadProjects();
-  }, []);
+    teamProjectsActions.loadTeamProjects(teamId);
+  }, [teamId]);
 
   const renderProject = ({ item }: { item: Project }) => {
-    const isSelected = selectedProjects.has(item.id);
+    const itemId = item._id || item.id;
+    const isSelected = selectedProjects.has(itemId);
     
     return (
       <TouchableOpacity
         style={[styles.projectCard, isSelected && styles.selectedCard]}
-        onPress={() => teamProjectsActions.toggleProject(item.id)}
+        onPress={() => teamProjectsActions.toggleProject(itemId)}
         activeOpacity={0.7}
       >
         <View style={styles.projectHeader}>
@@ -55,7 +59,7 @@ export const TeamProjectsScreen: React.FC<TeamProjectsScreenProps> = ({ teamId }
         </View>
         <View style={styles.projectStats}>
           <Text style={styles.statText}>
-            {item.itemCount} items • Créé le {new Date(item.createdAt).toLocaleDateString('fr-FR')}
+            {item.items?.length || 0} items • Créé le {new Date(item.createdAt).toLocaleDateString('fr-FR')}
           </Text>
         </View>
       </TouchableOpacity>
@@ -66,7 +70,7 @@ export const TeamProjectsScreen: React.FC<TeamProjectsScreenProps> = ({ teamId }
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>
-          {selectedProjects.size} projet{selectedProjects.size > 1 ? 's' : ''} sélectionné{selectedProjects.size > 1 ? 's' : ''}
+          {selectedProjects.size} projet{selectedProjects.size > 1 ? 's' : ''} sélectionné{selectedProjects.size > 1 ? 's' : ''} sur {allProjects.length}
         </Text>
         <Input
           placeholder="Rechercher un projet..."
@@ -77,19 +81,44 @@ export const TeamProjectsScreen: React.FC<TeamProjectsScreenProps> = ({ teamId }
         />
       </View>
 
-      <FlatList
-        data={filteredProjects}
-        keyExtractor={(item) => item.id}
-        renderItem={renderProject}
-        contentContainerStyle={styles.projectsList}
-        showsVerticalScrollIndicator={false}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-      />
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Chargement des projets...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => teamProjectsActions.loadTeamProjects(teamId)}
+          >
+            <Text style={styles.retryText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <FlatList
+          data={filteredProjects}
+          keyExtractor={(item) => item._id || item.id}
+          renderItem={renderProject}
+          contentContainerStyle={styles.projectsList}
+          showsVerticalScrollIndicator={false}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyContainer}>
+              <Ionicons name="folder-open" size={64} color={theme.colors.textSecondary} />
+              <Text style={styles.emptyText}>
+                {searchQuery ? 'Aucun projet trouvé' : 'Aucun projet disponible'}
+              </Text>
+            </View>
+          )}
+        />
+      )}
 
       <View style={styles.bottomActions}>
         <Button
           title={isUpdating ? '' : 'Enregistrer les modifications'}
-          onPress={teamProjectsActions.saveChanges}
+          onPress={() => teamProjectsActions.saveChanges(teamId)}
           disabled={isUpdating}
           style={styles.saveButton}
         >
@@ -205,5 +234,49 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.textSecondary,
     fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: theme.spacing.md,
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing.xl,
+  },
+  errorText: {
+    fontSize: theme.fontSize.md,
+    color: theme.colors.error,
+    textAlign: 'center',
+    marginBottom: theme.spacing.lg,
+  },
+  retryButton: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.md,
+  },
+  retryText: {
+    color: theme.colors.secondary,
+    fontSize: theme.fontSize.md,
+    fontWeight: '600',
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: theme.spacing.xxl,
+  },
+  emptyText: {
+    fontSize: theme.fontSize.lg,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.md,
   },
 });

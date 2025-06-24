@@ -1,16 +1,12 @@
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { useTeamProjectsStore } from './useStore';
-import { mockProjects } from '../../mock/projects';
 
 export const teamProjectsActions = {
-  loadProjects: () => {
-    // Load all projects and set some as selected (mock)
-    useTeamProjectsStore.getState().setAllProjects(mockProjects);
-    
-    // Mock: first 3 projects are already selected for this team
-    const selectedIds = mockProjects.slice(0, 3).map(p => p.id);
-    useTeamProjectsStore.getState().setSelectedProjects(selectedIds);
+  loadTeamProjects: async (teamId: string) => {
+    const store = useTeamProjectsStore.getState();
+    await store.loadTeamProjects(teamId);
+    await store.loadAllProjects();
   },
 
   searchProjects: (query: string) => {
@@ -21,9 +17,9 @@ export const teamProjectsActions = {
     useTeamProjectsStore.getState().toggleProject(projectId);
   },
 
-  saveChanges: async () => {
+  saveChanges: async (teamId: string) => {
     try {
-      await useTeamProjectsStore.getState().saveChanges();
+      await useTeamProjectsStore.getState().saveChanges(teamId);
       
       Alert.alert(
         'Succès',
@@ -31,7 +27,7 @@ export const teamProjectsActions = {
         [
           {
             text: 'OK',
-            onPress: () => router.back(),
+            onPress: () => router.replace('/(team)/[id]', { id: teamId }),
           },
         ]
       );
@@ -51,7 +47,7 @@ export const teamProjectsActions = {
         { text: 'Non', style: 'cancel' },
         {
           text: 'Oui',
-          onPress: () => router.back(),
+          onPress: () => router.replace('/(team)/[id]'),
         },
       ]
     );

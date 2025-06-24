@@ -5,13 +5,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../types/theme';
+import { theme } from '@/types/theme';
 import { teamActions } from './actions';
 import { useTeamStore } from './useStore';
-import { mockTeams } from '../../mock/teams';
 
 interface TeamMenuItem {
   id: string;
@@ -27,13 +27,10 @@ interface TeamScreenProps {
 }
 
 export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
-  const { currentTeam } = useTeamStore();
+  const { currentTeam, isLoading, error } = useTeamStore();
 
   useEffect(() => {
-    const team = mockTeams.find(t => t.id === teamId);
-    if (team) {
-      useTeamStore.getState().setCurrentTeam(team);
-    }
+    useTeamStore.getState().loadTeam(teamId);
   }, [teamId]);
 
   const menuItems: TeamMenuItem[] = [
@@ -55,6 +52,33 @@ export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Chargement de l'équipe...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity 
+            style={styles.retryButton}
+            onPress={() => useTeamStore.getState().loadTeam(teamId)}
+          >
+            <Text style={styles.retryText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -67,13 +91,13 @@ export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
             <View style={styles.stat}>
               <Ionicons name="people" size={20} color={theme.colors.primary} />
               <Text style={styles.statText}>
-                {currentTeam?.memberCount || 0} membres
+                {currentTeam?.members?.length || 0} membres
               </Text>
             </View>
             <View style={styles.stat}>
               <Ionicons name="folder" size={20} color={theme.colors.info} />
               <Text style={styles.statText}>
-                {currentTeam?.projectCount || 0} projets
+                {currentTeam?.projectId?.length || 0} projets
               </Text>
             </View>
           </View>
@@ -206,6 +230,39 @@ const styles = StyleSheet.create({
   },
   exitButtonText: {
     color: theme.colors.textSecondary,
+    fontSize: theme.fontSize.md,
+    fontWeight: '600',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: theme.spacing.md,
+    fontSize: theme.fontSize.md,
+    color: theme.colors.textSecondary,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing.xl,
+  },
+  errorText: {
+    fontSize: theme.fontSize.md,
+    color: theme.colors.error,
+    textAlign: 'center',
+    marginBottom: theme.spacing.lg,
+  },
+  retryButton: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.md,
+  },
+  retryText: {
+    color: theme.colors.secondary,
     fontSize: theme.fontSize.md,
     fontWeight: '600',
   },

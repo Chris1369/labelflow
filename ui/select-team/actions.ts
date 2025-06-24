@@ -9,7 +9,8 @@ export const selectTeamActions = {
 
   selectTeam: (team: Team) => {
     useSelectTeamStore.getState().selectTeam(team);
-    router.push(`/(team)/${team.id}`);
+    const teamId = team._id || team.id;
+    router.push(`/(team)/${teamId}`);
   },
 
   createNewTeam: () => {
