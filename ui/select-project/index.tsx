@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Ionicons } from '@expo/vector-icons';
 import { Input } from '@/components/atoms';
 import { theme } from '@/types/theme';
 import { useSelectProjectStore } from './useStore';
@@ -26,29 +28,57 @@ export const SelectProjectScreen: React.FC = () => {
       onPress={() => selectProjectActions.handleProjectSelect(item)}
       activeOpacity={0.7}
     >
-      <View style={styles.projectInfo}>
-        <Text style={styles.projectName}>{item.name}</Text>
-        {item.description && (
-          <Text style={styles.projectDescription}>{item.description}</Text>
-        )}
-        <View style={styles.projectMeta}>
-          <Text style={styles.itemCount}>{item.items?.length || 0} items</Text>
-          <Text style={styles.updatedDate}>
-            Modifié le {new Date(item.updatedAt).toLocaleDateString('fr-FR')}
-          </Text>
+      <View style={styles.projectHeader}>
+        <View style={styles.projectInfo}>
+          <Text style={styles.projectName}>{item.name}</Text>
+        </View>
+        <Ionicons
+          name="chevron-forward"
+          size={24}
+          color={theme.colors.textSecondary}
+        />
+      </View>
+      <Text style={styles.projectDescription} numberOfLines={2}>
+        {item.description}
+      </Text>
+      <View style={styles.projectStats}>
+        <View style={styles.stat}>
+          <Ionicons name="images" size={16} color={theme.colors.textSecondary} />
+          <Text style={styles.statText}>{item.items?.length || 0} items</Text>
+        </View>
+        <View style={styles.stat}>
+          <Ionicons name="calendar" size={16} color={theme.colors.textSecondary} />
+          <Text style={styles.statText}>{new Date(item.updatedAt).toLocaleDateString('fr-FR')}</Text>
         </View>
       </View>
     </TouchableOpacity>
   );
 
+  const renderEmptyState = () => (
+    <View style={styles.emptyContainer}>
+      <Ionicons name="folder-open" size={64} color={theme.colors.textSecondary} />
+      <Text style={styles.emptyText}>
+        {searchQuery ? 'Aucun projet trouvé' : 'Aucun projet disponible'}
+      </Text>
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => selectProjectActions.createNewProject()}
+      >
+        <Text style={styles.createButtonText}>Créer un projet</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   return (
-    <View style={styles.container}>
-      <View style={styles.searchContainer}>
+    <SafeAreaView style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Sélectionner un projet</Text>
         <Input
           placeholder="Rechercher un projet..."
           value={searchQuery}
           onChangeText={selectProjectActions.handleSearchChange}
-          icon="search-outline"
+          icon="search"
+          containerStyle={styles.searchInput}
         />
       </View>
 
@@ -73,15 +103,12 @@ export const SelectProjectScreen: React.FC = () => {
           keyExtractor={(item) => item.id}
           renderItem={renderProjectItem}
           contentContainerStyle={styles.listContent}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ListEmptyComponent={renderEmptyState}
           showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyText}>Aucun projet trouvé</Text>
-            </View>
-          }
         />
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -90,57 +117,91 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  searchContainer: {
-    padding: theme.spacing.lg,
-    paddingBottom: theme.spacing.sm,
+  header: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.lg,
+  },
+  title: {
+    fontSize: theme.fontSize.xxl,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+    marginBottom: theme.spacing.lg,
+  },
+  searchInput: {
+    marginBottom: 0,
   },
   listContent: {
-    padding: theme.spacing.lg,
-    paddingTop: 0,
+    paddingHorizontal: theme.spacing.lg,
+    paddingBottom: theme.spacing.xxl,
   },
   projectCard: {
-    backgroundColor: theme.colors.secondary,
-    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.lg,
     padding: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
+  projectHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+  },
   projectInfo: {
     flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.sm,
   },
   projectName: {
     fontSize: theme.fontSize.lg,
     fontWeight: '600',
     color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
   },
   projectDescription: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
   },
-  projectMeta: {
+  projectStats: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    gap: theme.spacing.lg,
+  },
+  stat: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: theme.spacing.xs,
   },
-  itemCount: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.primary,
-    fontWeight: '500',
-  },
-  updatedDate: {
+  statText: {
     fontSize: theme.fontSize.xs,
     color: theme.colors.textSecondary,
   },
+  separator: {
+    height: theme.spacing.md,
+  },
   emptyContainer: {
+    flex: 1,
     alignItems: 'center',
-    marginTop: theme.spacing.xxl,
+    justifyContent: 'center',
+    paddingTop: theme.spacing.xxl,
   },
   emptyText: {
-    fontSize: theme.fontSize.md,
+    fontSize: theme.fontSize.lg,
     color: theme.colors.textSecondary,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xl,
+  },
+  createButton: {
+    paddingHorizontal: theme.spacing.xl,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.md,
+  },
+  createButtonText: {
+    color: theme.colors.secondary,
+    fontSize: theme.fontSize.md,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,

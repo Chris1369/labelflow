@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useSelectProjectStore } from './useStore';
-import { Project } from '../../types/project';
+import { Project } from '@/types/project';
 
 export const selectProjectActions = {
   handleSearchChange: (query: string) => {
@@ -17,5 +17,9 @@ export const selectProjectActions = {
 
   loadProjects: () => {
     useSelectProjectStore.getState().loadProjects();
+  },
+
+  createNewProject: () => {
+    router.push('/(main)/create-project');
   },
 };
