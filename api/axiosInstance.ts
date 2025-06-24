@@ -3,10 +3,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getEnvironmentConfig } from '@/helpers/environment';
 import { StorageKeys } from '@/helpers/StorageKeys';
 
-const { apiUrl } = getEnvironmentConfig();
-
+const { apiUrl, version, projectName } = getEnvironmentConfig();
 const axiosInstance: AxiosInstance = axios.create({
-  baseURL: apiUrl,
+  baseURL: apiUrl+version+'/'+projectName,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',

@@ -4,6 +4,7 @@ interface EnvironmentConfig {
   apiUrl: string;
   environment: string;
   version: string;
+  projectName: string;
 }
 
 export const getEnvironmentConfig = (): EnvironmentConfig => {
@@ -11,6 +12,7 @@ export const getEnvironmentConfig = (): EnvironmentConfig => {
     apiUrl: Constants.expoConfig?.extra?.apiUrl || 'http://localhost:3000/',
     environment: Constants.expoConfig?.extra?.environment || 'development',
     version: Constants.expoConfig?.extra?.version || 'v1.0',
+    projectName: Constants.expoConfig?.extra?.projectName || 'labelflow-api',
   };
 };
 

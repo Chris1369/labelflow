@@ -55,9 +55,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const register = async (email: string, password: string, name: string) => {
+  const register = async (email: string, password: string, username: string) => {
     try {
-      const response = await authAPI.register({ email, password, name });
+      const response = await authAPI.register({ email, password, username });
       setUser(response.user);
       router.replace('/(main)/home');
     } catch (error) {

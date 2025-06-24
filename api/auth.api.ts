@@ -37,7 +37,7 @@ class AuthAPI {
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
     try {
-      const response = await axiosInstance.post(`${this.basePath}/register`, data);
+      const response = await axiosInstance.post(`/users`, data);
       const authData = handleApiResponse<AuthResponse>(response);
       
       // Store tokens and user data
