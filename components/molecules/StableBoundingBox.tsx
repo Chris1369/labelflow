@@ -97,7 +97,10 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
         if (!isSelectedRef.current) return false;
-        gestureStart.current.size = { width, height };
+        gestureStart.current.size = { 
+          width: currentDimensions.current.width, 
+          height: currentDimensions.current.height 
+        };
       },
       onPanResponderMove: (evt, gestureState) => {
         if (!isSelectedRef.current) return;
@@ -121,7 +124,10 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
       onPanResponderGrant: () => {
         if (!isSelectedRef.current) return false;
         gestureStart.current.box = { x: currentPosition.current.x, y: currentPosition.current.y };
-        gestureStart.current.size = { width, height };
+        gestureStart.current.size = { 
+          width: currentDimensions.current.width, 
+          height: currentDimensions.current.height 
+        };
       },
       onPanResponderMove: (evt, gestureState) => {
         if (!isSelectedRef.current) return;
