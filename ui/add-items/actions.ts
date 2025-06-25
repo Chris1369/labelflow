@@ -68,13 +68,15 @@ export const addItemsActions = {
   },
 
   saveAllItems: async (projectId: string) => {
-    const { boundingBoxes, capturedImageUri } = useAddItemsStore.getState();
+    const { boundingBoxes, capturedImageUri, setIsSaving } = useAddItemsStore.getState();
     const completedBoxes = boundingBoxes.filter((box) => box.isComplete);
 
     if (completedBoxes.length === 0) {
       Alert.alert('Aucun objet', 'Veuillez ajouter et valider au moins un objet');
       return;
     }
+
+    setIsSaving(true);
 
     try {
       const formData = new FormData();
@@ -95,6 +97,8 @@ export const addItemsActions = {
       }))));
 
       await projectItemAPI.addProjectItems(formData);
+      
+      setIsSaving(false);
       
       // Afficher un message de succès
       Alert.alert(
@@ -120,6 +124,7 @@ export const addItemsActions = {
       );
     } catch (error) {
       console.error('Error saving items:', error);
+      setIsSaving(false);
       Alert.alert('Erreur', 'Impossible d\'enregistrer les objets');
     }
   },

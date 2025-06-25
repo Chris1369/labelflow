@@ -23,6 +23,7 @@ export const AddItemsScreen: React.FC = () => {
     currentBoxId,
     isCapturing,
     showSaveButton,
+    isSaving,
   } = useAddItemsStore();
 
   useEffect(() => {
@@ -114,6 +115,7 @@ export const AddItemsScreen: React.FC = () => {
           showSaveButton={showSaveButton}
           hasCompletedBoxes={hasCompletedBoxes}
           hasUncompletedBoxes={hasUncompletedBoxes}
+          isSaving={isSaving}
           onRetake={addItemsActions.retakePicture}
           onAddBox={handleAddBox}
           onRotate={handleRotate}

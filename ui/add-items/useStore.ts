@@ -9,6 +9,7 @@ interface AddItemsState {
   currentBoxId: string | null;
   isCapturing: boolean;
   showSaveButton: boolean;
+  isSaving: boolean;
 }
 
 interface AddItemsActions {
@@ -17,6 +18,7 @@ interface AddItemsActions {
   setCapturedImage: (uri: string | null) => void;
   setIsCapturing: (isCapturing: boolean) => void;
   setShowSaveButton: (show: boolean) => void;
+  setIsSaving: (isSaving: boolean) => void;
   addBoundingBox: () => void;
   updateBoundingBox: (id: string, updates: Partial<BoundingBox>) => void;
   setCurrentBox: (id: string | null) => void;
@@ -44,10 +46,13 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     currentBoxId: null,
     isCapturing: false,
     showSaveButton: false,
+    isSaving: false,
 
     setPermission: (hasPermission) => set({ hasPermission }),
 
     setPermissionStatus: (permissionStatus) => set({ permissionStatus }),
+    
+    setIsSaving: (isSaving) => set({ isSaving }),
 
     setCapturedImage: (uri) => {
       if (uri) {
@@ -113,6 +118,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
         currentBoxId: null,
         showSaveButton: false,
         isCapturing: false,
+        isSaving: false,
       });
     },
   })
