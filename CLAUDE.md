@@ -204,6 +204,36 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
 - Relations : Les items sont référencés par ID dans les projets
 - Format de nom projet : `date-initials-company-index` (ex: 010225-DS-COMPANYNAME-001)
 
+## Export de datasets
+
+### Formats supportés
+L'application supporte maintenant l'export de datasets labellisés dans 8 formats différents :
+
+1. **YOLO** : Format texte standard pour la détection d'objets
+2. **YOLOv8 OBB** : Format YOLO v8 avec support des bounding boxes orientées (rotation)
+3. **JSON** : Export complet avec images et métadonnées
+4. **JSON-MIN** : Export minimal sans images, uniquement les annotations
+5. **CSV** : Format tabulaire avec séparateur virgule
+6. **TSV** : Format tabulaire avec séparateur tab
+7. **COCO** : Format JSON standard COCO pour la détection d'objets
+8. **Pascal VOC** : Format XML Pascal VOC
+
+### Sauvegarde de la rotation
+Les bounding boxes sont maintenant sauvegardées avec 5 valeurs dans l'array position :
+- `centerX` : Position X du centre (0-1)
+- `centerY` : Position Y du centre (0-1)  
+- `width` : Largeur (0-1)
+- `height` : Hauteur (0-1)
+- `rotation` : Angle de rotation en degrés
+
+Cette modification dans `/ui/add-items/actions.ts` permet de supporter les formats d'export qui gèrent les bounding boxes orientées comme YOLOv8 OBB.
+
+### Téléchargement des exports
+- Les exports sont générés de manière asynchrone côté serveur
+- Un fichier ZIP est créé pour les formats nécessitant plusieurs fichiers (YOLO, COCO, etc.)
+- Les fichiers JSON-MIN, CSV et TSV sont téléchargés directement sans ZIP
+- Si un export du même type existe déjà pour un projet, il est automatiquement supprimé lors de la génération d'un nouvel export
+
 ## Notes importantes
 - Toujours créer des fichiers de types
 - Pas de commentaires dans le code sauf si demandé

@@ -62,7 +62,7 @@ export const exportOptions: ExportOption[] = [
       "Format populaire d'apprentissage automatique utilisé par le dataset COCO pour les tâches de détection d'objets et de segmentation d'image avec polygones et rectangles.",
     format: "JSON",
     tags: ["segmentation d'image", "détection d'objets"],
-    enabled: false,
+    enabled: true,
   },
   {
     id: "pascal-voc",
@@ -71,6 +71,6 @@ export const exportOptions: ExportOption[] = [
       "Format XML populaire utilisé pour la détection d'objets et les tâches de segmentation d'image avec polygones.",
     format: "XML",
     tags: ["segmentation d'image", "détection d'objets"],
-    enabled: false,
+    enabled: true,
   },
 ];

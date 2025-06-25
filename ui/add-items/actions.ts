@@ -93,6 +93,7 @@ export const addItemsActions = {
           box.centerY.toFixed(4), // Y center as percentage
           box.width.toFixed(4), // Width as percentage
           box.height.toFixed(4), // Height as percentage
+          box.rotation.toFixed(4), // Rotation in degrees
         ],
       }))));
 
