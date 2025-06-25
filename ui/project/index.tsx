@@ -29,8 +29,14 @@ interface ProjectScreenProps {
 }
 
 export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
-  const { currentProject, isModalVisible, modalType, isLoading, error, updateProjectVisibility } =
-    useProjectStore();
+  const {
+    currentProject,
+    isModalVisible,
+    modalType,
+    isLoading,
+    error,
+    updateProjectVisibility,
+  } = useProjectStore();
 
   useEffect(() => {
     useProjectStore.getState().loadProject(projectId);
@@ -128,7 +134,7 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
           {currentProject?.description && (
             <Text style={styles.subtitle}>{currentProject.description}</Text>
           )}
-          
+
           <View style={styles.switchContainer}>
             <View style={styles.switchLabel}>
               <Text style={styles.switchLabelText}>Projet public</Text>
@@ -139,14 +145,18 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
             <Switch
               value={currentProject?.isPublic || false}
               onValueChange={(value) => updateProjectVisibility(value)}
-              trackColor={{ 
-                false: theme.colors.border, 
-                true: theme.colors.primary + '80' 
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary + "80",
               }}
-              thumbColor={currentProject?.isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
+              thumbColor={
+                currentProject?.isPublic
+                  ? theme.colors.primary
+                  : theme.colors.backgroundSecondary
+              }
             />
           </View>
-          
+
           <Text style={styles.itemCount}>
             {currentProject?.items?.length || 0} items
           </Text>

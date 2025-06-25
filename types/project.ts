@@ -27,18 +27,19 @@ export interface UpdateProjectRequest {
 
 export interface ProjectItem {
   id: string;
-  projectId: string;
-  image: string;
-  label: string;
-  position: {
-    centerX: number;
-    centerY: number;
-    width: number;
-    height: number;
-    rotation: number;
+  _id?: string;
+  projectId?: string;
+  filePath?: string;
+  fileUrl: string;
+  labels: {
+    id: string;
+    _id?: string;
+    name: string;
+    position: string[]; // [centerX, centerY, width, height]
   }[];
   createdAt: string;
   updatedAt: string;
+  __v?: number;
 }
 
 export interface CreateProjectItemRequest {
@@ -64,4 +65,12 @@ export interface UpdateProjectItemRequest {
     height: number;
     rotation: number;
   }[];
+}
+
+export interface ProjectItemsResponse {
+  projectItems: ProjectItem[];
+  total: number;
+  totalPage: number;
+  page: number;
+  limit: number;
 }

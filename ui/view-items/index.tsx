@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -8,18 +8,20 @@ import {
   ActivityIndicator,
   Image,
   Dimensions,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/types/theme';
-import { useViewItemsStore } from './useStore';
-import { ProjectItem } from '@/types/project';
-import { ViewItemsScreenProps } from './types';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "@/types/theme";
+import { useViewItemsStore } from "./useStore";
+import { ProjectItem } from "@/types/project";
+import { ViewItemsScreenProps } from "./types";
 
-const { width } = Dimensions.get('window');
+const { width } = Dimensions.get("window");
 const ITEM_SIZE = (width - theme.spacing.lg * 3) / 2;
 
-export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({ projectId }) => {
+export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
+  projectId,
+}) => {
   const {
     items,
     isLoading,
@@ -34,7 +36,7 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({ projectId }) =
   useEffect(() => {
     setProjectId(projectId);
     loadItems(true);
-    
+
     return () => {
       reset();
     };
@@ -43,17 +45,18 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({ projectId }) =
   const renderItem = ({ item }: { item: ProjectItem }) => (
     <TouchableOpacity style={styles.itemCard} activeOpacity={0.9}>
       <Image
-        source={{ uri: item.image }}
+        source={{ uri: item.fileUrl }}
         style={styles.itemImage}
-        resizeMode="cover"
+        resizeMode='cover'
       />
       <View style={styles.itemInfo}>
         <Text style={styles.itemLabel} numberOfLines={1}>
-          {item.label}
+          {item.labels.map(label => label.name).join(', ')}
         </Text>
-        {item.position && item.position.length > 0 && (
+        {item.labels && item.labels.length > 0 && (
           <Text style={styles.itemPositionCount}>
-            {item.position.length} annotation{item.position.length > 1 ? 's' : ''}
+            {item.labels.length} label
+            {item.labels.length > 1 ? "s" : ""}
           </Text>
         )}
       </View>
@@ -64,17 +67,21 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({ projectId }) =
     if (!hasMore) return null;
     return (
       <View style={styles.footerLoader}>
-        <ActivityIndicator size="small" color={theme.colors.primary} />
+        <ActivityIndicator size='small' color={theme.colors.primary} />
       </View>
     );
   };
 
   const renderEmptyState = () => {
     if (isLoading) return null;
-    
+
     return (
       <View style={styles.emptyContainer}>
-        <Ionicons name="images-outline" size={64} color={theme.colors.textSecondary} />
+        <Ionicons
+          name='images-outline'
+          size={64}
+          color={theme.colors.textSecondary}
+        />
         <Text style={styles.emptyText}>Aucun item dans ce projet</Text>
         <Text style={styles.emptySubtext}>
           Commencez par ajouter des images à votre projet
@@ -91,7 +98,7 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({ projectId }) =
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ActivityIndicator size='large' color={theme.colors.primary} />
           <Text style={styles.loadingText}>Chargement des items...</Text>
         </View>
       </SafeAreaView>
@@ -102,9 +109,9 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({ projectId }) =
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle" size={48} color={theme.colors.error} />
+          <Ionicons name='alert-circle' size={48} color={theme.colors.error} />
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.retryButton}
             onPress={() => loadItems(true)}
           >
@@ -114,13 +121,13 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({ projectId }) =
       </SafeAreaView>
     );
   }
-
+  console.log(JSON.stringify(items, null, 2));
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Items du projet</Text>
         <Text style={styles.subtitle}>
-          {items.length} item{items.length > 1 ? 's' : ''}
+          {items.length} item{items.length > 1 ? "s" : ""}
         </Text>
       </View>
 
@@ -156,7 +163,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.xxl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -169,18 +176,18 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.xxl,
   },
   columnWrapper: {
-    justifyContent: 'space-between',
+    justifyContent: "space-between",
   },
   itemCard: {
     width: ITEM_SIZE,
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: theme.borderRadius.md,
-    overflow: 'hidden',
+    overflow: "hidden",
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
   itemImage: {
-    width: '100%',
+    width: "100%",
     height: ITEM_SIZE,
     backgroundColor: theme.colors.backgroundTertiary,
   },
@@ -189,7 +196,7 @@ const styles = StyleSheet.create({
   },
   itemLabel: {
     fontSize: theme.fontSize.sm,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -202,8 +209,8 @@ const styles = StyleSheet.create({
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: theme.spacing.md,
@@ -212,12 +219,12 @@ const styles = StyleSheet.create({
   },
   footerLoader: {
     paddingVertical: theme.spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
   },
   emptyContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingTop: theme.spacing.xxl * 2,
   },
   emptyText: {
@@ -229,19 +236,19 @@ const styles = StyleSheet.create({
   emptySubtext: {
     fontSize: theme.fontSize.md,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     paddingHorizontal: theme.spacing.xl,
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.xl,
   },
   errorText: {
     fontSize: theme.fontSize.md,
     color: theme.colors.error,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: theme.spacing.md,
     marginBottom: theme.spacing.lg,
   },
@@ -254,6 +261,6 @@ const styles = StyleSheet.create({
   retryText: {
     color: theme.colors.secondary,
     fontSize: theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

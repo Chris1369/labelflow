@@ -50,8 +50,10 @@ export const useViewItemsStore = create<ViewItemsState & ViewItemsActions>((set,
         limit: ITEMS_PER_PAGE,
       });
 
-      const newItems = reset ? response.data : [...items, ...response.data];
-      const hasMore = response.data.length === ITEMS_PER_PAGE;
+      // La réponse est maintenant typée avec ProjectItemsResponse
+      const projectItems = response.projectItems || [];
+      const newItems = reset ? projectItems : [...items, ...projectItems];
+      const hasMore = projectItems.length === ITEMS_PER_PAGE;
 
       set({
         items: newItems,

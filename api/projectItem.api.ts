@@ -5,6 +5,7 @@ import {
   ProjectItem,
   CreateProjectItemRequest,
   UpdateProjectItemRequest,
+  ProjectItemsResponse,
 } from "@/types/project";
 import { QueryParams, PaginatedResponse } from "@/types/api";
 
@@ -26,13 +27,13 @@ class ProjectItemAPI extends BaseAPI<
   async getProjectItems(
     projectId: string,
     params?: QueryParams
-  ): Promise<PaginatedResponse<ProjectItem>> {
+  ): Promise<ProjectItemsResponse> {
     try {
       const response = await axiosInstance.get(
         `${this.basePath}/project/${projectId}`,
         { params }
       );
-      return handleApiResponse<PaginatedResponse<ProjectItem>>(response);
+      return handleApiResponse<ProjectItemsResponse>(response);
     } catch (error) {
       throw handleApiError(error);
     }
