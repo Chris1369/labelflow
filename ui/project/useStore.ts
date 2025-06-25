@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { Alert } from 'react-native';
 import { Project } from '@/types/project';
 import { projectAPI } from '@/api/project.api';
 import { router } from 'expo-router';
@@ -18,6 +19,7 @@ interface ProjectActions {
   hideModal: () => void;
   resetProject: () => Promise<void>;
   deleteProject: () => Promise<void>;
+  updateProjectVisibility: (isPublic: boolean) => Promise<void>;
 }
 
 export const useProjectStore = create<ProjectState & ProjectActions>((set, get) => ({
@@ -70,6 +72,34 @@ export const useProjectStore = create<ProjectState & ProjectActions>((set, get) 
       router.replace('/(main)/select-project');
     } catch (error: any) {
       set({ error: error.message || 'Failed to delete project' });
+    }
+  },
+
+  updateProjectVisibility: async (isPublic: boolean) => {
+    const { currentProject } = get();
+    if (!currentProject) return;
+    
+    // Mise à jour optimiste de l'interface
+    set({ currentProject: { ...currentProject, isPublic }, error: null });
+    
+    try {
+      const updatedProject = await projectAPI.update(currentProject.id, { isPublic });
+      // Si la réponse contient le projet mis à jour avec un id, on le met à jour
+      // Sinon on garde la mise à jour optimiste (cas du 204 No Content)
+      if (updatedProject && updatedProject.id) {
+        set({ currentProject: updatedProject });
+      }
+      // Si on reçoit un objet vide (204), on garde la mise à jour optimiste
+    } catch (error: any) {
+      console.error('Error updating project visibility:', error);
+      // En cas d'erreur, on revert le changement
+      set({ currentProject: { ...currentProject, isPublic: !isPublic } });
+      
+      // Afficher une alerte au lieu de stocker l'erreur dans le state
+      if (error.message && error.message !== "Une erreur est survenue") {
+        // On n'affiche l'alerte que si on a un message d'erreur spécifique
+        Alert.alert('Erreur', error.message);
+      }
     }
   },
 }));

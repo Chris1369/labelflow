@@ -5,6 +5,7 @@ import { router } from 'expo-router';
 interface CreateProjectState {
   name: string;
   description: string;
+  isPublic: boolean;
   isCreating: boolean;
   error: string | null;
 }
@@ -12,6 +13,7 @@ interface CreateProjectState {
 interface CreateProjectActions {
   setName: (name: string) => void;
   setDescription: (description: string) => void;
+  setIsPublic: (isPublic: boolean) => void;
   setIsCreating: (isCreating: boolean) => void;
   setError: (error: string | null) => void;
   resetForm: () => void;
@@ -21,23 +23,26 @@ interface CreateProjectActions {
 export const useCreateProjectStore = create<CreateProjectState & CreateProjectActions>((set, get) => ({
   name: '',
   description: '',
+  isPublic: false,
   isCreating: false,
   error: null,
 
   setName: (name) => set({ name }),
   setDescription: (description) => set({ description }),
+  setIsPublic: (isPublic) => set({ isPublic }),
   setIsCreating: (isCreating) => set({ isCreating }),
   setError: (error) => set({ error }),
   
   resetForm: () => set({
     name: '',
     description: '',
+    isPublic: false,
     isCreating: false,
     error: null,
   }),
   
   createProject: async () => {
-    const { name, description } = get();
+    const { name, description, isPublic } = get();
     
     if (!name.trim() || !description.trim()) {
       set({ error: 'Veuillez remplir tous les champs' });
@@ -50,6 +55,7 @@ export const useCreateProjectStore = create<CreateProjectState & CreateProjectAc
       const project = await projectAPI.create({
         name: name.trim(),
         description: description.trim(),
+        isPublic,
       });
       
       // Réinitialiser le formulaire

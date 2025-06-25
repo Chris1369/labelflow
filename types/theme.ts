@@ -10,6 +10,7 @@ export interface Theme {
     textSecondary: string;
     background: string;
     backgroundSecondary: string;
+    backgroundTertiary: string;
     border: string;
   };
   spacing: {
@@ -49,6 +50,7 @@ export const theme: Theme = {
     textSecondary: '#6B7280',
     background: '#FFFFFF',
     backgroundSecondary: '#F3F4F6',
+    backgroundTertiary: '#E5E7EB',
     border: '#E5E7EB',
   },
   spacing: {

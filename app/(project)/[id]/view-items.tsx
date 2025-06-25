@@ -1,24 +1,13 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { theme } from '../../../types/theme';
+import { useLocalSearchParams } from 'expo-router';
+import { ViewItemsScreen } from '@/ui/view-items';
 
 export default function ViewItemsPage() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.text}>Voir les items</Text>
-    </View>
-  );
-}
+  const { id } = useLocalSearchParams<{ id: string }>();
+  
+  if (!id) {
+    return null;
+  }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  text: {
-    fontSize: theme.fontSize.xl,
-    color: theme.colors.text,
-  },
-});
+  return <ViewItemsScreen projectId={id} />;
+}

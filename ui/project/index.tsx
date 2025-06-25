@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
   ActivityIndicator,
+  Switch,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -28,7 +29,7 @@ interface ProjectScreenProps {
 }
 
 export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
-  const { currentProject, isModalVisible, modalType, isLoading, error } =
+  const { currentProject, isModalVisible, modalType, isLoading, error, updateProjectVisibility } =
     useProjectStore();
 
   useEffect(() => {
@@ -96,7 +97,8 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
     );
   }
 
-  if (error) {
+  // Ne pas afficher l'erreur en plein écran si le projet est chargé
+  if (error && !currentProject) {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.errorContainer}>
@@ -126,6 +128,25 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
           {currentProject?.description && (
             <Text style={styles.subtitle}>{currentProject.description}</Text>
           )}
+          
+          <View style={styles.switchContainer}>
+            <View style={styles.switchLabel}>
+              <Text style={styles.switchLabelText}>Projet public</Text>
+              <Text style={styles.switchDescription}>
+                Visible par tous les utilisateurs
+              </Text>
+            </View>
+            <Switch
+              value={currentProject?.isPublic || false}
+              onValueChange={(value) => updateProjectVisibility(value)}
+              trackColor={{ 
+                false: theme.colors.border, 
+                true: theme.colors.primary + '80' 
+              }}
+              thumbColor={currentProject?.isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
+            />
+          </View>
+          
           <Text style={styles.itemCount}>
             {currentProject?.items?.length || 0} items
           </Text>
@@ -210,6 +231,31 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.sm,
     color: theme.colors.primary,
     fontWeight: "500",
+  },
+  switchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    marginVertical: theme.spacing.lg,
+    width: "100%",
+    maxWidth: 350,
+  },
+  switchLabel: {
+    flex: 1,
+    marginRight: theme.spacing.md,
+  },
+  switchLabelText: {
+    fontSize: theme.fontSize.md,
+    fontWeight: "600",
+    color: theme.colors.text,
+  },
+  switchDescription: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textSecondary,
+    marginTop: 2,
   },
   menuGrid: {
     flexDirection: "row",

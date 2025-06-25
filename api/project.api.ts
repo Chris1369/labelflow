@@ -26,10 +26,11 @@ class ProjectAPI extends BaseAPI<
       
       const user: User = JSON.parse(userDataStr);
       
-      // Ajouter l'ownerId
+      // Ajouter l'ownerId et isPublic par défaut
       const requestData = {
         ...data,
         ownerId: user.id,
+        isPublic: data.isPublic ?? false, // false par défaut
         items: [] // Initialiser avec un tableau vide
       };
       

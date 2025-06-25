@@ -5,6 +5,7 @@ export interface Project {
   description: string;
   items: string[]; // Array of ProjectItem IDs
   ownerId: string;
+  isPublic: boolean;
   createdAt: string;
   updatedAt: string;
   __v?: number; // MongoDB version key
@@ -13,12 +14,14 @@ export interface Project {
 export interface CreateProjectRequest {
   name: string;
   description: string;
+  isPublic?: boolean;
   ownerId?: string; // Optional car on peut le récupérer du user connecté
 }
 
 export interface UpdateProjectRequest {
   name?: string;
   description?: string;
+  isPublic?: boolean;
   items?: string[];
 }
 

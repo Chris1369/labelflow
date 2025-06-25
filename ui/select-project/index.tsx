@@ -31,6 +31,11 @@ export const SelectProjectScreen: React.FC = () => {
       <View style={styles.projectHeader}>
         <View style={styles.projectInfo}>
           <Text style={styles.projectName}>{item.name}</Text>
+          {item.isPublic && (
+            <View style={styles.publicBadge}>
+              <Text style={styles.publicText}>Public</Text>
+            </View>
+          )}
         </View>
         <Ionicons
           name="chevron-forward"
@@ -158,6 +163,17 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.lg,
     fontWeight: '600',
     color: theme.colors.text,
+  },
+  publicBadge: {
+    backgroundColor: theme.colors.info + '20',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.sm,
+  },
+  publicText: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.info,
+    fontWeight: '600',
   },
   projectDescription: {
     fontSize: theme.fontSize.sm,
