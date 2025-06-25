@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Image,
   Dimensions,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -27,9 +28,12 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
     isLoading,
     error,
     hasMore,
+    isOwner,
+    deletingItemId,
     setProjectId,
     loadItems,
     loadMoreItems,
+    deleteItem,
     reset,
   } = useViewItemsStore();
 
@@ -42,8 +46,39 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
     };
   }, [projectId]);
 
+  const handleDeleteItem = (item: ProjectItem) => {
+    Alert.alert(
+      "Supprimer l'item",
+      "Êtes-vous sûr de vouloir supprimer cet item ? Cette action est irréversible.",
+      [
+        {
+          text: "Annuler",
+          style: "cancel"
+        },
+        {
+          text: "Supprimer",
+          style: "destructive",
+          onPress: () => deleteItem(item.id)
+        }
+      ]
+    );
+  };
+
   const renderItem = ({ item }: { item: ProjectItem }) => (
     <TouchableOpacity style={styles.itemCard} activeOpacity={0.9}>
+      {isOwner && (
+        <TouchableOpacity
+          style={styles.deleteButton}
+          onPress={() => handleDeleteItem(item)}
+          disabled={deletingItemId === item.id}
+        >
+          {deletingItemId === item.id ? (
+            <ActivityIndicator size="small" color={theme.colors.secondary} />
+          ) : (
+            <Ionicons name="trash-outline" size={20} color={theme.colors.secondary} />
+          )}
+        </TouchableOpacity>
+      )}
       <Image
         source={{ uri: item.fileUrl }}
         style={styles.itemImage}
@@ -185,6 +220,27 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     borderWidth: 1,
     borderColor: theme.colors.border,
+    position: "relative",
+  },
+  deleteButton: {
+    position: "absolute",
+    top: theme.spacing.sm,
+    right: theme.spacing.sm,
+    backgroundColor: theme.colors.error,
+    borderRadius: theme.borderRadius.sm,
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 1,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   itemImage: {
     width: "100%",
