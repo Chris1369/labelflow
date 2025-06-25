@@ -31,6 +31,7 @@ export interface ProjectItem {
   projectId?: string;
   filePath?: string;
   fileUrl: string;
+  thumbnailUrl?: string;
   labels: {
     id: string;
     _id?: string;

@@ -80,7 +80,7 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
         </TouchableOpacity>
       )}
       <Image
-        source={{ uri: item.fileUrl }}
+        source={{ uri: item.thumbnailUrl || item.fileUrl }}
         style={styles.itemImage}
         resizeMode='cover'
       />
