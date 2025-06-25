@@ -71,26 +71,57 @@ export const addItemsActions = {
     const { boundingBoxes, capturedImageUri } = useAddItemsStore.getState();
     const completedBoxes = boundingBoxes.filter((box) => box.isComplete);
 
-    const formData = new FormData();
-    formData.append("file", {
-      uri: capturedImageUri,
-      name: "image.jpg",
-      type: "image/jpeg",
-    } as any);
-    formData.append("projectId", projectId);
-    formData.append("labels", JSON.stringify(completedBoxes.map((box) => ({
-      name: box.label,
-      position: [
-        box.centerX.toFixed(4), // X center as percentage
-        box.centerY.toFixed(4), // Y center as percentage
-        box.width.toFixed(4), // Width as percentage
-        box.height.toFixed(4), // Height as percentage
-      ],
-    }))));
+    if (completedBoxes.length === 0) {
+      Alert.alert('Aucun objet', 'Veuillez ajouter et valider au moins un objet');
+      return;
+    }
 
-    await projectItemAPI.addProjectItems(formData);
-    // retour back
-    router.back();
+    try {
+      const formData = new FormData();
+      formData.append("file", {
+        uri: capturedImageUri,
+        name: "image.jpg",
+        type: "image/jpeg",
+      } as any);
+      formData.append("projectId", projectId);
+      formData.append("labels", JSON.stringify(completedBoxes.map((box) => ({
+        name: box.label,
+        position: [
+          box.centerX.toFixed(4), // X center as percentage
+          box.centerY.toFixed(4), // Y center as percentage
+          box.width.toFixed(4), // Width as percentage
+          box.height.toFixed(4), // Height as percentage
+        ],
+      }))));
+
+      await projectItemAPI.addProjectItems(formData);
+      
+      // Afficher un message de succès
+      Alert.alert(
+        'Succès',
+        `${completedBoxes.length} objet${completedBoxes.length > 1 ? 's' : ''} enregistré${completedBoxes.length > 1 ? 's' : ''}`,
+        [
+          {
+            text: 'Continuer',
+            onPress: () => {
+              // Réinitialiser pour permettre de capturer une nouvelle image
+              useAddItemsStore.getState().resetCapture();
+            }
+          },
+          {
+            text: 'Terminer',
+            onPress: () => {
+              // Retourner à la page précédente
+              router.back();
+            },
+            style: 'cancel'
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error saving items:', error);
+      Alert.alert('Erreur', 'Impossible d\'enregistrer les objets');
+    }
   },
 
   updateBoxPosition: (centerX: number, centerY: number) => {
