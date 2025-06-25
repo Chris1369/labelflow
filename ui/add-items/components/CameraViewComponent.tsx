@@ -1,34 +1,48 @@
 import React from "react";
 import { View, TouchableOpacity, StyleSheet, ActivityIndicator } from "react-native";
 import { CameraView } from "expo-camera";
+import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/types/theme";
 
 interface CameraViewComponentProps {
   cameraRef: React.RefObject<any>;
   isCapturing: boolean;
   onCapture: () => void;
+  onImport: () => void;
 }
 
 export const CameraViewComponent: React.FC<CameraViewComponentProps> = ({
   cameraRef,
   isCapturing,
   onCapture,
+  onImport,
 }) => {
   return (
     <View style={styles.container}>
       <CameraView ref={cameraRef} style={styles.camera} facing="back">
         <View style={styles.cameraOverlay}>
-          <TouchableOpacity
-            style={styles.captureButton}
-            onPress={onCapture}
-            disabled={isCapturing}
-          >
-            {isCapturing ? (
-              <ActivityIndicator color={theme.colors.secondary} />
-            ) : (
-              <View style={styles.captureButtonInner} />
-            )}
-          </TouchableOpacity>
+          <View style={styles.bottomControls}>
+            <TouchableOpacity
+              style={styles.importButton}
+              onPress={onImport}
+            >
+              <Ionicons name="images" size={28} color={theme.colors.secondary} />
+            </TouchableOpacity>
+            
+            <TouchableOpacity
+              style={styles.captureButton}
+              onPress={onCapture}
+              disabled={isCapturing}
+            >
+              {isCapturing ? (
+                <ActivityIndicator color={theme.colors.secondary} />
+              ) : (
+                <View style={styles.captureButtonInner} />
+              )}
+            </TouchableOpacity>
+            
+            <View style={styles.placeholder} />
+          </View>
         </View>
       </CameraView>
     </View>
@@ -49,12 +63,29 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
     paddingBottom: 50,
   },
+  bottomControls: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 50,
+  },
+  importButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  placeholder: {
+    width: 50,
+    height: 50,
+  },
   captureButton: {
     width: 70,
     height: 70,
     borderRadius: 35,
     backgroundColor: theme.colors.secondary,
-    alignSelf: "center",
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 4,

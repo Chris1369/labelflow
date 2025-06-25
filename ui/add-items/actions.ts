@@ -1,4 +1,5 @@
 import { Camera } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import { useAddItemsStore } from './useStore';
 import { Alert } from 'react-native';
 import { projectItemAPI } from '@/api/projectItem.api';
@@ -86,16 +87,32 @@ export const addItemsActions = {
         type: "image/jpeg",
       } as any);
       formData.append("projectId", projectId);
-      formData.append("labels", JSON.stringify(completedBoxes.map((box) => ({
-        name: box.label,
-        position: [
-          box.centerX.toFixed(4), // X center as percentage
-          box.centerY.toFixed(4), // Y center as percentage
-          box.width.toFixed(4), // Width as percentage
-          box.height.toFixed(4), // Height as percentage
-          box.rotation.toFixed(4), // Rotation in degrees
-        ],
-      }))));
+      const labels = completedBoxes.map((box) => {
+        // Log les valeurs brutes avec toute leur précision
+        console.log(`Box ${box.label} - Valeurs brutes:`, {
+          centerX: box.centerX,
+          centerY: box.centerY,
+          width: box.width,
+          height: box.height,
+          rotation: box.rotation,
+          centerX_string: box.centerX.toString(),
+          centerY_string: box.centerY.toString(),
+          centerX_precision: box.centerX.toPrecision(20),
+          centerY_precision: box.centerY.toPrecision(20)
+        });
+        return {
+          name: box.label,
+          position: [
+            box.centerX.toString(), // X center as percentage
+            box.centerY.toString(), // Y center as percentage
+            box.width.toString(), // Width as percentage
+            box.height.toString(), // Height as percentage
+            box.rotation.toString(), // Rotation in degrees
+          ],
+        };
+      });
+      console.log('Labels to send:', JSON.stringify(labels, null, 2));
+      formData.append("labels", JSON.stringify(labels));
 
       await projectItemAPI.addProjectItems(formData);
       
@@ -142,5 +159,33 @@ export const addItemsActions = {
 
   updateBoxRotation: (id: string, rotation: number) => {
     useAddItemsStore.getState().updateBoundingBox(id, { rotation });
+  },
+
+  importFromGallery: async () => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission refusée',
+          'L\'accès à la galerie est nécessaire pour importer des images.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: false,
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        useAddItemsStore.getState().setCapturedImage(result.assets[0].uri);
+      }
+    } catch (error) {
+      console.error('Error importing image:', error);
+      Alert.alert('Erreur', 'Impossible d\'importer l\'image');
+    }
   },
 };

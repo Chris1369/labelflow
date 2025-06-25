@@ -39,6 +39,10 @@ export const AddItemsScreen: React.FC = () => {
     addItemsActions.takePicture(cameraRef.current);
   };
 
+  const handleImport = () => {
+    addItemsActions.importFromGallery();
+  };
+
   const handleBoxUpdate = (
     id: string,
     x: number,
@@ -127,6 +131,7 @@ export const AddItemsScreen: React.FC = () => {
       cameraRef={cameraRef}
       isCapturing={isCapturing}
       onCapture={handleCapture}
+      onImport={handleImport}
     />
   );
 };

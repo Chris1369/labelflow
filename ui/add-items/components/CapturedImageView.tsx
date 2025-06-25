@@ -26,40 +26,71 @@ export const CapturedImageView: React.FC<CapturedImageViewProps> = ({
   onBoxUpdate,
   onSelectBox,
 }) => {
-  const [imageSize, setImageSize] = React.useState({ width: 0, height: 0 });
+  const [containerSize, setContainerSize] = React.useState({ width: 0, height: 0 });
+  const [originalImageSize, setOriginalImageSize] = React.useState({ width: 0, height: 0 });
+  const [actualImageSize, setActualImageSize] = React.useState({ width: 0, height: 0 });
+  const [imageOffset, setImageOffset] = React.useState({ x: 0, y: 0 });
+
+  React.useEffect(() => {
+    if (containerSize.width > 0 && containerSize.height > 0 && originalImageSize.width > 0 && originalImageSize.height > 0) {
+      // Calculate the scale to fit the image within the container
+      const scaleX = containerSize.width / originalImageSize.width;
+      const scaleY = containerSize.height / originalImageSize.height;
+      const scale = Math.min(scaleX, scaleY);
+      
+      // Calculate actual displayed dimensions
+      const displayWidth = originalImageSize.width * scale;
+      const displayHeight = originalImageSize.height * scale;
+      
+      // Calculate offset (centering)
+      const offsetX = (containerSize.width - displayWidth) / 2;
+      const offsetY = (containerSize.height - displayHeight) / 2;
+      
+      setActualImageSize({ width: displayWidth, height: displayHeight });
+      setImageOffset({ x: offsetX, y: offsetY });
+    }
+  }, [containerSize, originalImageSize]);
 
   return (
     <>
-      <Image
-        source={{ uri: capturedImageUri }}
-        style={styles.capturedImage}
+      <View
+        style={StyleSheet.absoluteFill}
         onLayout={(event) => {
           const { width, height } = event.nativeEvent.layout;
-          setImageSize({ width, height });
+          setContainerSize({ width, height });
         }}
-      />
+      >
+        <Image
+          source={{ uri: capturedImageUri }}
+          style={styles.capturedImage}
+          onLoad={(event) => {
+            const { width, height } = event.nativeEvent.source;
+            setOriginalImageSize({ width, height });
+          }}
+        />
+      </View>
 
       {/* Render all bounding boxes */}
-      {imageSize.width > 0 && imageSize.height > 0 && boundingBoxes.map((box) => (
+      {actualImageSize.width > 0 && actualImageSize.height > 0 && boundingBoxes.map((box) => (
         <TouchableOpacity
           key={box.id}
           onPress={() => onSelectBox(box.id)}
           activeOpacity={1}
         >
           <StableBoundingBox
-            centerX={box.centerX * imageSize.width}
-            centerY={box.centerY * imageSize.height}
-            width={box.width * imageSize.width}
-            height={box.height * imageSize.height}
+            centerX={imageOffset.x + box.centerX * actualImageSize.width}
+            centerY={imageOffset.y + box.centerY * actualImageSize.height}
+            width={box.width * actualImageSize.width}
+            height={box.height * actualImageSize.height}
             rotation={box.rotation}
             isSelected={box.id === currentBoxId}
             isComplete={box.isComplete}
             onUpdate={(x, y, w, h, r) => onBoxUpdate(
               box.id, 
-              x / imageSize.width, 
-              y / imageSize.height, 
-              w / imageSize.width, 
-              h / imageSize.height, 
+              (x - imageOffset.x) / actualImageSize.width, 
+              (y - imageOffset.y) / actualImageSize.height, 
+              w / actualImageSize.width, 
+              h / actualImageSize.height, 
               r
             )}
           />
@@ -69,8 +100,8 @@ export const CapturedImageView: React.FC<CapturedImageViewProps> = ({
               style={[
                 styles.labelBadge,
                 {
-                  left: (box.centerX * imageSize.width) - (box.width * imageSize.width) / 2,
-                  top: (box.centerY * imageSize.height) - (box.height * imageSize.height) / 2 - 30,
+                  left: imageOffset.x + (box.centerX * actualImageSize.width) - (box.width * actualImageSize.width) / 2,
+                  top: imageOffset.y + (box.centerY * actualImageSize.height) - (box.height * actualImageSize.height) / 2 - 30,
                 }
               ]}
             >
