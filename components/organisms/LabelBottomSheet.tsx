@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState, forwardRef, useImperativeHandle } from 'react';
+import React, { useCallback, useMemo, useRef, useState, forwardRef, useImperativeHandle, useEffect } from 'react';
 import {
   View,
   Text,
@@ -16,6 +16,9 @@ import { theme } from '../../types/theme';
 import { mockObjectLabels, getObjectCategories, ObjectLabel } from '../../mock/objects';
 import { Ionicons } from '@expo/vector-icons';
 import { labelAPI } from '@/api/label.api';
+import { categoryAPI } from '@/api/category.api';
+import { Category } from '@/types/category';
+import { Label } from '@/types/label';
 
 interface LabelBottomSheetProps {
   onSelectLabel: (label: string) => void;
@@ -34,11 +37,43 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
     const [isPublic, setIsPublic] = useState(false);
     const [isCreating, setIsCreating] = useState(false);
     const [userLabels, setUserLabels] = useState<ObjectLabel[]>([]);
+    const [userCategories, setUserCategories] = useState<Category[]>([]);
+    const [categoryLabels, setCategoryLabels] = useState<{ [categoryId: string]: Label[] }>({});
     
-    const categories = useMemo(() => ['Tous', 'Mes labels', ...getObjectCategories()], []);
+    const categories = useMemo(() => {
+      const dynamicCategories = userCategories.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        isDynamic: true
+      }));
+      const staticCategories = ['Tous', 'Mes labels', ...getObjectCategories()].map(name => ({
+        id: name,
+        name: name,
+        isDynamic: false
+      }));
+      return [...dynamicCategories, ...staticCategories];
+    }, [userCategories]);
     
     const filteredLabels = useMemo(() => {
-      // Combine mock labels with user labels
+      // If a dynamic category is selected, show its labels
+      if (selectedCategory && userCategories.some(cat => cat.id === selectedCategory)) {
+        const catLabels = categoryLabels[selectedCategory] || [];
+        const formatted = catLabels.map(label => ({
+          id: label.id,
+          name: label.name,
+          category: userCategories.find(cat => cat.id === selectedCategory)?.name || '',
+          icon: 'pricetag' as any,
+        }));
+        
+        if (searchQuery) {
+          return formatted.filter(label =>
+            label.name.toLowerCase().includes(searchQuery.toLowerCase())
+          );
+        }
+        return formatted;
+      }
+      
+      // Otherwise, use the original logic
       let filtered = [...mockObjectLabels, ...userLabels];
       
       // Filter by category
@@ -54,18 +89,19 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       }
       
       return filtered;
-    }, [searchQuery, selectedCategory, userLabels]);
+    }, [searchQuery, selectedCategory, userLabels, userCategories, categoryLabels]);
 
     useImperativeHandle(ref, () => ({
       open: () => {
         setIsVisible(true);
-        loadUserLabels();
+        loadUserData();
       },
       close: () => setIsVisible(false),
     }));
 
-    const loadUserLabels = async () => {
+    const loadUserData = async () => {
       try {
+        // Load user labels
         const labels = await labelAPI.getMyLabels();
         const formattedLabels: ObjectLabel[] = labels.map(label => ({
           id: label.id,
@@ -74,8 +110,40 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
           icon: 'pricetag' as any,
         }));
         setUserLabels(formattedLabels);
+        
+        // Load user categories
+        const categories = await categoryAPI.getMyCategories();
+        setUserCategories(categories);
       } catch (error) {
-        console.error('Failed to load user labels:', error);
+        console.error('Failed to load user data:', error);
+      }
+    };
+    
+    // Load category labels when a category is selected
+    useEffect(() => {
+      if (selectedCategory && userCategories.some(cat => cat.id === selectedCategory)) {
+        loadCategoryLabels(selectedCategory);
+      }
+    }, [selectedCategory, userCategories]);
+    
+    const loadCategoryLabels = async (categoryId: string) => {
+      try {
+        const category = userCategories.find(cat => cat.id === categoryId);
+        if (category && category.labels) {
+          // If labels are populated objects
+          if (typeof category.labels[0] === 'object') {
+            setCategoryLabels(prev => ({
+              ...prev,
+              [categoryId]: category.labels as Label[]
+            }));
+          } else {
+            // If labels are IDs, we might need to fetch them
+            // For now, we'll assume they're populated
+            console.log('Labels are IDs, not objects');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load category labels:', error);
       }
     };
 
@@ -120,22 +188,27 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       </TouchableOpacity>
     );
 
-    const renderCategory = ({ item }: { item: string }) => (
+    const renderCategory = ({ item }: { item: { id: string; name: string; isDynamic: boolean } }) => (
       <TouchableOpacity
         style={[
           styles.categoryChip,
-          selectedCategory === item && styles.categoryChipActive,
+          selectedCategory === item.id && styles.categoryChipActive,
         ]}
-        onPress={() => setSelectedCategory(item === 'Tous' ? null : item)}
+        onPress={() => setSelectedCategory(item.name === 'Tous' ? null : item.id)}
       >
-        <Text
-          style={[
-            styles.categoryText,
-            selectedCategory === item && styles.categoryTextActive,
-          ]}
-        >
-          {item}
-        </Text>
+        <View style={styles.categoryContent}>
+          <Text
+            style={[
+              styles.categoryText,
+              selectedCategory === item.id && styles.categoryTextActive,
+            ]}
+          >
+            {item.name}
+          </Text>
+          {item.isDynamic && (
+            <View style={styles.dynamicIndicator} />
+          )}
+        </View>
       </TouchableOpacity>
     );
 
@@ -198,7 +271,7 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
               <FlatList
                 horizontal
                 data={categories}
-                keyExtractor={(item) => item}
+                keyExtractor={(item) => item.id}
                 renderItem={renderCategory}
                 style={styles.categoriesList}
                 showsHorizontalScrollIndicator={false}
@@ -318,12 +391,24 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
     borderColor: theme.colors.primary,
   },
+  categoryContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
   categoryText: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.text,
   },
   categoryTextActive: {
     color: theme.colors.secondary,
+  },
+  dynamicIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: theme.colors.primary,
+    marginLeft: 4,
   },
   labelsList: {
     paddingHorizontal: theme.spacing.lg,
