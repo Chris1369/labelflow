@@ -8,17 +8,25 @@ export const exportActions = {
     const { exportProject } = useExportStore.getState();
     
     try {
-      await exportProject(projectId, format);
+      const exportData = await exportProject(projectId, format);
       
       Alert.alert(
-        'Export réussi',
-        `Le projet a été exporté au format ${format.toUpperCase()}`,
-        [{ text: 'OK' }]
+        'Export lancé',
+        `L'export au format ${format.toUpperCase()} a été lancé avec succès. Vous recevrez une notification lorsqu'il sera prêt.`,
+        [{ 
+          text: 'OK',
+          onPress: () => {
+            // Navigate back to project screen
+            router.back();
+          }
+        }]
       );
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Export error:', error);
+      
       Alert.alert(
         'Erreur',
-        'Une erreur est survenue lors de l\'export',
+        error.message || 'Une erreur est survenue lors de l\'export',
         [{ text: 'OK' }]
       );
     }

@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { ExportState, ExportActions, ExportFormat } from './types';
+import { exportAPI } from '@/api/export.api';
+import { ExportType } from '@/types/export';
 
 export const useExportStore = create<ExportState & ExportActions>((set, get) => ({
   selectedFormat: null,
@@ -9,19 +11,34 @@ export const useExportStore = create<ExportState & ExportActions>((set, get) => 
   setSelectedFormat: (format) => set({ selectedFormat: format }),
 
   exportProject: async (projectId: string, format: ExportFormat) => {
-    set({ isExporting: true, exportError: null });
+    set({ isExporting: true, exportError: null, selectedFormat: format });
     
     try {
-      console.log(`Exporting project ${projectId} in format: ${format}`);
+      // Get current user from API
+      const { authAPI } = await import('@/api/auth.api');
+      const user = await authAPI.getCurrentUser();
       
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!user || !user._id) {
+        throw new Error('User not found');
+      }
+      
+      // Create export request
+      const response = await exportAPI.createExport({
+        ownerId: user._id,
+        fromProjectId: projectId,
+        type: format as ExportType
+      });
       
       set({ isExporting: false });
+      
+      // Return the export data for the actions to handle
+      return response.data;
     } catch (error) {
       set({ 
         isExporting: false, 
         exportError: 'Erreur lors de l\'export' 
       });
+      throw error;
     }
   },
 

@@ -134,7 +134,7 @@ export function ExportOptionCard({
         {isExporting && isSelected ? (
           <ActivityIndicator size="small" color={theme.colors.primary} />
         ) : (
-          <TouchableOpacity
+          <View
             style={{
               backgroundColor: option.enabled
                 ? theme.colors.primary
@@ -143,12 +143,6 @@ export function ExportOptionCard({
               paddingVertical: theme.spacing.sm,
               borderRadius: theme.borderRadius.md,
             }}
-            onPress={() => {
-              if (option.enabled && !isExporting) {
-                exportActions.handleExport(projectId, option.id);
-              }
-            }}
-            disabled={!option.enabled || isExporting}
           >
             <Text
               style={{
@@ -158,7 +152,7 @@ export function ExportOptionCard({
             >
               {option.enabled ? "Exporter" : "Bientôt"}
             </Text>
-          </TouchableOpacity>
+          </View>
         )}
       </View>
     </TouchableOpacity>
