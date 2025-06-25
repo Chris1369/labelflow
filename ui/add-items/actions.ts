@@ -124,17 +124,17 @@ export const addItemsActions = {
     }
   },
 
-  updateBoxPosition: (centerX: number, centerY: number) => {
+  updateBoxPosition: (id: string, centerX: number, centerY: number) => {
     // centerX and centerY should already be relative values (0-1)
-    useAddItemsStore.getState().updateBoundingBox({ centerX, centerY });
+    useAddItemsStore.getState().updateBoundingBox(id, { centerX, centerY });
   },
 
-  updateBoxSize: (width: number, height: number) => {
+  updateBoxSize: (id: string, width: number, height: number) => {
     // width and height should already be relative values (0-1)
-    useAddItemsStore.getState().updateBoundingBox({ width, height });
+    useAddItemsStore.getState().updateBoundingBox(id, { width, height });
   },
 
-  updateBoxRotation: (rotation: number) => {
-    useAddItemsStore.getState().updateBoundingBox({ rotation });
+  updateBoxRotation: (id: string, rotation: number) => {
+    useAddItemsStore.getState().updateBoundingBox(id, { rotation });
   },
 };
