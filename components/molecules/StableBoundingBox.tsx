@@ -40,6 +40,8 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
   const gestureStart = useRef({
     box: { x: 0, y: 0 },
     size: { width: 0, height: 0 },
+    rotation: 0,
+    angle: 0,
   });
   
   // Store current dimensions and position to preserve them during drag
@@ -104,8 +106,19 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
       },
       onPanResponderMove: (evt, gestureState) => {
         if (!isSelectedRef.current) return;
-        const newWidth = Math.max(50, gestureStart.current.size.width + gestureState.dx);
-        const newHeight = Math.max(50, gestureStart.current.size.height + gestureState.dy);
+        
+        // Convert gesture movement to local coordinates considering rotation
+        const rotation = currentDimensions.current.rotation * Math.PI / 180;
+        const cos = Math.cos(rotation);
+        const sin = Math.sin(rotation);
+        
+        // Transform dx, dy to local space
+        const localDx = gestureState.dx * cos + gestureState.dy * sin;
+        const localDy = -gestureState.dx * sin + gestureState.dy * cos;
+        
+        const newWidth = Math.max(50, gestureStart.current.size.width + localDx);
+        const newHeight = Math.max(50, gestureStart.current.size.height + localDy);
+        
         currentDimensions.current.width = newWidth;
         currentDimensions.current.height = newHeight;
         onUpdate(currentPosition.current.x, currentPosition.current.y, newWidth, newHeight, currentDimensions.current.rotation);
@@ -131,14 +144,72 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
       },
       onPanResponderMove: (evt, gestureState) => {
         if (!isSelectedRef.current) return;
-        const newWidth = Math.max(50, gestureStart.current.size.width - gestureState.dx);
-        const newHeight = Math.max(50, gestureStart.current.size.height - gestureState.dy);
-        const newX = gestureStart.current.box.x + gestureState.dx / 2;
-        const newY = gestureStart.current.box.y + gestureState.dy / 2;
+        
+        // Convert gesture movement to local coordinates considering rotation
+        const rotation = currentDimensions.current.rotation * Math.PI / 180;
+        const cos = Math.cos(rotation);
+        const sin = Math.sin(rotation);
+        
+        // Transform dx, dy to local space
+        const localDx = gestureState.dx * cos + gestureState.dy * sin;
+        const localDy = -gestureState.dx * sin + gestureState.dy * cos;
+        
+        const newWidth = Math.max(50, gestureStart.current.size.width - localDx);
+        const newHeight = Math.max(50, gestureStart.current.size.height - localDy);
+        
+        // Calculate new position (center moves when resizing from NW)
+        const deltaWidth = newWidth - gestureStart.current.size.width;
+        const deltaHeight = newHeight - gestureStart.current.size.height;
+        
+        // Transform position change back to world space
+        const positionDx = (-deltaWidth / 2) * cos - (-deltaHeight / 2) * sin;
+        const positionDy = (-deltaWidth / 2) * sin + (-deltaHeight / 2) * cos;
+        
+        const newX = gestureStart.current.box.x + positionDx;
+        const newY = gestureStart.current.box.y + positionDy;
+        
         currentDimensions.current.width = newWidth;
         currentDimensions.current.height = newHeight;
         currentPosition.current = { x: newX, y: newY };
         onUpdate(newX, newY, newWidth, newHeight, currentDimensions.current.rotation);
+      },
+      onPanResponderRelease: () => {
+        // Gesture ended
+      },
+    })
+  ).current;
+
+  // Pan responder for rotation (NE corner)
+  const rotateResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (evt, gestureState) => {
+        if (!isSelectedRef.current) return false;
+        gestureStart.current.rotation = currentDimensions.current.rotation;
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        if (!isSelectedRef.current) return;
+        
+        // Calculate rotation based on gesture movement
+        // Use horizontal movement for more intuitive rotation
+        const rotationSpeed = 0.5; // degrees per pixel
+        const deltaRotation = gestureState.dx * rotationSpeed;
+        
+        let newRotation = gestureStart.current.rotation + deltaRotation;
+        
+        // Normalize rotation to 0-360 range
+        while (newRotation < 0) newRotation += 360;
+        while (newRotation >= 360) newRotation -= 360;
+        
+        currentDimensions.current.rotation = newRotation;
+        onUpdate(
+          currentPosition.current.x, 
+          currentPosition.current.y, 
+          currentDimensions.current.width, 
+          currentDimensions.current.height, 
+          newRotation
+        );
       },
       onPanResponderRelease: () => {
         // Gesture ended
@@ -186,13 +257,26 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
             <View style={styles.handleDot} />
           </View>
         )}
+
+        {/* NE Handle for rotation - only show when selected */}
+        {isSelected && (
+          <View
+            style={[styles.handle, styles.ne]}
+            {...rotateResponder.panHandlers}
+          >
+            <View style={[styles.handleDot, styles.rotateHandleDot]} />
+          </View>
+        )}
       </View>
 
-      {/* Size display - only show when selected */}
+      {/* Size and rotation display - only show when selected */}
       {isSelected && (
         <View style={styles.sizeInfo}>
           <Text style={styles.sizeText}>
             {Math.round(width)} × {Math.round(height)}
+          </Text>
+          <Text style={styles.rotationText}>
+            {Math.round(rotation)}°
           </Text>
         </View>
       )}
@@ -233,10 +317,10 @@ const styles = StyleSheet.create({
   handleDot: {
     width: 24,
     height: 24,
-    backgroundColor: theme.colors.primary,
+    backgroundColor: theme.colors.secondary,
     borderRadius: 12,
     borderWidth: 3,
-    borderColor: theme.colors.secondary,
+    borderColor: theme.colors.primary,
   },
   nw: {
     top: -HANDLE_SIZE / 2,
@@ -245,6 +329,14 @@ const styles = StyleSheet.create({
   se: {
     bottom: -HANDLE_SIZE / 2,
     right: -HANDLE_SIZE / 2,
+  },
+  ne: {
+    top: -HANDLE_SIZE / 2,
+    right: -HANDLE_SIZE / 2,
+  },
+  rotateHandleDot: {
+    backgroundColor: '#4CAF50',
+    borderColor: '#2E7D32',
   },
   sizeInfo: {
     position: "absolute",
@@ -261,5 +353,11 @@ const styles = StyleSheet.create({
     color: theme.colors.secondary,
     fontSize: theme.fontSize.md,
     fontWeight: "600",
+  },
+  rotationText: {
+    color: theme.colors.secondary,
+    fontSize: theme.fontSize.sm,
+    fontWeight: "500",
+    marginTop: 2,
   },
 });

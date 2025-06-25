@@ -13,7 +13,6 @@ interface ControlButtonsProps {
   isSaving: boolean;
   onRetake: () => void;
   onAddBox: () => void;
-  onRotate: (direction: "left" | "right") => void;
   onValidate: () => void;
 }
 
@@ -26,10 +25,8 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
   isSaving,
   onRetake,
   onAddBox,
-  onRotate,
   onValidate,
 }) => {
-  const currentBox = boundingBoxes.find(box => box.id === currentBoxId);
 
   return (
     <>
@@ -55,47 +52,13 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
       </TouchableOpacity>
 
       {/* Bottom controls */}
-      <View style={styles.bottomControls}>
-        {/* Rotation controls */}
-        {currentBoxId && (
-          <View style={styles.rotationControls}>
-            <TouchableOpacity
-              style={styles.rotationButton}
-              onPress={() => onRotate("left")}
-              activeOpacity={0.7}
-            >
-              <Ionicons
-                name="refresh-outline"
-                size={20}
-                color={theme.colors.secondary}
-                style={{ transform: [{ scaleX: -1 }] }}
-              />
-            </TouchableOpacity>
-
-            <Text style={styles.rotationText}>
-              {currentBox?.rotation || 0}°
-            </Text>
-
-            <TouchableOpacity
-              style={styles.rotationButton}
-              onPress={() => onRotate("right")}
-              activeOpacity={0.7}
-            >
-              <Ionicons
-                name="refresh-outline"
-                size={20}
-                color={theme.colors.secondary}
-              />
-            </TouchableOpacity>
-          </View>
-        )}
-
-        {/* Validate button */}
-        {showSaveButton && (
+      {showSaveButton && (
+        <View style={styles.bottomControls}>
           <TouchableOpacity
             style={[
               styles.saveButton,
-              hasCompletedBoxes && !currentBoxId && styles.saveAllButton
+              hasCompletedBoxes && !currentBoxId && styles.saveAllButton,
+              currentBoxId && styles.validateButton
             ]}
             onPress={onValidate}
             activeOpacity={0.8}
@@ -114,8 +77,8 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
               />
             )}
           </TouchableOpacity>
-        )}
-      </View>
+        </View>
+      )}
 
       {/* Box count indicator */}
       {boundingBoxes.length > 0 && (
@@ -152,32 +115,9 @@ const styles = StyleSheet.create({
   bottomControls: {
     position: "absolute",
     bottom: 40,
-    left: 20,
-    right: 20,
-    flexDirection: "row",
-    justifyContent: "space-between",
+    left: 0,
+    right: 0,
     alignItems: "center",
-  },
-  rotationControls: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.85)",
-    borderRadius: theme.borderRadius.lg,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-  },
-  rotationButton: {
-    padding: theme.spacing.sm,
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-  },
-  rotationText: {
-    color: theme.colors.secondary,
-    fontSize: theme.fontSize.md,
-    fontWeight: "bold",
-    marginHorizontal: theme.spacing.md,
-    minWidth: 40,
-    textAlign: "center",
   },
   saveButton: {
     backgroundColor: theme.colors.secondary,
@@ -187,6 +127,13 @@ const styles = StyleSheet.create({
   saveAllButton: {
     backgroundColor: theme.colors.primary,
     padding: theme.spacing.md,
+  },
+  validateButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: "center",
+    alignItems: "center",
   },
   boxCounter: {
     position: "absolute",

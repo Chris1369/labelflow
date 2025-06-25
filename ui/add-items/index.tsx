@@ -56,14 +56,6 @@ export const AddItemsScreen: React.FC = () => {
     });
   };
 
-  const handleRotate = (direction: "left" | "right") => {
-    if (!currentBoxId) return;
-    const currentBox = boundingBoxes.find(box => box.id === currentBoxId);
-    if (!currentBox) return;
-
-    const newRotation = currentBox.rotation + (direction === "right" ? 15 : -15);
-    useAddItemsStore.getState().updateBoundingBox(currentBoxId, { rotation: newRotation });
-  };
 
   const handleValidate = () => {
     if (currentBoxId) {
@@ -118,7 +110,6 @@ export const AddItemsScreen: React.FC = () => {
           isSaving={isSaving}
           onRetake={addItemsActions.retakePicture}
           onAddBox={handleAddBox}
-          onRotate={handleRotate}
           onValidate={handleValidate}
         />
 
