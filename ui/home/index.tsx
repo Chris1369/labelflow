@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -33,6 +34,7 @@ export const HomeScreen: React.FC = () => {
       title: 'Sélectionner un projet',
       icon: 'folder-open',
       onPress: homeActions.handleSelectProject,
+      color: theme.colors.info,
     },
     {
       id: 'create-team',
@@ -46,18 +48,28 @@ export const HomeScreen: React.FC = () => {
       title: 'Sélectionner une équipe',
       icon: 'people-circle',
       onPress: homeActions.handleSelectTeam,
+      color: theme.colors.success,
+    },
+    {
+      id: 'dictionary',
+      title: 'Dictionnaire',
+      icon: 'book',
+      onPress: homeActions.handleDictionary,
+      color: theme.colors.warning,
     },
     {
       id: 'settings',
       title: 'Paramètres',
       icon: 'settings',
       onPress: homeActions.handleSettings,
+      color: theme.colors.textSecondary,
     },
     {
       id: 'help',
       title: 'Aide',
       icon: 'help-circle',
       onPress: homeActions.handleHelp,
+      color: theme.colors.info,
     },
   ];
 
@@ -72,7 +84,14 @@ export const HomeScreen: React.FC = () => {
           >
             <Ionicons name="log-out" size={24} color={theme.colors.text} />
           </TouchableOpacity>
-          <Text style={styles.title}>Labeltool</Text>
+          <View style={styles.logoContainer}>
+            <Image 
+              source={require('@/assets/logo.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.title}>Labelflow</Text>
+          </View>
           <Text style={styles.subtitle}>Menu principal</Text>
         </View>
 
@@ -123,11 +142,20 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: theme.borderRadius.md,
   },
+  logoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: theme.spacing.xs,
+  },
+  logo: {
+    width: 40,
+    height: 40,
+    marginRight: theme.spacing.sm,
+  },
   title: {
     fontSize: theme.fontSize.xxl,
     fontWeight: 'bold',
     color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
   },
   subtitle: {
     fontSize: theme.fontSize.lg,

@@ -33,7 +33,7 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
   }
 
   // Méthodes spécifiques aux labels
-  async getMyLabels(): Promise<Label[]> {
+  async getMyLabels(includePublic: boolean = true): Promise<Label[]> {
     try {
       // Récupérer l'utilisateur actuel
       const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
@@ -41,8 +41,12 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
 
       const user: User = JSON.parse(userDataStr);
 
-      // Utiliser l'endpoint /labels/owner/:ownerId
-      const response = await axiosInstance.get(`${this.basePath}/owner/${user.id}`);
+      // Utiliser l'endpoint /labels/owner/:ownerId avec le paramètre getIsPublic
+      const response = await axiosInstance.get(`${this.basePath}/owner/${user.id}`, {
+        params: {
+          getIsPublic: includePublic
+        }
+      });
 
       // La réponse peut avoir une structure paginée
       const result = handleApiResponse<{

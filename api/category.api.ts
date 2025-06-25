@@ -35,7 +35,7 @@ class CategoryAPI extends BaseAPI<Category, CreateCategoryRequest, UpdateCategor
   }
 
   // Méthodes spécifiques aux catégories
-  async getMyCategories(): Promise<Category[]> {
+  async getMyCategories(includePublic: boolean = true): Promise<Category[]> {
     try {
       // Récupérer l'utilisateur actuel
       const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
@@ -43,8 +43,12 @@ class CategoryAPI extends BaseAPI<Category, CreateCategoryRequest, UpdateCategor
 
       const user: User = JSON.parse(userDataStr);
 
-      // Utiliser l'endpoint /categories/owner/:ownerId
-      const response = await axiosInstance.get(`${this.basePath}/owner/${user.id}`);
+      // Utiliser l'endpoint /categories/owner/:ownerId avec le paramètre getIsPublic
+      const response = await axiosInstance.get(`${this.basePath}/owner/${user.id}`, {
+        params: {
+          getIsPublic: includePublic
+        }
+      });
 
       // La réponse peut avoir une structure paginée
       const result = handleApiResponse<{
@@ -95,7 +99,7 @@ class CategoryAPI extends BaseAPI<Category, CreateCategoryRequest, UpdateCategor
 
   async addLabel(categoryId: string, labelId: string): Promise<Category> {
     try {
-      const response = await axiosInstance.post(
+      const response = await axiosInstance.put(
         `${this.basePath}/${categoryId}/labels/${labelId}`
       );
       return handleApiResponse<Category>(response);

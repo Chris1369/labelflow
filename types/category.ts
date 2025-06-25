@@ -1,8 +1,10 @@
+import { Label } from './label';
+
 export interface Category {
   id: string;
   _id?: string;
   name: string;
-  labels: string[]; // Array of Label IDs
+  labels: (string | Label)[]; // Array of Label IDs or populated Label objects
   ownerId: string;
   isPublic: boolean;
   createdAt: string;

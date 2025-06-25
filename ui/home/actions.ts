@@ -23,6 +23,11 @@ export const homeActions = {
     router.push('/(main)/select-team');
   },
 
+  handleDictionary: () => {
+    useHomeStore.getState().setSelectedMenuItem('dictionary');
+    router.push('/(main)/dictionary');
+  },
+
   handleSettings: () => {
     useHomeStore.getState().setSelectedMenuItem('settings');
     router.push('/(main)/settings');

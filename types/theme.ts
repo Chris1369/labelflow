@@ -24,6 +24,7 @@ export interface Theme {
     sm: number;
     md: number;
     lg: number;
+    xl: number;
     full: number;
   };
   fontSize: {
@@ -62,6 +63,7 @@ export const theme: Theme = {
     sm: 4,
     md: 8,
     lg: 16,
+    xl: 24,
     full: 9999,
   },
   fontSize: {

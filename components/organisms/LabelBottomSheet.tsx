@@ -8,11 +8,14 @@ import {
   Modal,
   KeyboardAvoidingView,
   Platform,
+  Switch,
+  Alert,
 } from 'react-native';
 import { Input } from '../atoms';
 import { theme } from '../../types/theme';
 import { mockObjectLabels, getObjectCategories, ObjectLabel } from '../../mock/objects';
 import { Ionicons } from '@expo/vector-icons';
+import { labelAPI } from '@/api/label.api';
 
 interface LabelBottomSheetProps {
   onSelectLabel: (label: string) => void;
@@ -28,11 +31,15 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
     const [isVisible, setIsVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+    const [isPublic, setIsPublic] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
+    const [userLabels, setUserLabels] = useState<ObjectLabel[]>([]);
     
-    const categories = useMemo(() => ['Tous', ...getObjectCategories()], []);
+    const categories = useMemo(() => ['Tous', 'Mes labels', ...getObjectCategories()], []);
     
     const filteredLabels = useMemo(() => {
-      let filtered = mockObjectLabels;
+      // Combine mock labels with user labels
+      let filtered = [...mockObjectLabels, ...userLabels];
       
       // Filter by category
       if (selectedCategory && selectedCategory !== 'Tous') {
@@ -47,24 +54,59 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       }
       
       return filtered;
-    }, [searchQuery, selectedCategory]);
+    }, [searchQuery, selectedCategory, userLabels]);
 
     useImperativeHandle(ref, () => ({
-      open: () => setIsVisible(true),
+      open: () => {
+        setIsVisible(true);
+        loadUserLabels();
+      },
       close: () => setIsVisible(false),
     }));
+
+    const loadUserLabels = async () => {
+      try {
+        const labels = await labelAPI.getMyLabels();
+        const formattedLabels: ObjectLabel[] = labels.map(label => ({
+          id: label.id,
+          name: label.name,
+          category: 'Mes labels',
+          icon: 'pricetag' as any,
+        }));
+        setUserLabels(formattedLabels);
+      } catch (error) {
+        console.error('Failed to load user labels:', error);
+      }
+    };
 
     const handleSelectLabel = (label: ObjectLabel) => {
       onSelectLabel(label.name);
       setIsVisible(false);
       setSearchQuery('');
+      setIsPublic(false);
     };
 
-    const handleAddCustomLabel = () => {
+    const handleAddCustomLabel = async () => {
       if (searchQuery.trim()) {
-        onSelectLabel(searchQuery.trim());
-        setIsVisible(false);
-        setSearchQuery('');
+        setIsCreating(true);
+        try {
+          await labelAPI.create({
+            name: searchQuery.trim(),
+            isPublic,
+          });
+          
+          // Add to selection and close
+          onSelectLabel(searchQuery.trim());
+          setIsVisible(false);
+          setSearchQuery('');
+          setIsPublic(false);
+          
+          Alert.alert('Succès', `Label "${searchQuery.trim()}" créé avec succès`);
+        } catch (error: any) {
+          Alert.alert('Erreur', error.message || 'Impossible de créer le label');
+        } finally {
+          setIsCreating(false);
+        }
       }
     };
 
@@ -126,13 +168,30 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
                   icon="search-outline"
                 />
                 {searchQuery.trim() && !filteredLabels.some(l => l.name.toLowerCase() === searchQuery.toLowerCase()) && (
-                  <TouchableOpacity
-                    style={styles.addButton}
-                    onPress={handleAddCustomLabel}
-                  >
-                    <Ionicons name="add-circle" size={24} color={theme.colors.primary} />
-                    <Text style={styles.addButtonText}>Ajouter "{searchQuery}"</Text>
-                  </TouchableOpacity>
+                  <View style={styles.addLabelContainer}>
+                    <View style={styles.switchContainer}>
+                      <Text style={styles.switchLabel}>Rendre public</Text>
+                      <Switch
+                        value={isPublic}
+                        onValueChange={setIsPublic}
+                        trackColor={{ 
+                          false: theme.colors.border, 
+                          true: theme.colors.primary + '80' 
+                        }}
+                        thumbColor={isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
+                      />
+                    </View>
+                    <TouchableOpacity
+                      style={[styles.addButton, isCreating && styles.addButtonDisabled]}
+                      onPress={handleAddCustomLabel}
+                      disabled={isCreating}
+                    >
+                      <Ionicons name="add-circle" size={24} color={isCreating ? theme.colors.textSecondary : theme.colors.primary} />
+                      <Text style={[styles.addButtonText, isCreating && styles.addButtonTextDisabled]}>
+                        {isCreating ? 'Création...' : `Ajouter "${searchQuery}"`}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
               </View>
 
@@ -203,18 +262,41 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     marginBottom: theme.spacing.md,
   },
+  addLabelContainer: {
+    marginTop: theme.spacing.md,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+  },
+  switchContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: theme.spacing.sm,
+  },
+  switchLabel: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.text,
+    fontWeight: '500',
+  },
   addButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: theme.spacing.sm,
     padding: theme.spacing.sm,
-    backgroundColor: theme.colors.backgroundSecondary,
+    backgroundColor: theme.colors.primary + '20',
     borderRadius: theme.borderRadius.md,
+    justifyContent: 'center',
+  },
+  addButtonDisabled: {
+    backgroundColor: theme.colors.border,
   },
   addButtonText: {
     marginLeft: theme.spacing.sm,
     color: theme.colors.primary,
     fontWeight: '600',
+  },
+  addButtonTextDisabled: {
+    color: theme.colors.textSecondary,
   },
   categoriesList: {
     paddingHorizontal: theme.spacing.lg,
