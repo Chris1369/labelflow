@@ -17,4 +17,7 @@ export const StorageKeys = {
   // Cache
   TEAMS_CACHE: '@labeltool:teams_cache',
   PROJECTS_CACHE: '@labeltool:projects_cache',
+  
+  // Labels
+  RECENT_LABELS: '@labeltool:recent_labels',
 } as const;

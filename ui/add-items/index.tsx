@@ -10,7 +10,9 @@ import {
   CameraViewComponent,
   CapturedImageView,
   ControlButtons,
+  RecentLabelsBar,
 } from "./components";
+import { RecentLabelsManager } from "@/helpers/recentLabels";
 
 export const AddItemsScreen: React.FC = () => {
   const { id: projectId } = useLocalSearchParams();
@@ -71,9 +73,11 @@ export const AddItemsScreen: React.FC = () => {
     }
   };
 
-  const handleSelectLabel = (label: string) => {
+  const handleSelectLabel = async (label: string) => {
     if (currentBoxId) {
       useAddItemsStore.getState().setLabelForBox(currentBoxId, label);
+      // Add to recent labels
+      await RecentLabelsManager.addRecentLabel(label);
     }
   };
 
@@ -115,6 +119,11 @@ export const AddItemsScreen: React.FC = () => {
           onRetake={addItemsActions.retakePicture}
           onAddBox={handleAddBox}
           onValidate={handleValidate}
+        />
+
+        <RecentLabelsBar
+          visible={currentBoxId !== null && !boundingBoxes.find(b => b.id === currentBoxId)?.isComplete}
+          onSelectLabel={handleSelectLabel}
         />
 
         <LabelBottomSheet

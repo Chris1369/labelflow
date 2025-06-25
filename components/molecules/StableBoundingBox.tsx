@@ -269,17 +269,7 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
         )}
       </View>
 
-      {/* Size and rotation display - only show when selected */}
-      {isSelected && (
-        <View style={styles.sizeInfo}>
-          <Text style={styles.sizeText}>
-            {Math.round(width)} × {Math.round(height)}
-          </Text>
-          <Text style={styles.rotationText}>
-            {Math.round(rotation)}°
-          </Text>
-        </View>
-      )}
+      {/* Size and rotation display moved to parent component */}
     </>
   );
 };
@@ -337,27 +327,5 @@ const styles = StyleSheet.create({
   rotateHandleDot: {
     backgroundColor: '#4CAF50',
     borderColor: '#2E7D32',
-  },
-  sizeInfo: {
-    position: "absolute",
-    top: 60,
-    alignSelf: "center",
-    backgroundColor: "rgba(0,0,0,0.85)",
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.borderRadius.md,
-    left: "50%",
-    transform: [{ translateX: -60 }],
-  },
-  sizeText: {
-    color: theme.colors.secondary,
-    fontSize: theme.fontSize.md,
-    fontWeight: "600",
-  },
-  rotationText: {
-    color: theme.colors.secondary,
-    fontSize: theme.fontSize.sm,
-    fontWeight: "500",
-    marginTop: 2,
   },
 });

@@ -110,6 +110,29 @@ export const CapturedImageView: React.FC<CapturedImageViewProps> = ({
           )}
         </TouchableOpacity>
       ))}
+      
+      {/* Info display in bottom right */}
+      <View style={styles.infoContainer}>
+        {currentBoxId && (() => {
+          const currentBox = boundingBoxes.find(b => b.id === currentBoxId);
+          if (!currentBox) return null;
+          return (
+            <View style={styles.boxInfo}>
+              <Text style={styles.infoText}>
+                {Math.round(currentBox.width * actualImageSize.width)} × {Math.round(currentBox.height * actualImageSize.height)}
+              </Text>
+              <Text style={styles.infoTextSmall}>
+                {Math.round(currentBox.rotation)}°
+              </Text>
+            </View>
+          );
+        })()}
+        <View style={styles.countInfo}>
+          <Text style={styles.infoText}>
+            {boundingBoxes.filter(b => b.isComplete).length}/{boundingBoxes.length} objets
+          </Text>
+        </View>
+      </View>
     </>
   );
 };
@@ -132,5 +155,36 @@ const styles = StyleSheet.create({
     color: theme.colors.secondary,
     fontSize: theme.fontSize.xs,
     fontWeight: "600",
+  },
+  infoContainer: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    alignItems: "flex-end",
+    gap: theme.spacing.sm,
+  },
+  boxInfo: {
+    backgroundColor: "rgba(0,0,0,0.85)",
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.md,
+    alignItems: "center",
+  },
+  countInfo: {
+    backgroundColor: "rgba(0,0,0,0.85)",
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.md,
+  },
+  infoText: {
+    color: theme.colors.secondary,
+    fontSize: theme.fontSize.sm,
+    fontWeight: "600",
+  },
+  infoTextSmall: {
+    color: theme.colors.secondary,
+    fontSize: theme.fontSize.xs,
+    fontWeight: "500",
+    marginTop: 2,
   },
 });

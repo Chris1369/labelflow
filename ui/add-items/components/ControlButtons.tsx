@@ -1,5 +1,11 @@
 import React from "react";
-import { View, TouchableOpacity, Text, StyleSheet, ActivityIndicator } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  // Text,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/types/theme";
 import { BoundingBox } from "../types";
@@ -27,27 +33,37 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
   onAddBox,
   onValidate,
 }) => {
-
   return (
     <>
       {/* Top controls */}
-      <TouchableOpacity 
-        style={[styles.retakeButton, isSaving && styles.disabledButton]} 
+      <TouchableOpacity
+        style={[styles.retakeButton, isSaving && styles.disabledButton]}
         onPress={onRetake}
         disabled={isSaving}
       >
-        <Ionicons name="camera-reverse" size={32} color={theme.colors.secondary} />
+        <Ionicons
+          name='camera-reverse'
+          size={32}
+          color={theme.colors.secondary}
+        />
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={[styles.addBoxButton, (hasUncompletedBoxes || isSaving) && styles.disabledButton]}
+        style={[
+          styles.addBoxButton,
+          (hasUncompletedBoxes || isSaving) && styles.disabledButton,
+        ]}
         onPress={onAddBox}
         disabled={hasUncompletedBoxes || isSaving}
       >
         <Ionicons
-          name="add-circle"
+          name='add-circle'
           size={48}
-          color={hasUncompletedBoxes ? theme.colors.textSecondary : theme.colors.primary}
+          color={
+            hasUncompletedBoxes
+              ? theme.colors.textSecondary
+              : theme.colors.primary
+          }
         />
       </TouchableOpacity>
 
@@ -58,22 +74,23 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
             style={[
               styles.saveButton,
               hasCompletedBoxes && !currentBoxId && styles.saveAllButton,
-              currentBoxId && styles.validateButton
+              currentBoxId && styles.validateButton,
             ]}
             onPress={onValidate}
             activeOpacity={0.8}
             disabled={isSaving}
           >
             {isSaving && hasCompletedBoxes && !currentBoxId ? (
-              <ActivityIndicator 
-                size="large" 
-                color={theme.colors.secondary} 
-              />
+              <ActivityIndicator size='large' color={theme.colors.secondary} />
             ) : (
               <Ionicons
-                name={currentBoxId ? 'checkmark-circle' : 'save-outline'}
+                name={currentBoxId ? "checkmark-circle" : "save-outline"}
                 size={currentBoxId ? 56 : 32}
-                color={hasCompletedBoxes && !currentBoxId ? theme.colors.secondary : theme.colors.primary}
+                color={
+                  hasCompletedBoxes && !currentBoxId
+                    ? theme.colors.secondary
+                    : theme.colors.primary
+                }
               />
             )}
           </TouchableOpacity>
@@ -81,13 +98,14 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
       )}
 
       {/* Box count indicator */}
-      {boundingBoxes.length > 0 && (
+      {/* {boundingBoxes.length > 0 && (
         <View style={styles.boxCounter}>
           <Text style={styles.boxCounterText}>
-            {boundingBoxes.filter(b => b.isComplete).length}/{boundingBoxes.length} objets
+            {boundingBoxes.filter((b) => b.isComplete).length}/
+            {boundingBoxes.length} objets ede
           </Text>
         </View>
-      )}
+      )} */}
     </>
   );
 };
