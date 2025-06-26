@@ -1,8 +1,15 @@
-import React, { Component, ReactNode, ErrorInfo } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { theme } from '@/types/theme';
-import * as Updates from 'expo-updates';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import React, { Component, ReactNode, ErrorInfo } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { theme } from "@/types/theme";
+import * as Updates from "expo-updates";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Props {
   children: ReactNode;
@@ -36,11 +43,11 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+
     // Save error details to AsyncStorage for debugging
     this.saveErrorLog(error, errorInfo);
-    
+
     // Update state with error details
     this.setState({
       error,
@@ -57,20 +64,20 @@ export class ErrorBoundary extends Component<Props, State> {
         stack: error.stack,
         componentStack: errorInfo.componentStack,
       };
-      
+
       // Get existing logs
-      const existingLogs = await AsyncStorage.getItem('@labelflow:errorLogs');
+      const existingLogs = await AsyncStorage.getItem("@bboxly:errorLogs");
       const logs = existingLogs ? JSON.parse(existingLogs) : [];
-      
+
       // Add new log (keep only last 10 errors)
       logs.unshift(errorLog);
       if (logs.length > 10) {
         logs.pop();
       }
-      
-      await AsyncStorage.setItem('@labelflow:errorLogs', JSON.stringify(logs));
+
+      await AsyncStorage.setItem("@bboxly:errorLogs", JSON.stringify(logs));
     } catch (e) {
-      console.error('Failed to save error log:', e);
+      console.error("Failed to save error log:", e);
     }
   };
 
@@ -86,7 +93,7 @@ export class ErrorBoundary extends Component<Props, State> {
     try {
       await Updates.reloadAsync();
     } catch (e) {
-      Alert.alert('Erreur', 'Impossible de recharger l\'application');
+      Alert.alert("Erreur", "Impossible de recharger l'application");
     }
   };
 
@@ -94,12 +101,15 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.hasError) {
       return (
         <View style={styles.container}>
-          <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.content}
+          >
             <Text style={styles.title}>Oops! Une erreur s'est produite</Text>
             <Text style={styles.subtitle}>
               L'application a rencontré une erreur inattendue.
             </Text>
-            
+
             <View style={styles.errorDetails}>
               <Text style={styles.errorTitle}>Détails de l'erreur:</Text>
               <View style={styles.errorBox}>
@@ -107,7 +117,7 @@ export class ErrorBoundary extends Component<Props, State> {
                   {this.state.error && this.state.error.toString()}
                 </Text>
               </View>
-              
+
               {__DEV__ && this.state.errorInfo && (
                 <View style={styles.stackTrace}>
                   <Text style={styles.stackTitle}>Stack trace:</Text>
@@ -119,14 +129,17 @@ export class ErrorBoundary extends Component<Props, State> {
                 </View>
               )}
             </View>
-            
+
             <View style={styles.actions}>
-              <TouchableOpacity style={styles.button} onPress={this.handleReset}>
+              <TouchableOpacity
+                style={styles.button}
+                onPress={this.handleReset}
+              >
                 <Text style={styles.buttonText}>Réessayer</Text>
               </TouchableOpacity>
-              
-              <TouchableOpacity 
-                style={[styles.button, styles.secondaryButton]} 
+
+              <TouchableOpacity
+                style={[styles.button, styles.secondaryButton]}
                 onPress={this.handleReload}
               >
                 <Text style={[styles.buttonText, styles.secondaryButtonText]}>
@@ -134,7 +147,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 </Text>
               </TouchableOpacity>
             </View>
-            
+
             {__DEV__ && (
               <Text style={styles.devNote}>
                 Mode développement: Les détails de l'erreur sont affichés
@@ -164,13 +177,13 @@ const styles = StyleSheet.create({
   title: {
     ...theme.fonts.title,
     color: theme.colors.error,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: theme.spacing.md,
   },
   subtitle: {
     ...theme.fonts.body,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: theme.spacing.xl,
   },
   errorDetails: {
@@ -209,7 +222,7 @@ const styles = StyleSheet.create({
   stackText: {
     ...theme.fonts.label,
     color: theme.colors.textSecondary,
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
   },
   actions: {
     gap: theme.spacing.md,
@@ -219,11 +232,11 @@ const styles = StyleSheet.create({
     paddingVertical: theme.spacing.md,
     paddingHorizontal: theme.spacing.xl,
     borderRadius: theme.borderRadius.md,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: theme.spacing.sm,
   },
   secondaryButton: {
-    backgroundColor: 'transparent',
+    backgroundColor: "transparent",
     borderWidth: 1,
     borderColor: theme.colors.primary,
   },
@@ -237,8 +250,8 @@ const styles = StyleSheet.create({
   devNote: {
     ...theme.fonts.caption,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: theme.spacing.xl,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
 });

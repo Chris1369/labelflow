@@ -1,37 +1,61 @@
 {
   "cli": {
-    "version": ">= 5.9.1"
+    "version": ">= 5.0.0"
   },
   "build": {
-    "preview": {
-      "android": {
-        "buildType": "apk",
-        "distribution": "internal"
+    "development": {
+      "developmentClient": true,
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "development"
       },
       "ios": {
         "simulator": true,
-        "distribution": "internal"
+        "buildConfiguration": "Debug"
+      },
+      "android": {
+        "buildType": "developmentClient"
+      }
+    },
+    "staging": {
+      "distribution": "internal",
+      "env": {
+        "APP_VARIANT": "staging"
+      },
+      "ios": {
+        "simulator": false,
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "apk"
       }
     },
     "production": {
-      "android": {
-        "buildType": "app-bundle",
-        "distribution": "store"
+      "env": {
+        "APP_VARIANT": "production"
       },
       "ios": {
-        "distribution": "store"
+        "simulator": false,
+        "buildConfiguration": "Release"
+      },
+      "android": {
+        "buildType": "aab"
       }
     }
   },
   "submit": {
-    "production": {
-      "android": {
-        "track": "production"
-      },
+    "staging": {
       "ios": {
-        "appleId": "YOUR_APPLE_ID",
-        "ascAppId": "YOUR_APP_STORE_CONNECT_APP_ID",
-        "appleTeamId": "YOUR_APPLE_TEAM_ID"
+        "appleId": "ton-email@domain.com",
+        "ascAppId": "ton-app-id-staging",
+        "appleTeamId": "ton-team-id"
+      }
+    },
+    "production": {
+      "ios": {
+        "appleId": "ton-email@domain.com",
+        "ascAppId": "ton-app-id-production",
+        "appleTeamId": "ton-team-id"
       }
     }
   }

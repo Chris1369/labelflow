@@ -70,7 +70,7 @@ export const HomeScreen: React.FC = () => {
               style={styles.logo}
               resizeMode='contain'
             />
-            <Text style={styles.title}>Labelflow</Text>
+            <Text style={styles.title}>BBoxly</Text>
           </View>
           <Text style={styles.subtitle}>Menu principal</Text>
         </View>

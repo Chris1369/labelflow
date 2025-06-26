@@ -1,23 +1,23 @@
 export const StorageKeys = {
   // Auth
-  ACCESS_TOKEN: "@labelflow:access_token",
-  REFRESH_TOKEN: "@labelflow:refresh_token",
-  USER_DATA: "@labelflow:user_data",
+  ACCESS_TOKEN: "@bboxly:access_token",
+  REFRESH_TOKEN: "@bboxly:refresh_token",
+  USER_DATA: "@bboxly:user_data",
 
   // App settings
-  LANGUAGE: "@labelflow:language",
-  THEME: "@labelflow:theme",
+  LANGUAGE: "@bboxly:language",
+  THEME: "@bboxly:theme",
 
   // Team
-  CURRENT_TEAM_ID: "@labelflow:current_team_id",
+  CURRENT_TEAM_ID: "@bboxly:current_team_id",
 
   // Project
-  CURRENT_PROJECT_ID: "@labelflow:current_project_id",
+  CURRENT_PROJECT_ID: "@bboxly:current_project_id",
 
   // Cache
-  TEAMS_CACHE: "@labelflow:teams_cache",
-  PROJECTS_CACHE: "@labelflow:projects_cache",
+  TEAMS_CACHE: "@bboxly:teams_cache",
+  PROJECTS_CACHE: "@bboxly:projects_cache",
 
   // Labels
-  RECENT_LABELS: "@labelflow:recent_labels",
+  RECENT_LABELS: "@bboxly:recent_labels",
 } as const;

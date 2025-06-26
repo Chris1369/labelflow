@@ -16,48 +16,48 @@ interface EnvironmentValues {
 export function getEnvironmentValues(): EnvironmentValues {
   if (IS_DEV) {
     return {
-      name: "Labelflow Dev",
+      name: "BBoxly Dev",
       icon: "./assets/icon.png", // Using existing icon for now
       adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
-      package: "com.labelflow.dev",
+      package: "com.bboxly.dev",
       BASE_URL: `http://${IP}:3000/`,
       VERSION: "v1.0",
-      PROJECT_NAME: "labelflow-api",
+      PROJECT_NAME: "bboxly-api",
     };
   }
   if (IS_STAGING) {
     return {
-      name: "Labelflow Staging",
+      name: "BBoxly Staging",
       icon: "./assets/icon.png", // Using existing icon for now
       adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
-      package: "com.labelflow.staging",
-      BASE_URL: "https://staging-api.labelflow.com/",
+      package: "com.bboxly.staging",
+      BASE_URL: "https://staging-api.bboxly.com/",
       VERSION: "v1.0",
-      PROJECT_NAME: "labelflow-api",
+      PROJECT_NAME: "bboxly-api",
     };
   }
   // Production
   return {
-    name: "Labelflow",
+    name: "BBoxly",
     icon: "./assets/icon.png",
     adaptiveIcon: "./assets/adaptive-icon.png",
-    package: "com.labelflow.app",
-    BASE_URL: "https://api.labelflow.com/",
+    package: "com.bboxly.app",
+    BASE_URL: "https://api.bboxly.com/",
     VERSION: "v1.0",
-    PROJECT_NAME: "labelflow-api",
+    PROJECT_NAME: "bboxly-api",
   };
 }
 
 export default {
   expo: {
     name: getEnvironmentValues().name,
-    slug: "labelflow",
+    slug: "bboxly",
     version: "1.0.0",
     orientation: "portrait",
     icon: getEnvironmentValues().icon,
     userInterfaceStyle: "light",
     newArchEnabled: true,
-    scheme: "labelflow",
+    scheme: "bboxly",
     splash: {
       image: "./assets/splash-icon.png",
       resizeMode: "contain",

@@ -1,11 +1,11 @@
-# Instructions spécifiques au projet Labelflow
+# Instructions spécifiques au projet BBoxly
 
 ## Architecture du projet
 
 ### Structure complète des dossiers
 
 ```
-labelflow-app/
+bboxly-app/
 ├── api/                    # Couche API avec axios
 ├── app/                    # Routes expo-router
 ├── assets/                 # Ressources statiques (fonts, images, icons)
@@ -30,7 +30,6 @@ labelflow-app/
   - **atoms/** : Composants de base indivisibles
     - `Button.tsx` : Bouton configurable (primary, secondary, outline)
     - `Input.tsx` : Champ de saisie réutilisable
-    
   - **molecules/** : Composants composés d'atoms
     - `DraggableBox.tsx` : Boîte déplaçable
     - `FixedBoundingBox.tsx` : Boîte de délimitation fixe
@@ -38,12 +37,10 @@ labelflow-app/
     - `SimpleBoundingBox.tsx` : Boîte simple pour affichage
     - `SimpleDraggableBox.tsx` : Boîte déplaçable simplifiée
     - `StableBoundingBox.tsx` : Boîte stable pour labellisation avec rotation
-    
   - **organisms/** : Composants complexes autonomes
     - `ErrorDebugPanel.tsx` : Panneau de debug des erreurs (dev only)
     - `LabelBottomSheet.tsx` : Modal pour sélection de labels (utilise Modal, pas BottomSheet)
     - `ProtectedRoute.tsx` : Route protégée par authentification
-    
   - **Règle importante** : Tout composant utilisé dans plus d'un endroit devient un atom/molecule/organism. Les composants exclusifs à une partie de l'UI restent dans leur dossier ui/
 
 ### Structure UI (Logique métier)
@@ -54,7 +51,6 @@ labelflow-app/
     - `index.tsx` : Composant de la page (JAMAIS de state direct, uniquement UI)
     - `actions.ts` : Actions et logique métier (API calls, transformations)
     - `useStore.ts` : Store Zustand pour l'état local
-    
   - Dossiers existants :
     - `auth/` : Écrans d'authentification
     - `home/` : Menu principal regroupé
@@ -84,7 +80,6 @@ labelflow-app/
       - `signin.tsx` : Connexion
       - `signup.tsx` : Inscription
       - `forget-password.tsx` : Récupération mot de passe
-      
     - `(main)/` : Routes principales
       - `home.tsx` : Menu principal
       - `create-project.tsx` : Création de projet
@@ -96,14 +91,12 @@ labelflow-app/
       - `dictionary.tsx` : Dictionnaire de labels
       - `settings.tsx` : Paramètres
       - `help.tsx` : Aide
-      
     - `(project)/` : Routes projet avec paramètres dynamiques
       - `[id].tsx` : Vue projet
       - `[id]/add-items.tsx` : Ajout d'items avec caméra
       - `[id]/view-items.tsx` : Visualisation des items
       - `[id]/export.tsx` : Export de données
       - `[id]/import.tsx` : Import de données
-      
     - `(team)/` : Routes équipe
       - `[id].tsx` : Vue équipe
       - `[id]/members.tsx` : Gestion des membres
@@ -117,7 +110,6 @@ labelflow-app/
     - `axiosInstance.ts` : Instance axios avec intercepteurs (auth, refresh token)
     - `responseHelper.ts` : Helpers pour réponses/erreurs standardisées
     - `baseAPI.ts` : Classe abstraite pour CRUD générique
-    
   - **APIs métier** :
     - `auth.api.ts` : Authentification (login, register, refresh, logout, OTP)
     - `project.api.ts` : CRUD projets + méthodes spécifiques
@@ -134,7 +126,6 @@ labelflow-app/
   - **Types génériques** :
     - `api.ts` : ApiResponse, PaginatedResponse, QueryParams, ErrorResponse
     - `theme.ts` : Thème global (colors, spacing, fonts, shadows)
-    
   - **Types métier** :
     - `auth.ts` : User, AuthTokens, LoginRequest, RegisterRequest, OTPRequest
     - `project.ts` : Project, ProjectItem, BoundingBoxPosition (avec rotation)
@@ -152,12 +143,10 @@ labelflow-app/
     - `errorHandler.ts` : Singleton pour gestion centralisée
     - `errorBoundary.tsx` : Capture erreurs React globalement
     - `safeAction.ts` : Wrapper pour actions sécurisées
-    
   - **Storage et données** :
-    - `StorageKeys.ts` : Clés AsyncStorage centralisées (@labelflow:*)
+    - `StorageKeys.ts` : Clés AsyncStorage centralisées (@bboxly:\*)
     - `recentLabels.ts` : Gestion des labels récemment utilisés
     - `labelColors.ts` : Palette de couleurs pour labels
-    
   - **Utilitaires** :
     - `validation.ts` : Règles de validation (email, password, etc.)
     - `imageResizer.ts` : Redimensionnement d'images pour upload
@@ -167,7 +156,6 @@ labelflow-app/
 
 - **contexts/** :
   - `AuthContext.tsx` : Contexte d'authentification global
-  
 - **hooks/** :
   - `useErrorHandler.ts` : Hook pour gestion d'erreurs dans composants
   - Autres hooks custom selon besoins
@@ -359,7 +347,7 @@ Chaque API suit généralement cette structure :
 
 Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
 
-- Préfixe : `@labelflow:`
+- Préfixe : `@bboxly:`
 - Auth : tokens, user data
 - App : settings, préférences
 - Cache : données mises en cache
@@ -386,7 +374,6 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
   - `forgotPassword(email)` : Envoi OTP
   - `verifyOTP(email, otp)` : Vérification code
   - `resetPassword(email, otp, newPassword)` : Réinitialisation
-  
 - **project.api.ts** : Gestion des projets
   - CRUD standard hérité de BaseAPI
   - `getByUser()` : Projets de l'utilisateur
@@ -394,7 +381,6 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
   - `addMember(projectId, userId)` : Ajouter membre
   - `removeMember(projectId, userId)` : Retirer membre
   - `updateSettings(projectId, settings)` : MAJ paramètres
-  
 - **projectItem.api.ts** : Gestion des items
   - CRUD standard hérité de BaseAPI
   - `uploadImage(projectId, image, metadata)` : Upload avec metadata
@@ -402,7 +388,6 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
   - `bulkUpdate(projectId, updates[])` : MAJ en masse
   - `bulkDelete(projectId, itemIds[])` : Suppression en masse
   - `getByProject(projectId, filters)` : Items filtrés
-  
 - **team.api.ts** : Gestion des équipes
   - CRUD standard hérité de BaseAPI
   - `addMember(teamId, email)` : Ajouter membre par email
@@ -415,18 +400,15 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
   - `addProject(teamId, projectId)` : Ajouter projet
   - `removeProject(teamId, projectId)` : Retirer projet
   - `updateProjects(teamId, action, projectIds[])` : Ajouter ou supprimer plusieurs projets en masse
-  
 - **category.api.ts** : Gestion des catégories
   - CRUD standard hérité de BaseAPI
   - `getWithLabels()` : Catégories avec leurs labels
   - `reorderCategories(categoryIds[])` : Réordonner
-  
 - **label.api.ts** : Gestion des labels
   - CRUD standard hérité de BaseAPI
   - `getByCategory(categoryId)` : Labels d'une catégorie
   - `searchLabels(query)` : Recherche de labels
   - `getUserLabels()` : Labels personnalisés utilisateur
-  
 - **export.api.ts** : Export de données
   - `requestExport(projectId, format)` : Demander export
   - `getExportStatus(exportId)` : Statut export
@@ -491,29 +473,34 @@ Cette modification dans `/ui/add-items/actions.ts` permet de supporter les forma
 Le système de fonts utilise 6 rôles distincts avec des usages spécifiques :
 
 1. **title** (28px, 700, lh: 36)
+
    - Titres principaux des pages
    - Headers de sections importantes
    - Exemples : "Sélectionner un projet", "Ajouter des items"
 
 2. **subtitle** (20px, 600, lh: 28)
+
    - Sous-titres et sections secondaires
    - Noms de projets dans les listes
    - Headers de modals et bottom sheets
    - Exemples : Nom du projet, titres de catégories
 
 3. **body** (16px, 400, lh: 24)
+
    - Texte principal et contenu
    - Descriptions et paragraphes
    - Texte des inputs et champs
    - Exemples : Description de projet, texte d'aide
 
 4. **caption** (14px, 400, lh: 20)
+
    - Textes secondaires et informatifs
    - Hints et placeholders
    - Métadonnées (dates, compteurs)
    - Exemples : "Centrez votre objet ici", nombre d'items
 
 5. **button** (16px, 600, lh: 24)
+
    - Texte des boutons principaux
    - Actions importantes
    - Exemples : "Valider", "Ajouter", "Enregistrer"
@@ -560,11 +547,13 @@ import { theme } from '@/types/theme';
 ### Architecture
 
 1. **ErrorBoundary** (`/helpers/errorBoundary.tsx`)
+
    - Capture les erreurs React au niveau global
    - Affiche une interface de récupération
    - Sauvegarde les erreurs dans AsyncStorage
 
 2. **ErrorHandler** (`/helpers/errorHandler.ts`)
+
    - Singleton pour la gestion centralisée des erreurs
    - Types d'erreurs : api, navigation, state, render, unknown
    - Intercepte console.error et les promesses rejetées
@@ -579,10 +568,11 @@ import { theme } from '@/types/theme';
 ### Utilisation
 
 #### Dans les composants
-```typescript
-import { useErrorHandler } from '@/hooks/useErrorHandler';
 
-const { handleError, wrapAsync } = useErrorHandler('ComponentName');
+```typescript
+import { useErrorHandler } from "@/hooks/useErrorHandler";
+
+const { handleError, wrapAsync } = useErrorHandler("ComponentName");
 
 // Pour wrapper une fonction async
 const loadData = wrapAsync(async () => {
@@ -592,8 +582,9 @@ const loadData = wrapAsync(async () => {
 ```
 
 #### Dans les actions
+
 ```typescript
-import { createSafeAction } from '@/helpers/safeAction';
+import { createSafeAction } from "@/helpers/safeAction";
 
 const safeAction = createSafeAction(
   async () => {
@@ -601,13 +592,14 @@ const safeAction = createSafeAction(
   },
   {
     showAlert: true,
-    alertTitle: 'Erreur',
-    componentName: 'ActionName'
+    alertTitle: "Erreur",
+    componentName: "ActionName",
   }
 );
 ```
 
 #### Accès au debug en développement
+
 - Un bouton flottant 🐛 apparaît en bas à droite
 - Badge rouge avec le nombre d'erreurs
 - Cliquer pour voir les détails
@@ -616,6 +608,7 @@ const safeAction = createSafeAction(
 ### Intégration API
 
 Les erreurs API sont automatiquement capturées par :
+
 - `axiosInstance` : Intercepteurs pour requêtes/réponses
 - `responseHelper` : handleApiError log automatiquement
 - Affichage d'alertes user-friendly en production
@@ -625,11 +618,11 @@ Les erreurs API sont automatiquement capturées par :
 ### Gestion d'état avec Zustand
 
 - **Pattern strict** : `create<State & Actions>((set, get) => ({...}))`
-- **Organisation** : 
+- **Organisation** :
   - État en premier
   - Actions ensuite
   - Utiliser `get()` pour accéder à l'état dans les actions
-- **Nommage** : 
+- **Nommage** :
   - Actions : verbes (setUser, updateProject, resetForm)
   - État : noms (user, projects, isLoading)
 
@@ -637,23 +630,23 @@ Les erreurs API sont automatiquement capturées par :
 
 ```typescript
 // Pattern pour actions.ts
-import { createSafeAction } from '@/helpers/safeAction';
-import { api } from '@/api/[feature].api';
-import { useStore } from './useStore';
+import { createSafeAction } from "@/helpers/safeAction";
+import { api } from "@/api/[feature].api";
+import { useStore } from "./useStore";
 
 export const loadData = createSafeAction(
   async () => {
     const store = useStore.getState();
     store.setLoading(true);
-    
+
     const data = await api.getData();
     store.setData(data);
-    
+
     store.setLoading(false);
   },
-  { 
+  {
     showAlert: true,
-    componentName: 'FeatureName'
+    componentName: "FeatureName",
   }
 );
 ```
@@ -749,7 +742,7 @@ export const loadData = createSafeAction(
 ### Outils de développement
 
 - **Error Debug Panel** : Panneau flottant en dev
-- **Console helpers** : 
+- **Console helpers** :
   - `showErrorDebug()` : Ouvre le panneau d'erreurs
   - `clearErrors()` : Vide les logs d'erreurs
 - **React DevTools** : Support complet
@@ -775,67 +768,61 @@ export const loadData = createSafeAction(
 ## Documentation API Backend
 
 ### Accès à la documentation
-- **Swagger UI** : http://localhost:3000/v1.0/labelflow-api/api-docs
-- **Base URL** : 
-  - Development : `http://localhost:3000/v1.0/labelflow-api`
+
+- **Swagger UI** : http://localhost:3000/v1.0/bboxly-api/api-docs
+- **Base URL** :
+  - Development : `http://localhost:3000/v1.0/bboxly-api`
   - Staging/Production : Configuré via `BASE_URL`
 
 ### Routes API complètes
 
 #### 🔐 Authentication (`/auth`)
+
 - `POST /auth/login` - Connexion utilisateur
   - Body: `{ email: string, password: string }`
   - Retourne: `{ user, accessToken, refreshToken }`
-  
 - `GET /auth/login` - Obtenir les infos de l'utilisateur authentifié
   - Headers: `Authorization: Bearer {token}`
-  
 - `POST /auth/register` - Inscription nouveau utilisateur
   - Body: `{ email: string, password: string, username: string }`
   - Retourne: `{ user, accessToken, refreshToken }`
-  
 - `GET /auth/me` - Obtenir l'utilisateur actuellement connecté
   - Headers: `Authorization: Bearer {token}`
-  
 - `POST /auth/refresh-token` - Rafraîchir le token JWT
   - Body: `{ refreshToken: string }`
-  
 - `POST /auth/requestResetPassword` - Demander une réinitialisation de mot de passe
   - Body: `{ email: string }`
-  
 - `POST /auth/resetPassword` - Réinitialiser le mot de passe
   - Body: `{ token: string, password: string }`
 
 #### 👤 Users (`/users`)
+
 - `GET /users` - Liste des utilisateurs
   - Query: `page, limit, search`
-  
 - `GET /users/:id` - Obtenir un utilisateur
 - `PUT /users/:id` - Mettre à jour un utilisateur
 - `DELETE /users/:id` - Supprimer un utilisateur
 - `PUT /users/:id/password` - Changer le mot de passe
   - Body: `{ oldPassword, newPassword }`
-  
 - `GET /users/:id/lastPendingProject` - Dernier projet en cours
 
 #### 📁 Projects (`/projects`)
+
 - `GET /projects` - Liste de tous les projets
   - Query: `page, limit, search, getIsPublic`
-  
 - `POST /projects` - Créer un nouveau projet
   - Body: `{ name, description, items[], ownerId, isPublic? }`
-  
 - `GET /projects/{id}` - Obtenir un projet par ID
 - `PUT /projects/{id}` - Mettre à jour un projet
 - `DELETE /projects/{id}` - Supprimer un projet
 - `GET /projects/owner/{ownerId}` - Obtenir tous les projets d'un propriétaire
 
 #### 📸 Project Items (`/project-items`)
+
 - `GET /project-items` - Obtenir tous les items de projet
 - `POST /project-items` - Créer un nouvel item avec upload de fichier
   - Body: FormData avec image + `{ projectId, labels[{ name, position[] }] }`
   - Position: `[centerX, centerY, width, height, rotation]`
-  
 - `GET /project-items/{id}` - Obtenir un item par ID
 - `PUT /project-items/{id}` - Mettre à jour un item
 - `DELETE /project-items/{id}` - Supprimer un item
@@ -843,20 +830,20 @@ export const loadData = createSafeAction(
 - `GET /project-items/project/{projectId}` - Obtenir tous les items d'un projet
 
 #### 🏷️ Labels (`/labels`)
+
 - `GET /labels` - Obtenir tous les labels
 - `POST /labels` - Créer un nouveau label
   - Body: `{ name, ownerId, isPublic? }`
-  
 - `GET /labels/{id}` - Obtenir un label par ID
 - `PUT /labels/{id}` - Mettre à jour un label
 - `DELETE /labels/{id}` - Supprimer un label
 - `GET /labels/owner/{ownerId}` - Obtenir tous les labels d'un propriétaire
 
 #### 📂 Categories (`/categories`)
+
 - `GET /categories` - Obtenir toutes les catégories
 - `POST /categories` - Créer une nouvelle catégorie
   - Body: `{ name, labels[]?, ownerId, isPublic? }`
-  
 - `GET /categories/{id}` - Obtenir une catégorie par ID
 - `PUT /categories/{id}` - Mettre à jour une catégorie
 - `DELETE /categories/{id}` - Supprimer une catégorie
@@ -864,20 +851,20 @@ export const loadData = createSafeAction(
 - `GET /categories/owner/{ownerId}` - Obtenir toutes les catégories d'un propriétaire
 
 #### 📤 Exports (`/exports`)
+
 - `GET /exports` - Obtenir tous les exports
 - `POST /exports` - Créer un nouvel export
   - Body: `{ ownerId, fromProjectId, type }`
   - Types: `yolo, yolo-v8-obb, json, json-min, csv, tsv, coco, pascal-voc`
-  
 - `GET /exports/{id}` - Obtenir un export par ID
 - `PUT /exports/{id}` - Mettre à jour un export
 - `DELETE /exports/{id}` - Supprimer un export
 
 #### 👥 Teams (`/teams`)
+
 - `GET /teams` - Obtenir toutes les équipes
 - `POST /teams` - Créer une nouvelle équipe
   - Body: `{ name, projectId[], description, members[], ownerId }`
-  
 - `GET /teams/{id}` - Obtenir une équipe par ID
 - `PUT /teams/{id}` - Mettre à jour une équipe
 - `DELETE /teams/{id}` - Supprimer une équipe
@@ -887,10 +874,10 @@ export const loadData = createSafeAction(
   - Body: `{ email: string }`
   - Vérifie: existence équipe, utilisateur par email, canBeAddedToTeam, pas déjà membre
   - Erreur 403: Si l'utilisateur a `canBeAddedToTeam: false`
-  
 - `GET /teams/{id}/members` - Obtenir les membres de l'équipe
 
 #### 💰 Options (`/options`) - Gestion des options de tarification
+
 - `GET /options` - Obtenir toutes les options
 - `POST /options` - Créer une nouvelle option
 - `GET /options/{id}` - Obtenir une option par ID
@@ -898,6 +885,7 @@ export const loadData = createSafeAction(
 - `DELETE /options/{id}` - Supprimer une option
 
 #### 🛒 Orders (`/orders`) - Gestion des commandes
+
 - `GET /orders` - Obtenir toutes les commandes
 - `POST /orders` - Créer une nouvelle commande
 - `GET /orders/{id}` - Obtenir une commande par ID
@@ -905,6 +893,7 @@ export const loadData = createSafeAction(
 - `DELETE /orders/{id}` - Supprimer une commande
 
 #### 💡 Recommendations (`/recommendations`) - Gestion des recommandations
+
 - `GET /recommendations` - Obtenir toutes les recommandations
 - `POST /recommendations` - Créer une nouvelle recommandation
 - `GET /recommendations/{id}` - Obtenir une recommandation par ID
@@ -912,6 +901,7 @@ export const loadData = createSafeAction(
 - `DELETE /recommendations/{id}` - Supprimer une recommandation
 
 ### Notes sur l'API
+
 - **Authentication** : Token JWT requis dans header `Authorization: Bearer {token}`
 - **Pagination** : Paramètres `page` et `limit` sur toutes les listes
 - **Recherche** : Paramètre `search` disponible sur la plupart des GET
@@ -932,6 +922,7 @@ Les utilisateurs ont une propriété `canBeAddedToTeam` qui contrôle s'ils peuv
 #### Implémentation côté front
 
 1. **Vérifier avant l'ajout** :
+
 ```typescript
 if (user.canBeAddedToTeam) {
   // Permettre l'ajout à l'équipe
@@ -939,6 +930,7 @@ if (user.canBeAddedToTeam) {
 ```
 
 2. **Gérer l'erreur 403** :
+
 ```typescript
 if (error?.response?.status === 403) {
   // Message: "Cet utilisateur n'autorise pas l'ajout aux équipes"
@@ -946,15 +938,17 @@ if (error?.response?.status === 403) {
 ```
 
 3. **Permettre la mise à jour du profil** :
+
 ```typescript
 await userAPI.update(userId, {
-  canBeAddedToTeam: true
+  canBeAddedToTeam: true,
 });
 ```
 
 ### Gestion des erreurs d'ajout de membres
 
 Le front gère automatiquement les différents cas d'erreur :
+
 - **403** : L'utilisateur n'autorise pas l'ajout aux équipes
 - **404** : Utilisateur ou équipe non trouvée
 - **409** : L'utilisateur est déjà membre de l'équipe

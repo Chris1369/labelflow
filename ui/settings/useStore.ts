@@ -41,7 +41,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       resetSettings: () => set(defaultSettings),
     }),
     {
-      name: "labelflow-settings",
+      name: "bboxly-settings",
       storage: createJSONStorage(() => AsyncStorage),
     }
   )
