@@ -5,12 +5,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Category } from '@/types/category';
 import { Label } from '@/types/label';
 import { theme } from '@/types/theme';
 import { AddLabelsModal } from './AddLabelsModal';
+import { categoryAPI } from '@/api/category.api';
 
 interface CategoryItemProps {
   category: Category;
@@ -30,6 +32,8 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
   onLabelsUpdated,
 }) => {
   const [isAddLabelsModalVisible, setIsAddLabelsModalVisible] = useState(false);
+  const [isPublic, setIsPublic] = useState(category.isPublic);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   const handleDelete = () => {
     Alert.alert(
@@ -44,6 +48,29 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
         },
       ]
     );
+  };
+
+  const handleTogglePublic = async (value: boolean) => {
+    try {
+      setIsUpdating(true);
+      setIsPublic(value);
+      
+      const categoryId = category._id || category.id;
+      await categoryAPI.update(categoryId, { isPublic: value });
+      
+      if (onLabelsUpdated) {
+        onLabelsUpdated();
+      }
+    } catch (error) {
+      console.error('Error updating category visibility:', error);
+      setIsPublic(!value);
+      Alert.alert(
+        'Erreur',
+        'Impossible de modifier la visibilité de la catégorie'
+      );
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   return (
@@ -67,11 +94,17 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
           </View>
         </View>
         <View style={styles.headerRight}>
-          {category.isPublic && (
-            <View style={styles.publicBadge}>
-              <Text style={styles.publicText}>Public</Text>
-            </View>
-          )}
+          <View style={styles.switchContainer}>
+            <Text style={styles.switchLabel}>{isPublic ? 'Public' : 'Privé'}</Text>
+            <Switch
+              value={isPublic}
+              onValueChange={handleTogglePublic}
+              disabled={isUpdating}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={isPublic ? theme.colors.secondary : theme.colors.backgroundSecondary}
+              ios_backgroundColor={theme.colors.border}
+            />
+          </View>
           <TouchableOpacity
             onPress={handleDelete}
             style={styles.deleteButton}
@@ -155,16 +188,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: theme.spacing.sm,
   },
-  publicBadge: {
-    backgroundColor: theme.colors.info + '20',
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.borderRadius.sm,
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
   },
-  publicText: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.info,
-    fontWeight: '600',
+  switchLabel: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textSecondary,
   },
   deleteButton: {
     padding: theme.spacing.xs,

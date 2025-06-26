@@ -86,6 +86,7 @@ export const LabelsScreen: React.FC = () => {
             <LabelItem
               label={item}
               onDelete={() => deleteLabel(item.id)}
+              onUpdate={loadLabels}
             />
           )}
           contentContainerStyle={styles.listContent}

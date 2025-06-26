@@ -1,21 +1,27 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Switch,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Label } from '@/types/label';
 import { theme } from '@/types/theme';
+import { labelAPI } from '@/api/label.api';
 
 interface LabelItemProps {
   label: Label;
   onDelete: () => void;
+  onUpdate?: () => void;
 }
 
-export const LabelItem: React.FC<LabelItemProps> = ({ label, onDelete }) => {
+export const LabelItem: React.FC<LabelItemProps> = ({ label, onDelete, onUpdate }) => {
+  const [isPublic, setIsPublic] = useState(label.isPublic);
+  const [isUpdating, setIsUpdating] = useState(false);
+
   const handleDelete = () => {
     Alert.alert(
       'Supprimer le label',
@@ -31,6 +37,29 @@ export const LabelItem: React.FC<LabelItemProps> = ({ label, onDelete }) => {
     );
   };
 
+  const handleTogglePublic = async (value: boolean) => {
+    try {
+      setIsUpdating(true);
+      setIsPublic(value);
+      
+      const labelId = label._id || label.id;
+      await labelAPI.update(labelId, { isPublic: value });
+      
+      if (onUpdate) {
+        onUpdate();
+      }
+    } catch (error) {
+      console.error('Error updating label visibility:', error);
+      setIsPublic(!value);
+      Alert.alert(
+        'Erreur',
+        'Impossible de modifier la visibilité du label'
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -41,11 +70,17 @@ export const LabelItem: React.FC<LabelItemProps> = ({ label, onDelete }) => {
           <Text style={styles.labelName}>{label.name}</Text>
         </View>
         <View style={styles.actions}>
-          {label.isPublic && (
-            <View style={styles.publicBadge}>
-              <Text style={styles.publicText}>Public</Text>
-            </View>
-          )}
+          <View style={styles.switchContainer}>
+            <Text style={styles.switchLabel}>{isPublic ? 'Public' : 'Privé'}</Text>
+            <Switch
+              value={isPublic}
+              onValueChange={handleTogglePublic}
+              disabled={isUpdating}
+              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
+              thumbColor={isPublic ? theme.colors.secondary : theme.colors.backgroundSecondary}
+              ios_backgroundColor={theme.colors.border}
+            />
+          </View>
           <TouchableOpacity
             onPress={handleDelete}
             style={styles.deleteButton}
@@ -96,16 +131,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: theme.spacing.sm,
   },
-  publicBadge: {
-    backgroundColor: theme.colors.info + '20',
-    paddingHorizontal: theme.spacing.sm,
-    paddingVertical: theme.spacing.xs,
-    borderRadius: theme.borderRadius.sm,
+  switchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.xs,
   },
-  publicText: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.info,
-    fontWeight: '600',
+  switchLabel: {
+    fontSize: theme.fontSize.sm,
+    color: theme.colors.textSecondary,
   },
   deleteButton: {
     padding: theme.spacing.xs,
