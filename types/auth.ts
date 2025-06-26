@@ -34,6 +34,7 @@ export interface User {
   email: string;
   name: string;
   avatar?: string;
+  canBeAddedToTeam?: boolean;
   role: AuthAccessType;
   createdAt: string;
   updatedAt: string;
@@ -46,11 +47,11 @@ export interface AuthTokens {
 }
 
 export interface AuthResponse {
-  tokens:{
+  tokens: {
     accessToken: string;
     refreshToken: string;
     expiresIn: number;
-  }
+  };
   user: User;
 }
 
@@ -81,6 +82,6 @@ export interface AuthError {
 }
 
 export enum AuthProvider {
-  GOOGLE = 'google',
-  APPLE = 'apple',
+  GOOGLE = "google",
+  APPLE = "apple",
 }
