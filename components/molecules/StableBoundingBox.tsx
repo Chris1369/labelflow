@@ -6,6 +6,7 @@ import {
   Text,
 } from "react-native";
 import { theme } from "../../types/theme";
+import { getLabelColor } from "@/helpers/labelColors";
 
 interface StableBoundingBoxProps {
   centerX: number;
@@ -15,6 +16,7 @@ interface StableBoundingBoxProps {
   rotation: number;
   isSelected?: boolean;
   isComplete?: boolean;
+  label?: string;
   onUpdate: (
     x: number,
     y: number,
@@ -34,8 +36,11 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
   rotation,
   isSelected = false,
   isComplete = false,
+  label,
   onUpdate,
 }) => {
+  // Get color based on label
+  const boxColor = getLabelColor(label);
   // Store gesture start values and current dimensions
   const gestureStart = useRef({
     box: { x: 0, y: 0 },
@@ -234,8 +239,12 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
         <View style={styles.boxContent} {...panResponder.panHandlers}>
           <View style={[
             styles.boxBorder,
-            isComplete ? styles.completeBorder : (isSelected ? styles.selectedBorder : styles.unselectedBorder)
-          ]} />
+            isComplete ? styles.completeBorder : (isSelected ? styles.selectedBorder : styles.unselectedBorder),
+            { borderColor: boxColor }
+          ]}>
+            {/* Semi-transparent overlay */}
+            <View style={[styles.overlay, { backgroundColor: boxColor, opacity: 0.15 }]} />
+          </View>
         </View>
 
         {/* NW Handle - only show when selected */}
@@ -244,7 +253,7 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
             style={[styles.handle, styles.nw]}
             {...nwResizeResponder.panHandlers}
           >
-            <View style={styles.handleDot} />
+            <View style={[styles.handleDot, { borderColor: boxColor }]} />
           </View>
         )}
 
@@ -254,7 +263,7 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
             style={[styles.handle, styles.se]}
             {...seResizeResponder.panHandlers}
           >
-            <View style={styles.handleDot} />
+            <View style={[styles.handleDot, { borderColor: boxColor }]} />
           </View>
         )}
 
@@ -264,7 +273,7 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
             style={[styles.handle, styles.ne]}
             {...rotateResponder.panHandlers}
           >
-            <View style={[styles.handleDot, styles.rotateHandleDot]} />
+            <View style={[styles.handleDot, styles.rotateHandleDot, { borderColor: boxColor }]} />
           </View>
         )}
       </View>
@@ -283,6 +292,10 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: theme.colors.primary,
     backgroundColor: "transparent",
+    overflow: 'hidden',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
   },
   selectedBorder: {
     borderColor: theme.colors.primary,

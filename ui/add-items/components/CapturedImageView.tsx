@@ -3,6 +3,7 @@ import { View, Image, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { StableBoundingBox } from "@/components/molecules";
 import { theme } from "@/types/theme";
 import { BoundingBox } from "../types";
+import { getLabelColor } from "@/helpers/labelColors";
 
 interface CapturedImageViewProps {
   capturedImageUri: string;
@@ -85,6 +86,7 @@ export const CapturedImageView: React.FC<CapturedImageViewProps> = ({
             rotation={box.rotation}
             isSelected={box.id === currentBoxId}
             isComplete={box.isComplete}
+            label={box.label}
             onUpdate={(x, y, w, h, r) => onBoxUpdate(
               box.id, 
               (x - imageOffset.x) / actualImageSize.width, 
@@ -102,6 +104,7 @@ export const CapturedImageView: React.FC<CapturedImageViewProps> = ({
                 {
                   left: imageOffset.x + (box.centerX * actualImageSize.width) - (box.width * actualImageSize.width) / 2,
                   top: imageOffset.y + (box.centerY * actualImageSize.height) - (box.height * actualImageSize.height) / 2 - 30,
+                  backgroundColor: getLabelColor(box.label),
                 }
               ]}
             >

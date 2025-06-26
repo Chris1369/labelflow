@@ -113,7 +113,7 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
 const styles = StyleSheet.create({
   retakeButton: {
     position: "absolute",
-    top: 60,
+    top: 140,
     left: 20,
     width: 50,
     height: 50,
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   },
   addBoxButton: {
     position: "absolute",
-    top: 60,
+    top: 140,
     right: 20,
   },
   disabledButton: {

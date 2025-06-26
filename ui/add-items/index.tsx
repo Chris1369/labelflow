@@ -13,6 +13,7 @@ import {
   RecentLabelsBar,
 } from "./components";
 import { RecentLabelsManager } from "@/helpers/recentLabels";
+import { resetLabelColors } from "@/helpers/labelColors";
 
 export const AddItemsScreen: React.FC = () => {
   const { id: projectId } = useLocalSearchParams();
@@ -26,19 +27,36 @@ export const AddItemsScreen: React.FC = () => {
     isCapturing,
     showSaveButton,
     isSaving,
+    flashMode,
+    setFlashMode,
   } = useAddItemsStore();
 
   useEffect(() => {
+    let mounted = true;
+
     (async () => {
-      const hasPermission = await addItemsActions.checkCameraPermission();
-      if (!hasPermission) {
-        await addItemsActions.requestCameraPermission();
+      if (mounted) {
+        const hasPermission = await addItemsActions.checkCameraPermission();
+        if (!hasPermission && mounted) {
+          await addItemsActions.requestCameraPermission();
+        }
       }
     })();
+
+    // Cleanup function
+    return () => {
+      mounted = false;
+      // Reset capture state when unmounting
+      useAddItemsStore.getState().resetCapture();
+      // Reset label colors to avoid memory leaks
+      resetLabelColors();
+    };
   }, []);
 
   const handleCapture = () => {
-    addItemsActions.takePicture(cameraRef.current);
+    if (cameraRef.current && !isCapturing) {
+      addItemsActions.takePicture(cameraRef.current);
+    }
   };
 
   const handleImport = () => {
@@ -97,6 +115,7 @@ export const AddItemsScreen: React.FC = () => {
     return <PermissionView hasPermission={hasPermission} />;
   }
 
+
   // Show captured image with bounding boxes
   if (capturedImageUri) {
     return (
@@ -141,6 +160,8 @@ export const AddItemsScreen: React.FC = () => {
       isCapturing={isCapturing}
       onCapture={handleCapture}
       onImport={handleImport}
+      flashMode={flashMode}
+      onFlashModeChange={setFlashMode}
     />
   );
 };

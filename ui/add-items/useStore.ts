@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import { BoundingBox, CameraPermissionStatus } from "../../types/camera";
 
+export type FlashMode = 'off' | 'on' | 'auto';
+
 interface AddItemsState {
   hasPermission: boolean | null;
   permissionStatus: CameraPermissionStatus | null;
@@ -10,6 +12,7 @@ interface AddItemsState {
   isCapturing: boolean;
   showSaveButton: boolean;
   isSaving: boolean;
+  flashMode: FlashMode;
 }
 
 interface AddItemsActions {
@@ -25,6 +28,7 @@ interface AddItemsActions {
   deleteBoundingBox: (id: string) => void;
   setLabelForBox: (id: string, label: string) => void;
   resetCapture: () => void;
+  setFlashMode: (mode: FlashMode) => void;
 }
 
 const createInitialBox = (): BoundingBox => ({
@@ -47,6 +51,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     isCapturing: false,
     showSaveButton: false,
     isSaving: false,
+    flashMode: 'off',
 
     setPermission: (hasPermission) => set({ hasPermission }),
 
@@ -121,5 +126,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
         isSaving: false,
       });
     },
+
+    setFlashMode: (mode) => set({ flashMode: mode }),
   })
 );

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, StyleSheet, PanResponder, TouchableOpacity, Text } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../types/theme';
+import { getLabelColor } from '@/helpers/labelColors';
 
 interface InteractiveBoundingBoxProps {
   initialX: number;
@@ -9,6 +10,7 @@ interface InteractiveBoundingBoxProps {
   initialWidth: number;
   initialHeight: number;
   initialRotation: number;
+  label?: string;
   onUpdate: (x: number, y: number, width: number, height: number, rotation: number) => void;
 }
 
@@ -18,6 +20,7 @@ export const InteractiveBoundingBox: React.FC<InteractiveBoundingBoxProps> = ({
   initialWidth,
   initialHeight,
   initialRotation,
+  label,
   onUpdate,
 }) => {
   const [position, setPosition] = useState({
@@ -29,6 +32,9 @@ export const InteractiveBoundingBox: React.FC<InteractiveBoundingBoxProps> = ({
     height: initialHeight,
   });
   const [rotation, setRotation] = useState(initialRotation);
+  
+  // Get color based on label
+  const boxColor = getLabelColor(label);
 
   // Pan responder for moving the box
   const panResponder = PanResponder.create({
@@ -109,15 +115,35 @@ export const InteractiveBoundingBox: React.FC<InteractiveBoundingBoxProps> = ({
     width: size.width,
     height: size.height,
     transform: [{ rotate: `${rotation}deg` }],
+    borderColor: boxColor,
+  };
+
+  const overlayStyle = {
+    backgroundColor: boxColor,
+    opacity: 0.15,
+  };
+
+  const cornerStyle = {
+    backgroundColor: boxColor,
   };
 
   return (
     <>
       <View style={[styles.box, boxStyle]} {...panResponder.panHandlers}>
-        <View {...handleResize('tl').panHandlers} style={[styles.corner, styles.topLeft]} />
-        <View {...handleResize('tr').panHandlers} style={[styles.corner, styles.topRight]} />
-        <View {...handleResize('bl').panHandlers} style={[styles.corner, styles.bottomLeft]} />
-        <View {...handleResize('br').panHandlers} style={[styles.corner, styles.bottomRight]} />
+        {/* Semi-transparent overlay */}
+        <View style={[styles.overlay, overlayStyle]} />
+        
+        {/* Label text */}
+        {label && (
+          <View style={[styles.labelContainer, { backgroundColor: boxColor }]}>
+            <Text style={styles.labelText} numberOfLines={1}>{label}</Text>
+          </View>
+        )}
+        
+        <View {...handleResize('tl').panHandlers} style={[styles.corner, styles.topLeft, cornerStyle]} />
+        <View {...handleResize('tr').panHandlers} style={[styles.corner, styles.topRight, cornerStyle]} />
+        <View {...handleResize('bl').panHandlers} style={[styles.corner, styles.bottomLeft, cornerStyle]} />
+        <View {...handleResize('br').panHandlers} style={[styles.corner, styles.bottomRight, cornerStyle]} />
       </View>
 
       {/* Rotation controls */}
@@ -146,6 +172,23 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: theme.colors.primary,
     backgroundColor: 'transparent',
+    overflow: 'hidden',
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  labelContainer: {
+    position: 'absolute',
+    top: -25,
+    left: 0,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  labelText: {
+    color: theme.colors.secondary,
+    fontSize: 12,
+    fontWeight: '600',
   },
   corner: {
     position: 'absolute',
