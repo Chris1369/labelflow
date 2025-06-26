@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { StorageKeys } from './StorageKeys';
 
 const RECENT_LABELS_KEY = `${StorageKeys.RECENT_LABELS}`;
-const MAX_RECENT_LABELS = 20;
+const MAX_RECENT_LABELS = 30;
 
 export interface RecentLabel {
   name: string;

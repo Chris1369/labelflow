@@ -3,6 +3,8 @@ export interface ObjectLabel {
   name: string;
   category: string;
   icon?: string;
+  isDynamic?: boolean;
+  isRecent?: boolean;
 }
 
 export const mockObjectLabels: ObjectLabel[] = [

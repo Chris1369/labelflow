@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { Project } from "@/types/project";
 import { teamAPI } from "@/api/team.api";
 import { projectAPI } from "@/api/project.api";
+import { useSettingsStore } from "@/ui/settings/useStore";
 
 interface TeamProjectsState {
   teamProjects: Project[]; // Projets actuellement liés à la team
@@ -65,8 +66,11 @@ export const useTeamProjectsStore = create<
 
   loadAllProjects: async () => {
     try {
-      // Charger tous les projets de l'utilisateur
-      const projects = await projectAPI.getMyProjects();
+      // Récupérer le paramètre des settings
+      const includePublic = useSettingsStore.getState().includePublicProjects;
+      
+      // Charger tous les projets de l'utilisateur avec le paramètre includePublic
+      const projects = await projectAPI.getMyProjects(includePublic);
 
       // S'assurer que projects est un tableau
       const projectArray = Array.isArray(projects) ? projects : [];

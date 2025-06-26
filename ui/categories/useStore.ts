@@ -3,6 +3,7 @@ import { Category } from '@/types/category';
 import { Label } from '@/types/label';
 import { categoryAPI } from '@/api/category.api';
 import { ExpandedCategories } from './types';
+import { useSettingsStore } from '@/ui/settings/useStore';
 
 interface CategoriesState {
   categories: Category[];
@@ -11,7 +12,6 @@ interface CategoriesState {
   searchQuery: string;
   isLoading: boolean;
   error: string | null;
-  includePublic: boolean;
 }
 
 interface CategoriesActions {
@@ -21,7 +21,6 @@ interface CategoriesActions {
   toggleCategory: (categoryId: string) => void;
   deleteCategory: (categoryId: string) => Promise<void>;
   refreshCategories: () => Promise<void>;
-  setIncludePublic: (includePublic: boolean) => Promise<void>;
 }
 
 export const useCategoriesStore = create<CategoriesState & CategoriesActions>((set, get) => ({
@@ -31,12 +30,11 @@ export const useCategoriesStore = create<CategoriesState & CategoriesActions>((s
   searchQuery: '',
   isLoading: false,
   error: null,
-  includePublic: true,
 
   loadCategories: async () => {
     set({ isLoading: true, error: null });
     try {
-      const { includePublic } = get();
+      const includePublic = useSettingsStore.getState().includePublicCategories;
       const categories = await categoryAPI.getMyCategories(includePublic);
       set({ 
         categories,
@@ -91,11 +89,6 @@ export const useCategoriesStore = create<CategoriesState & CategoriesActions>((s
   },
 
   refreshCategories: async () => {
-    await get().loadCategories();
-  },
-
-  setIncludePublic: async (includePublic) => {
-    set({ includePublic });
     await get().loadCategories();
   },
 }));

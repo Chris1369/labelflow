@@ -10,6 +10,8 @@ import {
   Platform,
   Switch,
   Alert,
+  Dimensions,
+  Keyboard,
 } from 'react-native';
 import { Input } from '../atoms';
 import { theme } from '../../types/theme';
@@ -19,6 +21,9 @@ import { labelAPI } from '@/api/label.api';
 import { categoryAPI } from '@/api/category.api';
 import { Category } from '@/types/category';
 import { Label } from '@/types/label';
+import { RecentLabelsManager } from '@/helpers/recentLabels';
+
+const { height: screenHeight } = Dimensions.get('window');
 
 interface LabelBottomSheetProps {
   onSelectLabel: (label: string) => void;
@@ -39,6 +44,8 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
     const [userLabels, setUserLabels] = useState<ObjectLabel[]>([]);
     const [userCategories, setUserCategories] = useState<Category[]>([]);
     const [categoryLabels, setCategoryLabels] = useState<{ [categoryId: string]: Label[] }>({});
+    const [recentLabels, setRecentLabels] = useState<string[]>([]);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
     
     const categories = useMemo(() => {
       const dynamicCategories = userCategories.map(cat => ({
@@ -55,6 +62,9 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
     }, [userCategories]);
     
     const filteredLabels = useMemo(() => {
+      // Create a map to track if a label is dynamic (user-created)
+      const userLabelNames = new Set(userLabels.map(l => l.name.toLowerCase()));
+      
       // If a dynamic category is selected, show its labels
       if (selectedCategory && userCategories.some(cat => cat.id === selectedCategory)) {
         const catLabels = categoryLabels[selectedCategory] || [];
@@ -63,6 +73,7 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
           name: label.name,
           category: userCategories.find(cat => cat.id === selectedCategory)?.name || '',
           icon: 'pricetag' as any,
+          isDynamic: true,
         }));
         
         if (searchQuery) {
@@ -74,33 +85,91 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       }
       
       // Otherwise, use the original logic
-      let filtered = [...mockObjectLabels, ...userLabels];
+      let allLabels = [...mockObjectLabels, ...userLabels];
+      
+      // Mark dynamic labels
+      allLabels = allLabels.map(label => ({
+        ...label,
+        isDynamic: userLabelNames.has(label.name.toLowerCase())
+      }));
+      
+      // If showing all labels and no search query, show recent labels first
+      if (!selectedCategory && !searchQuery && recentLabels.length > 0) {
+        const recentLabelObjects: ObjectLabel[] = recentLabels
+          .map(labelName => {
+            const found = allLabels.find(l => l.name === labelName);
+            if (found) return { ...found, isRecent: true };
+            return {
+              id: `recent-${labelName}`,
+              name: labelName,
+              category: 'Récents',
+              icon: 'time' as any,
+              isDynamic: userLabelNames.has(labelName.toLowerCase()),
+              isRecent: true,
+            };
+          })
+          .filter(Boolean);
+        
+        // Remove duplicates from the main list
+        const recentNames = new Set(recentLabels);
+        const otherLabels = allLabels.filter(label => !recentNames.has(label.name));
+        
+        return [...recentLabelObjects, ...otherLabels];
+      }
       
       // Filter by category
       if (selectedCategory && selectedCategory !== 'Tous') {
-        filtered = filtered.filter(label => label.category === selectedCategory);
+        allLabels = allLabels.filter(label => label.category === selectedCategory);
       }
       
       // Filter by search query
       if (searchQuery) {
-        filtered = filtered.filter(label =>
+        allLabels = allLabels.filter(label =>
           label.name.toLowerCase().includes(searchQuery.toLowerCase())
         );
       }
       
-      return filtered;
-    }, [searchQuery, selectedCategory, userLabels, userCategories, categoryLabels]);
+      return allLabels;
+    }, [searchQuery, selectedCategory, userLabels, userCategories, categoryLabels, recentLabels]);
 
     useImperativeHandle(ref, () => ({
       open: () => {
         setIsVisible(true);
         loadUserData();
       },
-      close: () => setIsVisible(false),
+      close: () => {
+        setIsVisible(false);
+        Keyboard.dismiss();
+      },
     }));
+
+    useEffect(() => {
+      const keyboardWillShow = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+        (e) => {
+          setKeyboardHeight(e.endCoordinates.height);
+        }
+      );
+      
+      const keyboardWillHide = Keyboard.addListener(
+        Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+        () => {
+          setKeyboardHeight(0);
+        }
+      );
+
+      return () => {
+        keyboardWillShow.remove();
+        keyboardWillHide.remove();
+      };
+    }, []);
 
     const loadUserData = async () => {
       try {
+        // Load recent labels
+        const recent = await RecentLabelsManager.getRecentLabels();
+        setRecentLabels(recent);
+        
         // Load user labels
         const labels = await labelAPI.getMyLabels();
         const formattedLabels: ObjectLabel[] = labels.map(label => ({
@@ -147,7 +216,10 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       }
     };
 
-    const handleSelectLabel = (label: ObjectLabel) => {
+    const handleSelectLabel = async (label: ObjectLabel) => {
+      // Add to recent labels
+      await RecentLabelsManager.addRecentLabel(label.name);
+      
       onSelectLabel(label.name);
       setIsVisible(false);
       setSearchQuery('');
@@ -162,6 +234,9 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
             name: searchQuery.trim(),
             isPublic,
           });
+          
+          // Add to recent labels
+          await RecentLabelsManager.addRecentLabel(searchQuery.trim());
           
           // Add to selection and close
           onSelectLabel(searchQuery.trim());
@@ -178,13 +253,20 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       }
     };
 
-    const renderLabel = ({ item }: { item: ObjectLabel }) => (
+    const renderLabel = ({ item }: { item: ObjectLabel & { isDynamic?: boolean; isRecent?: boolean } }) => (
       <TouchableOpacity
-        style={styles.labelItem}
+        style={[styles.labelItem, item.isRecent && styles.recentLabelItem]}
         onPress={() => handleSelectLabel(item)}
       >
-        <Text style={styles.labelText}>{item.name}</Text>
-        <Text style={styles.labelCategory}>{item.category}</Text>
+        <View style={styles.labelContent}>
+          <Text style={styles.labelText}>{item.name}</Text>
+          {item.isDynamic && (
+            <View style={styles.dynamicLabelIndicator} />
+          )}
+        </View>
+        <Text style={[styles.labelCategory, item.isRecent && styles.recentLabelCategory]}>
+          {item.category}
+        </Text>
       </TouchableOpacity>
     );
 
@@ -219,16 +301,17 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
         animationType="slide"
         onRequestClose={() => setIsVisible(false)}
       >
-        <TouchableOpacity
-          style={styles.overlay}
-          activeOpacity={1}
-          onPress={() => setIsVisible(false)}
-        >
+        <View style={styles.overlay}>
+          <TouchableOpacity 
+            style={styles.overlayTouch}
+            activeOpacity={1}
+            onPress={() => setIsVisible(false)}
+          />
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.keyboardView}
           >
-            <View style={styles.container}>
+            <View style={[styles.container, { maxHeight: screenHeight * 0.9 - keyboardHeight }]}>
               <View style={styles.handle} />
               
               <Text style={styles.title}>Sélectionner un label</Text>
@@ -292,7 +375,7 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
               />
             </View>
           </KeyboardAvoidingView>
-        </TouchableOpacity>
+        </View>
       </Modal>
     );
   }
@@ -304,6 +387,13 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'flex-end',
   },
+  overlayTouch: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: screenHeight * 0.1,
+  },
   keyboardView: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -312,7 +402,8 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     borderTopLeftRadius: theme.borderRadius.lg,
     borderTopRightRadius: theme.borderRadius.lg,
-    maxHeight: '80%',
+    minHeight: screenHeight * 0.5,
+    maxHeight: screenHeight * 0.9,
     paddingBottom: 40,
   },
   handle: {
@@ -370,7 +461,8 @@ const styles = StyleSheet.create({
   categoriesList: {
     paddingHorizontal: theme.spacing.lg,
     marginBottom: theme.spacing.md,
-    height: 45,
+    minHeight: 45,
+    maxHeight: 45,
   },
   categoryChip: {
     paddingHorizontal: theme.spacing.md,
@@ -408,6 +500,7 @@ const styles = StyleSheet.create({
   },
   labelsList: {
     paddingHorizontal: theme.spacing.lg,
+    flex: 1,
   },
   labelItem: {
     flexDirection: 'row',
@@ -417,12 +510,31 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: theme.colors.border,
   },
+  recentLabelItem: {
+    backgroundColor: theme.colors.primary + '05',
+  },
+  labelContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
   labelText: {
     ...theme.fonts.body,
   },
   labelCategory: {
     ...theme.fonts.caption,
     color: theme.colors.textSecondary,
+  },
+  recentLabelCategory: {
+    color: theme.colors.primary,
+    fontWeight: '600',
+  },
+  dynamicLabelIndicator: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: theme.colors.primary,
+    marginLeft: theme.spacing.sm,
   },
   emptyText: {
     ...theme.fonts.body,

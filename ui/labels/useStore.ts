@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Label } from '@/types/label';
 import { labelAPI } from '@/api/label.api';
+import { useSettingsStore } from '@/ui/settings/useStore';
 
 interface LabelsState {
   labels: Label[];
@@ -8,7 +9,6 @@ interface LabelsState {
   searchQuery: string;
   isLoading: boolean;
   error: string | null;
-  includePublic: boolean;
 }
 
 interface LabelsActions {
@@ -17,7 +17,6 @@ interface LabelsActions {
   filterLabels: () => void;
   deleteLabel: (labelId: string) => Promise<void>;
   refreshLabels: () => Promise<void>;
-  setIncludePublic: (includePublic: boolean) => Promise<void>;
 }
 
 export const useLabelsStore = create<LabelsState & LabelsActions>((set, get) => ({
@@ -26,12 +25,11 @@ export const useLabelsStore = create<LabelsState & LabelsActions>((set, get) => 
   searchQuery: '',
   isLoading: false,
   error: null,
-  includePublic: true,
 
   loadLabels: async () => {
     set({ isLoading: true, error: null });
     try {
-      const { includePublic } = get();
+      const includePublic = useSettingsStore.getState().includePublicLabels;
       const labels = await labelAPI.getMyLabels(includePublic);
       // Sort labels alphabetically
       const sortedLabels = labels.sort((a, b) => 
@@ -80,11 +78,6 @@ export const useLabelsStore = create<LabelsState & LabelsActions>((set, get) => 
   },
 
   refreshLabels: async () => {
-    await get().loadLabels();
-  },
-
-  setIncludePublic: async (includePublic) => {
-    set({ includePublic });
     await get().loadLabels();
   },
 }));

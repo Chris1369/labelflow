@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { Project } from '@/types/project';
 import { projectAPI } from '@/api/project.api';
+import { useSettingsStore } from '@/ui/settings/useStore';
 
 interface SelectProjectState {
   projects: Project[];
@@ -47,8 +48,11 @@ export const useSelectProjectStore = create<SelectProjectState & SelectProjectAc
   loadProjects: async () => {
     set({ isLoading: true, error: null });
     try {
-      // Utiliser getMyProjects pour récupérer uniquement les projets de l'utilisateur
-      const projects = await projectAPI.getMyProjects();
+      // Récupérer le paramètre des settings
+      const includePublic = useSettingsStore.getState().includePublicProjects;
+      
+      // Utiliser getMyProjects avec le paramètre includePublic
+      const projects = await projectAPI.getMyProjects(includePublic);
       console.log('My projects:', projects);
       
       set({ 
