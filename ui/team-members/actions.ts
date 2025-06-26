@@ -1,5 +1,7 @@
 import { Alert } from 'react-native';
 import { useTeamMembersStore, TeamMember } from './useStore';
+import { teamAPI } from '@/api/team.api';
+import { createSafeAction } from '@/helpers/safeAction';
 
 const mockMembers: TeamMember[] = [
   {
@@ -26,17 +28,76 @@ const mockMembers: TeamMember[] = [
 ];
 
 export const teamMembersActions = {
-  loadMembers: () => {
-    useTeamMembersStore.getState().setMembers(mockMembers);
-  },
+  loadMembers: createSafeAction(
+    async () => {
+      const { teamId } = useTeamMembersStore.getState();
+      
+      try {
+        // Récupérer les membres de l'équipe via l'API
+        const members = await teamAPI.getTeamMembers(teamId);
+        useTeamMembersStore.getState().setMembers(members);
+      } catch (error) {
+        console.error('Erreur lors du chargement des membres:', error);
+        // En cas d'erreur, utiliser les données mockées pour le développement
+        useTeamMembersStore.getState().setMembers(mockMembers);
+      }
+    },
+    {
+      showAlert: false,
+      componentName: 'TeamMembers'
+    }
+  ),
 
   searchMembers: (query: string) => {
     useTeamMembersStore.getState().setSearchQuery(query);
   },
 
-  addMember: () => {
-    useTeamMembersStore.getState().addMember();
-  },
+  addMember: createSafeAction(
+    async () => {
+      const { teamId, newMemberEmail, members } = useTeamMembersStore.getState();
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      
+      if (!emailRegex.test(newMemberEmail)) {
+        useTeamMembersStore.getState().setError('Email invalide');
+        return;
+      }
+      
+      if (members.some(member => member.email === newMemberEmail)) {
+        useTeamMembersStore.getState().setError('Ce membre fait déjà partie de l\'équipe');
+        return;
+      }
+
+      useTeamMembersStore.getState().setIsAddingMember(true);
+      useTeamMembersStore.getState().setError(null);
+      
+      try {
+        // Appel API pour ajouter le membre
+        await teamAPI.addMember(teamId, newMemberEmail);
+        
+        // Recharger la liste des membres après ajout
+        await teamMembersActions.loadMembers();
+        
+        // Réinitialiser le formulaire
+        useTeamMembersStore.getState().resetForm();
+        
+        Alert.alert(
+          'Succès',
+          'Le membre a été ajouté à l\'équipe avec succès'
+        );
+      } catch (error: any) {
+        const errorMessage = error?.response?.data?.message || 
+                           error?.message || 
+                           'Erreur lors de l\'ajout du membre';
+        useTeamMembersStore.getState().setError(errorMessage);
+      } finally {
+        useTeamMembersStore.getState().setIsAddingMember(false);
+      }
+    },
+    {
+      showAlert: false, // On gère les alertes nous-mêmes
+      componentName: 'TeamMembers'
+    }
+  ),
 
   removeMember: (member: TeamMember) => {
     if (member.role === 'owner') {

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -6,19 +6,21 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { Input, Button } from '../../components/atoms';
-import { theme } from '../../types/theme';
-import { useTeamMembersStore, TeamMember } from './useStore';
-import { teamMembersActions } from './actions';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { Input, Button } from "../../components/atoms";
+import { theme } from "../../types/theme";
+import { useTeamMembersStore, TeamMember } from "./useStore";
+import { teamMembersActions } from "./actions";
 
 interface TeamMembersScreenProps {
   teamId: string;
 }
 
-export const TeamMembersScreen: React.FC<TeamMembersScreenProps> = ({ teamId }) => {
+export const TeamMembersScreen: React.FC<TeamMembersScreenProps> = ({
+  teamId,
+}) => {
   const {
     filteredMembers,
     searchQuery,
@@ -28,14 +30,15 @@ export const TeamMembersScreen: React.FC<TeamMembersScreenProps> = ({ teamId }) 
   } = useTeamMembersStore();
 
   useEffect(() => {
+    useTeamMembersStore.getState().setTeamId(teamId);
     teamMembersActions.loadMembers();
-  }, []);
+  }, [teamId]);
 
   const getRoleBadgeStyle = (role: string) => {
     switch (role) {
-      case 'owner':
+      case "owner":
         return { backgroundColor: theme.colors.primary };
-      case 'admin':
+      case "admin":
         return { backgroundColor: theme.colors.info };
       default:
         return { backgroundColor: theme.colors.textSecondary };
@@ -44,52 +47,62 @@ export const TeamMembersScreen: React.FC<TeamMembersScreenProps> = ({ teamId }) 
 
   const getRoleText = (role: string) => {
     switch (role) {
-      case 'owner':
-        return 'Propriétaire';
-      case 'admin':
-        return 'Admin';
+      case "owner":
+        return "Propriétaire";
+      case "admin":
+        return "Admin";
       default:
-        return 'Membre';
+        return "Membre";
     }
   };
 
-  const renderMember = ({ item }: { item: TeamMember }) => (
-    <View style={styles.memberCard}>
-      <View style={styles.memberInfo}>
-        <View style={styles.memberAvatar}>
-          <Text style={styles.avatarText}>
-            {item.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-          </Text>
+  const renderMember = ({ item }: { item: TeamMember }) => {
+    const getInitials = (name: string | undefined) => {
+      if (!name) return "?";
+      return name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2);
+    };
+
+    return (
+      <View style={styles.memberCard}>
+        <View style={styles.memberInfo}>
+          <View style={styles.memberAvatar}>
+            <Text style={styles.avatarText}>{getInitials(item.name)}</Text>
+          </View>
+          <View style={styles.memberDetails}>
+            <Text style={styles.memberName}>{item.username || "Sans nom"}</Text>
+            <Text style={styles.memberEmail}>{item.email.split("@")[0]}</Text>
+          </View>
         </View>
-        <View style={styles.memberDetails}>
-          <Text style={styles.memberName}>{item.name}</Text>
-          <Text style={styles.memberEmail}>{item.email}</Text>
+        <View style={styles.memberActions}>
+          <View style={[styles.roleBadge, getRoleBadgeStyle(item.role)]}>
+            <Text style={styles.roleText}>{getRoleText(item.role)}</Text>
+          </View>
+          {item.role !== "owner" && (
+            <TouchableOpacity
+              onPress={() => teamMembersActions.removeMember(item)}
+              style={styles.removeButton}
+            >
+              <Ionicons name='trash' size={20} color={theme.colors.error} />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
-      <View style={styles.memberActions}>
-        <View style={[styles.roleBadge, getRoleBadgeStyle(item.role)]}>
-          <Text style={styles.roleText}>{getRoleText(item.role)}</Text>
-        </View>
-        {item.role !== 'owner' && (
-          <TouchableOpacity
-            onPress={() => teamMembersActions.removeMember(item)}
-            style={styles.removeButton}
-          >
-            <Ionicons name="trash" size={20} color={theme.colors.error} />
-          </TouchableOpacity>
-        )}
-      </View>
-    </View>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Input
-          placeholder="Rechercher un membre..."
+          placeholder='Rechercher un membre...'
           value={searchQuery}
           onChangeText={teamMembersActions.searchMembers}
-          icon="search"
+          icon='search'
           containerStyle={styles.searchInput}
         />
       </View>
@@ -98,28 +111,34 @@ export const TeamMembersScreen: React.FC<TeamMembersScreenProps> = ({ teamId }) 
         <Text style={styles.sectionTitle}>Ajouter un membre</Text>
         <View style={styles.addMemberForm}>
           <Input
-            placeholder="Email du nouveau membre"
+            placeholder='Email du nouveau membre'
             value={newMemberEmail}
-            onChangeText={(email) => useTeamMembersStore.getState().setNewMemberEmail(email)}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            onChangeText={(email) =>
+              useTeamMembersStore.getState().setNewMemberEmail(email)
+            }
+            keyboardType='email-address'
+            autoCapitalize='none'
             autoCorrect={false}
             containerStyle={styles.emailInput}
           />
           <Button
-            title={isAddingMember ? '' : 'Inviter'}
+            title={isAddingMember ? "" : "Inviter"}
             onPress={teamMembersActions.addMember}
             disabled={!newMemberEmail.trim() || isAddingMember}
-            size="small"
+            size='small'
           >
             {isAddingMember && (
-              <ActivityIndicator color={theme.colors.secondary} size="small" />
+              <ActivityIndicator color={theme.colors.secondary} size='small' />
             )}
           </Button>
         </View>
         {error && (
           <View style={styles.errorContainer}>
-            <Ionicons name="alert-circle" size={16} color={theme.colors.error} />
+            <Ionicons
+              name='alert-circle'
+              size={16}
+              color={theme.colors.error}
+            />
             <Text style={styles.errorText}>{error}</Text>
           </View>
         )}
@@ -163,13 +182,13 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: theme.fontSize.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.text,
     marginBottom: theme.spacing.md,
   },
   addMemberForm: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     gap: theme.spacing.sm,
   },
   emailInput: {
@@ -177,8 +196,8 @@ const styles = StyleSheet.create({
     marginBottom: 0,
   },
   errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginTop: theme.spacing.sm,
     paddingHorizontal: theme.spacing.sm,
   },
@@ -196,14 +215,14 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.xl,
   },
   memberCard: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: theme.spacing.md,
   },
   memberInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   memberAvatar: {
@@ -211,21 +230,21 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     backgroundColor: theme.colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginRight: theme.spacing.md,
   },
   avatarText: {
     color: theme.colors.secondary,
     fontSize: theme.fontSize.lg,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   memberDetails: {
     flex: 1,
   },
   memberName: {
     fontSize: theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.text,
     marginBottom: 2,
   },
@@ -234,8 +253,8 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
   },
   memberActions: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.sm,
   },
   roleBadge: {
@@ -246,7 +265,7 @@ const styles = StyleSheet.create({
   roleText: {
     color: theme.colors.secondary,
     fontSize: theme.fontSize.xs,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   removeButton: {
     padding: theme.spacing.sm,

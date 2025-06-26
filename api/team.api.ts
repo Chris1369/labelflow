@@ -7,11 +7,11 @@ import {
   Team,
   CreateTeamRequest,
   UpdateTeamRequest,
-  AddMemberRequest,
   TeamMember,
 } from "@/types/team";
 import { User } from "@/types/auth";
 import { Project } from "@/types/project";
+import { AxiosError } from "axios";
 
 class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
   protected basePath = "/teams";
@@ -50,17 +50,22 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
       const user: User = JSON.parse(userDataStr);
 
       // Utiliser l'endpoint /teams/owner/:ownerId
-      const response = await axiosInstance.get(`${this.basePath}/owner/${user.id}`);
+      const response = await axiosInstance.get(
+        `${this.basePath}/owner/${user.id}`
+      );
 
       // La réponse peut avoir une structure paginée similaire aux projects
-      const result = handleApiResponse<{
-        teams?: Team[];
-        total?: number;
-        totalPage?: number;
-        page?: number;
-        limit?: number;
-      } | Team[]>(response);
-      
+      const result = handleApiResponse<
+        | {
+            teams?: Team[];
+            total?: number;
+            totalPage?: number;
+            page?: number;
+            limit?: number;
+          }
+        | Team[]
+      >(response);
+
       // Gérer les deux types de réponse possibles
       if (Array.isArray(result)) {
         return result;
@@ -78,14 +83,17 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
       );
 
       // La réponse peut avoir une structure paginée similaire aux projects
-      const result = handleApiResponse<{
-        teams?: Team[];
-        total?: number;
-        totalPage?: number;
-        page?: number;
-        limit?: number;
-      } | Team[]>(response);
-      
+      const result = handleApiResponse<
+        | {
+            teams?: Team[];
+            total?: number;
+            totalPage?: number;
+            page?: number;
+            limit?: number;
+          }
+        | Team[]
+      >(response);
+
       // Gérer les deux types de réponse possibles
       if (Array.isArray(result)) {
         return result;
@@ -107,11 +115,11 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
     }
   }
 
-  async addMember(teamId: string, data: AddMemberRequest): Promise<Team> {
+  async addMember(teamId: string, email: string): Promise<Team> {
     try {
       const response = await axiosInstance.post(
-        `${this.basePath}/${teamId}/members`,
-        data
+        `${this.basePath}/${teamId}/add-member`,
+        { email }
       );
       return handleApiResponse<Team>(response);
     } catch (error) {
@@ -132,28 +140,35 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
 
   async getTeamProjects(teamId: string): Promise<Project[]> {
     try {
-      console.log('Getting projects for team:', teamId);
+      console.log("Getting projects for team:", teamId);
       const response = await axiosInstance.get(
         `${this.basePath}/${teamId}/projects`
       );
-      console.log('Team projects response:', response.data);
-      
+      console.log("Team projects response:", response.data);
+
       // Gérer différentes structures de réponse possibles
       if (Array.isArray(response.data)) {
         return response.data;
       } else if (response.data && Array.isArray(response.data.projects)) {
         return response.data.projects;
-      } else if (response.data && response.data.data && Array.isArray(response.data.data)) {
+      } else if (
+        response.data &&
+        response.data.data &&
+        Array.isArray(response.data.data)
+      ) {
         return response.data.data;
       }
-      
+
       // Si aucune structure connue, retourner un tableau vide
-      console.warn('Unexpected response structure for team projects:', response.data);
+      console.warn(
+        "Unexpected response structure for team projects:",
+        response.data
+      );
       return [];
     } catch (error) {
-      console.error('Error in getTeamProjects:', error);
+      console.error("Error in getTeamProjects:", error);
       // En cas d'erreur 404, retourner un tableau vide plutôt qu'une erreur
-      if (error.response?.status === 404) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
         return [];
       }
       throw handleApiError(error);

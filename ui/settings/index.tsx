@@ -9,9 +9,11 @@ export const SettingsScreen: React.FC = () => {
     includePublicCategories,
     includePublicLabels,
     includePublicProjects,
+    canBeAddedToTeam,
     setIncludePublicCategories,
     setIncludePublicLabels,
     setIncludePublicProjects,
+    setCanBeAddedToTeam,
   } = useSettingsStore();
 
   return (
@@ -40,6 +42,30 @@ export const SettingsScreen: React.FC = () => {
               }}
               thumbColor={
                 includePublicCategories
+                  ? theme.colors.primary
+                  : theme.colors.backgroundSecondary
+              }
+            />
+          </View>
+
+          <View style={styles.separator} />
+
+          <View style={styles.settingItem}>
+            <View style={styles.settingInfo}>
+              <Text style={styles.settingLabel}>Ajouter à un équipe</Text>
+              <Text style={styles.settingDescription}>
+                Permettre à d'autres utilisateurs de vous ajouter à leur équipe
+              </Text>
+            </View>
+            <Switch
+              value={canBeAddedToTeam}
+              onValueChange={setCanBeAddedToTeam}
+              trackColor={{
+                false: theme.colors.border,
+                true: theme.colors.primary + "80",
+              }}
+              thumbColor={
+                includePublicLabels
                   ? theme.colors.primary
                   : theme.colors.backgroundSecondary
               }

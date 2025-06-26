@@ -1,14 +1,16 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export interface TeamMember {
   id: string;
-  name: string;
+  name?: string;
+  username?: string;
   email: string;
-  role: 'owner' | 'admin' | 'member';
-  joinedAt: string;
+  role: "owner" | "admin" | "member";
+  joinedAt?: string;
 }
 
 interface TeamMembersState {
+  teamId: string;
   members: TeamMember[];
   filteredMembers: TeamMember[];
   searchQuery: string;
@@ -18,6 +20,7 @@ interface TeamMembersState {
 }
 
 interface TeamMembersActions {
+  setTeamId: (teamId: string) => void;
   setMembers: (members: TeamMember[]) => void;
   setSearchQuery: (query: string) => void;
   setNewMemberEmail: (email: string) => void;
@@ -29,13 +32,18 @@ interface TeamMembersActions {
   resetForm: () => void;
 }
 
-export const useTeamMembersStore = create<TeamMembersState & TeamMembersActions>((set, get) => ({
+export const useTeamMembersStore = create<
+  TeamMembersState & TeamMembersActions
+>((set, get) => ({
+  teamId: "",
   members: [],
   filteredMembers: [],
-  searchQuery: '',
-  newMemberEmail: '',
+  searchQuery: "",
+  newMemberEmail: "",
   isAddingMember: false,
   error: null,
+
+  setTeamId: (teamId) => set({ teamId }),
 
   setMembers: (members) => {
     set({ members, filteredMembers: members });
@@ -60,63 +68,27 @@ export const useTeamMembersStore = create<TeamMembersState & TeamMembersActions>
     const query = searchQuery.toLowerCase();
     const filtered = members.filter(
       (member) =>
-        member.name.toLowerCase().includes(query) ||
+        member?.username?.toLowerCase().includes(query) ||
         member.email.toLowerCase().includes(query)
     );
     set({ filteredMembers: filtered });
   },
 
-  addMember: async () => {
-    const { newMemberEmail, members } = get();
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
-    if (!emailRegex.test(newMemberEmail)) {
-      set({ error: 'Email invalide' });
-      return;
-    }
-    
-    if (members.some(member => member.email === newMemberEmail)) {
-      set({ error: 'Ce membre fait déjà partie de l\'équipe' });
-      return;
-    }
-
-    try {
-      set({ isAddingMember: true, error: null });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const newMember: TeamMember = {
-        id: Date.now().toString(),
-        name: newMemberEmail.split('@')[0],
-        email: newMemberEmail,
-        role: 'member',
-        joinedAt: new Date().toISOString(),
-      };
-      
-      const updatedMembers = [...members, newMember];
-      set({ 
-        members: updatedMembers,
-        filteredMembers: updatedMembers,
-        newMemberEmail: '',
-      });
-    } catch (error) {
-      set({ error: 'Erreur lors de l\'ajout du membre' });
-    } finally {
-      set({ isAddingMember: false });
-    }
+  addMember: () => {
+    // Cette méthode est maintenant gérée dans actions.ts
   },
 
   removeMember: (id) => {
-    const updatedMembers = get().members.filter(member => member.id !== id);
-    set({ 
+    const updatedMembers = get().members.filter((member) => member.id !== id);
+    set({
       members: updatedMembers,
       filteredMembers: updatedMembers,
     });
   },
 
-  resetForm: () => set({
-    newMemberEmail: '',
-    error: null,
-  }),
+  resetForm: () =>
+    set({
+      newMemberEmail: "",
+      error: null,
+    }),
 }));

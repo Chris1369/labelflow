@@ -2,30 +2,181 @@
 
 ## Architecture du projet
 
-### Structure des dossiers
+### Structure complète des dossiers
 
-- **components/** : Composants réutilisables
+```
+labelflow-app/
+├── api/                    # Couche API avec axios
+├── app/                    # Routes expo-router
+├── assets/                 # Ressources statiques (fonts, images, icons)
+├── components/             # Composants réutilisables (Atomic Design)
+├── constants/              # Constantes globales (StorageKeys)
+├── contexts/               # Contextes React (AuthContext)
+├── helpers/                # Utilitaires et fonctions helpers
+├── hooks/                  # Hooks personnalisés (useErrorHandler, etc.)
+├── mock/                   # Données mockées pour dev
+├── types/                  # Types TypeScript centralisés
+├── ui/                     # Logique métier des écrans
+├── app.config.ts           # Configuration multi-environnements
+├── package.json            # Dépendances NPM
+├── tsconfig.json           # Configuration TypeScript avec alias @/
+├── babel.config.js         # Configuration Babel
+└── CLAUDE.md               # Documentation projet
+```
 
-  - **atoms/** : Composants de base (Button, Input, Select)
-  - **molecules/** : Composants composés
-  - **organisms/** : Composants complexes
+### Organisation des composants (Atomic Design)
+
+- **components/** : Composants réutilisables suivant l'Atomic Design
+
+  - **atoms/** : Composants de base indivisibles
+    - `Button.tsx` : Bouton configurable (primary, secondary, outline)
+    - `Input.tsx` : Champ de saisie réutilisable
+    
+  - **molecules/** : Composants composés d'atoms
+    - `DraggableBox.tsx` : Boîte déplaçable
+    - `FixedBoundingBox.tsx` : Boîte de délimitation fixe
+    - `InteractiveBoundingBox.tsx` : Boîte interactive avec gestion tactile
+    - `SimpleBoundingBox.tsx` : Boîte simple pour affichage
+    - `SimpleDraggableBox.tsx` : Boîte déplaçable simplifiée
+    - `StableBoundingBox.tsx` : Boîte stable pour labellisation avec rotation
+    
+  - **organisms/** : Composants complexes autonomes
+    - `ErrorDebugPanel.tsx` : Panneau de debug des erreurs (dev only)
+    - `LabelBottomSheet.tsx` : Modal pour sélection de labels (utilise Modal, pas BottomSheet)
+    - `ProtectedRoute.tsx` : Route protégée par authentification
+    
   - **Règle importante** : Tout composant utilisé dans plus d'un endroit devient un atom/molecule/organism. Les composants exclusifs à une partie de l'UI restent dans leur dossier ui/
+
+### Structure UI (Logique métier)
 
 - **ui/** : Contenu et logique métier des pages
 
   - Chaque dossier de page contient au minimum :
-    - `index.tsx` : Composant de la page (JAMAIS de state direct)
-    - `actions.ts` : Actions et logique métier
-    - `useStore.ts` : Store Zustand pour l'état
+    - `index.tsx` : Composant de la page (JAMAIS de state direct, uniquement UI)
+    - `actions.ts` : Actions et logique métier (API calls, transformations)
+    - `useStore.ts` : Store Zustand pour l'état local
+    
+  - Dossiers existants :
+    - `auth/` : Écrans d'authentification
+    - `main/` : Écrans principaux (home, projets, équipes)
+    - `project/` : Écrans liés aux projets
+    - `team/` : Écrans liés aux équipes
+    - `add-items/` : Logique de capture et labellisation
+    - `view-items/` : Visualisation des items
+    - `export/` : Export de données
+    - `import/` : Import de données
 
-- **app/** : Routes expo-router (pas de dossier pages séparé)
+### Routes et navigation (expo-router)
 
-  - Les pages sont directement dans app/
-  - Utilisation des groupes avec parenthèses : `(auth)`, etc.
+- **app/** : Routes expo-router avec structure de groupes
 
-- **helpers/** : Fonctions utilitaires
+  - **Groupes de routes** :
+    - `(auth)/` : Routes d'authentification
+      - `signin.tsx` : Connexion
+      - `signup.tsx` : Inscription
+      - `forget-password.tsx` : Récupération mot de passe
+      
+    - `(main)/` : Routes principales
+      - `home.tsx` : Menu principal
+      - `create-project.tsx` : Création de projet
+      - `select-project.tsx` : Sélection de projet
+      - `create-team.tsx` : Création d'équipe
+      - `select-team.tsx` : Sélection d'équipe
+      - `categories.tsx` : Gestion des catégories
+      - `labels.tsx` : Gestion des labels
+      - `dictionary.tsx` : Dictionnaire de labels
+      - `settings.tsx` : Paramètres
+      - `help.tsx` : Aide
+      
+    - `(project)/` : Routes projet avec paramètres dynamiques
+      - `[id].tsx` : Vue projet
+      - `[id]/add-items.tsx` : Ajout d'items avec caméra
+      - `[id]/view-items.tsx` : Visualisation des items
+      - `[id]/export.tsx` : Export de données
+      - `[id]/import.tsx` : Import de données
+      
+    - `(team)/` : Routes équipe
+      - `[id].tsx` : Vue équipe
+      - `[id]/members.tsx` : Gestion des membres
+      - `[id]/projects.tsx` : Projets de l'équipe
 
-- **types/** : Fichiers TypeScript de types
+### Couche API
+
+- **api/** : Gestion centralisée des appels API
+
+  - **Architecture de base** :
+    - `axiosInstance.ts` : Instance axios avec intercepteurs (auth, refresh token)
+    - `responseHelper.ts` : Helpers pour réponses/erreurs standardisées
+    - `baseAPI.ts` : Classe abstraite pour CRUD générique
+    
+  - **APIs métier** :
+    - `auth.api.ts` : Authentification (login, register, refresh, logout, OTP)
+    - `project.api.ts` : CRUD projets + méthodes spécifiques
+    - `projectItem.api.ts` : CRUD items + upload images, export, bulk operations
+    - `team.api.ts` : CRUD équipes + gestion membres, invitations
+    - `category.api.ts` : CRUD catégories de labels
+    - `label.api.ts` : CRUD labels personnalisés
+    - `export.api.ts` : Gestion des exports (8 formats)
+
+### Types TypeScript
+
+- **types/** : Définitions TypeScript centralisées
+
+  - **Types génériques** :
+    - `api.ts` : ApiResponse, PaginatedResponse, QueryParams, ErrorResponse
+    - `theme.ts` : Thème global (colors, spacing, fonts, shadows)
+    
+  - **Types métier** :
+    - `auth.ts` : User, AuthTokens, LoginRequest, RegisterRequest, OTPRequest
+    - `project.ts` : Project, ProjectItem, BoundingBoxPosition (avec rotation)
+    - `team.ts` : Team, TeamMember, TeamInvitation, TeamRole
+    - `category.ts` : Category, CategoryWithLabels
+    - `label.ts` : Label, LabelWithCategory, RecentLabel
+    - `export.ts` : ExportFormat (8 types), ExportRequest, ExportStatus
+    - `camera.ts` : CameraState, BoundingBox, ImageMetadata
+
+### Helpers et utilitaires
+
+- **helpers/** : Fonctions utilitaires réutilisables
+
+  - **Gestion d'erreurs** :
+    - `errorHandler.ts` : Singleton pour gestion centralisée
+    - `errorBoundary.tsx` : Capture erreurs React globalement
+    - `safeAction.ts` : Wrapper pour actions sécurisées
+    
+  - **Storage et données** :
+    - `StorageKeys.ts` : Clés AsyncStorage centralisées (@labelflow:*)
+    - `recentLabels.ts` : Gestion des labels récemment utilisés
+    - `labelColors.ts` : Palette de couleurs pour labels
+    
+  - **Utilitaires** :
+    - `validation.ts` : Règles de validation (email, password, etc.)
+    - `imageResizer.ts` : Redimensionnement d'images pour upload
+    - `environment.ts` : Accès aux variables d'environnement
+
+### Contextes et hooks
+
+- **contexts/** :
+  - `AuthContext.tsx` : Contexte d'authentification global
+  
+- **hooks/** :
+  - `useErrorHandler.ts` : Hook pour gestion d'erreurs dans composants
+  - Autres hooks custom selon besoins
+
+### Assets et ressources
+
+- **assets/** :
+  - **fonts/** : Police Outfit (9 variantes de 100 à 900)
+  - **images/** : Logo, splash screen, illustrations
+  - **adaptive-icon.png** : Icône adaptive Android
+  - Configuration expo pour permissions (caméra, galerie)
+
+### Mocks et données de test
+
+- **mock/** :
+  - Données mockées pour développement
+  - Labels et catégories prédéfinis
+  - Projets et équipes de test
 
 ## Stack technique
 
@@ -214,11 +365,62 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
 - `handleApiError` pour formater les erreurs de manière cohérente
 - Logout automatique si refresh token échoue
 
-### APIs disponibles
+### APIs disponibles et leurs méthodes
 
-- **auth.api.ts** : Authentification (login, register, logout, etc.)
-- **project.api.ts** : CRUD des projets + méthodes spécifiques
-- **projectItem.api.ts** : CRUD des items + upload, export, bulk operations
+- **auth.api.ts** : Authentification
+  - `login(email, password)` : Connexion utilisateur
+  - `register(userData)` : Inscription
+  - `logout()` : Déconnexion
+  - `refreshToken()` : Renouvellement token
+  - `forgotPassword(email)` : Envoi OTP
+  - `verifyOTP(email, otp)` : Vérification code
+  - `resetPassword(email, otp, newPassword)` : Réinitialisation
+  
+- **project.api.ts** : Gestion des projets
+  - CRUD standard hérité de BaseAPI
+  - `getByUser()` : Projets de l'utilisateur
+  - `getByTeam(teamId)` : Projets d'une équipe
+  - `addMember(projectId, userId)` : Ajouter membre
+  - `removeMember(projectId, userId)` : Retirer membre
+  - `updateSettings(projectId, settings)` : MAJ paramètres
+  
+- **projectItem.api.ts** : Gestion des items
+  - CRUD standard hérité de BaseAPI
+  - `uploadImage(projectId, image, metadata)` : Upload avec metadata
+  - `bulkCreate(projectId, items[])` : Création en masse
+  - `bulkUpdate(projectId, updates[])` : MAJ en masse
+  - `bulkDelete(projectId, itemIds[])` : Suppression en masse
+  - `getByProject(projectId, filters)` : Items filtrés
+  
+- **team.api.ts** : Gestion des équipes
+  - CRUD standard hérité de BaseAPI
+  - `addMember(teamId, email)` : Ajouter membre par email
+  - `inviteMembers(teamId, emails[])` : Inviter plusieurs membres
+  - `removeMember(teamId, userId)` : Retirer membre
+  - `getMyTeams()` : Équipes de l'utilisateur
+  - `getTeamsByOwnerId(ownerId)` : Équipes par propriétaire
+  - `getTeamMembers(teamId)` : Liste des membres
+  - `getTeamProjects(teamId)` : Projets de l'équipe
+  - `addProject(teamId, projectId)` : Ajouter projet
+  - `removeProject(teamId, projectId)` : Retirer projet
+  
+- **category.api.ts** : Gestion des catégories
+  - CRUD standard hérité de BaseAPI
+  - `getWithLabels()` : Catégories avec leurs labels
+  - `reorderCategories(categoryIds[])` : Réordonner
+  
+- **label.api.ts** : Gestion des labels
+  - CRUD standard hérité de BaseAPI
+  - `getByCategory(categoryId)` : Labels d'une catégorie
+  - `searchLabels(query)` : Recherche de labels
+  - `getUserLabels()` : Labels personnalisés utilisateur
+  
+- **export.api.ts** : Export de données
+  - `requestExport(projectId, format)` : Demander export
+  - `getExportStatus(exportId)` : Statut export
+  - `downloadExport(exportId)` : Télécharger fichier
+  - `listExports(projectId)` : Liste des exports
+  - `deleteExport(exportId)` : Supprimer export
 
 ### Règles de création d'API
 
@@ -406,9 +608,310 @@ Les erreurs API sont automatiquement capturées par :
 - `responseHelper` : handleApiError log automatiquement
 - Affichage d'alertes user-friendly en production
 
+## Patterns et conventions de code
+
+### Gestion d'état avec Zustand
+
+- **Pattern strict** : `create<State & Actions>((set, get) => ({...}))`
+- **Organisation** : 
+  - État en premier
+  - Actions ensuite
+  - Utiliser `get()` pour accéder à l'état dans les actions
+- **Nommage** : 
+  - Actions : verbes (setUser, updateProject, resetForm)
+  - État : noms (user, projects, isLoading)
+
+### Structure des actions
+
+```typescript
+// Pattern pour actions.ts
+import { createSafeAction } from '@/helpers/safeAction';
+import { api } from '@/api/[feature].api';
+import { useStore } from './useStore';
+
+export const loadData = createSafeAction(
+  async () => {
+    const store = useStore.getState();
+    store.setLoading(true);
+    
+    const data = await api.getData();
+    store.setData(data);
+    
+    store.setLoading(false);
+  },
+  { 
+    showAlert: true,
+    componentName: 'FeatureName'
+  }
+);
+```
+
+### Conventions de nommage
+
+- **Fichiers** : camelCase pour .ts/.tsx, PascalCase pour composants
+- **Dossiers** : kebab-case
+- **Types** : PascalCase, préfixe I pour interfaces si nécessaire
+- **Constantes** : UPPER_SNAKE_CASE
+- **Stores Zustand** : toujours nommés `useStore.ts`
+
+### Imports et exports
+
+- **Toujours** utiliser l'alias `@/`
+- **Ordre des imports** :
+  1. React/React Native
+  2. Bibliothèques tierces
+  3. Composants
+  4. Helpers/Utils
+  5. Types
+  6. Assets/Styles
+
+### Gestion des erreurs
+
+- Utiliser `createSafeAction` pour toutes les actions async
+- Utiliser `useErrorHandler` dans les composants
+- Toujours typer les erreurs avec ErrorResponse
+- Logger en dev, alertes user-friendly en prod
+
+### Performance
+
+- Mémoriser les composants lourds avec React.memo
+- Utiliser useCallback/useMemo judicieusement
+- Lazy loading pour les routes avec React.lazy
+- Optimiser les images avec imageResizer avant upload
+
+## Architecture décisionnelle
+
+### Où placer un nouveau fichier ?
+
+1. **C'est un composant réutilisable ?** → `components/[atomic-level]/`
+2. **C'est spécifique à un écran ?** → `ui/[feature]/`
+3. **C'est un type partagé ?** → `types/`
+4. **C'est une fonction utilitaire ?** → `helpers/`
+5. **C'est un appel API ?** → `api/`
+6. **C'est une route ?** → `app/`
+
+### Quand créer un nouveau composant ?
+
+- Utilisé dans 2+ endroits → Devient atom/molecule/organism
+- Logique complexe → Séparer en composant
+- Plus de 100 lignes → Décomposer
+- Besoin de tests isolés → Composant séparé
+
+### Choix du niveau atomique
+
+- **Atom** : Aucune dépendance, état minimal, pure UI
+- **Molecule** : Combine des atoms, logique simple
+- **Organism** : Autonome, logique métier, peut faire des API calls
+
+## Fonctionnalités avancées implémentées
+
+### Système de permissions
+
+- Gestion des rôles dans les équipes (owner, admin, member, viewer)
+- Permissions granulaires par projet
+- Vérification côté client et serveur
+
+### Optimisations
+
+- Cache des images avec AsyncStorage
+- Pagination automatique des listes
+- Debounce sur les recherches
+- Lazy loading des composants lourds
+
+### Sécurité
+
+- Tokens JWT avec rotation automatique
+- Validation des inputs côté client
+- Sanitization des données utilisateur
+- HTTPS obligatoire en production
+
+### Accessibilité
+
+- Support des lecteurs d'écran
+- Navigation au clavier
+- Contrastes respectant WCAG 2.1
+- Labels ARIA appropriés
+
+## Debugging et monitoring
+
+### Outils de développement
+
+- **Error Debug Panel** : Panneau flottant en dev
+- **Console helpers** : 
+  - `showErrorDebug()` : Ouvre le panneau d'erreurs
+  - `clearErrors()` : Vide les logs d'erreurs
+- **React DevTools** : Support complet
+- **Expo DevTools** : Intégration native
+
+### Logs et métriques
+
+- Logs structurés par niveau (error, warn, info, debug)
+- Métriques de performance (temps de chargement, FPS)
+- Tracking des erreurs en production (à implémenter)
+
+## Roadmap technique
+
+### Prochaines étapes
+
+1. Intégration de tests (Jest, React Testing Library)
+2. CI/CD avec GitHub Actions
+3. Monitoring en production (Sentry)
+4. Optimisation du bundle size
+5. Support offline complet
+6. Internationalisation (i18n)
+
+## Documentation API Backend
+
+### Accès à la documentation
+- **Swagger UI** : http://localhost:3000/v1.0/labelflow-api/api-docs
+- **Base URL** : 
+  - Development : `http://localhost:3000/v1.0/labelflow-api`
+  - Staging/Production : Configuré via `BASE_URL`
+
+### Routes API complètes
+
+#### 🔐 Authentication (`/auth`)
+- `POST /auth/login` - Connexion utilisateur
+  - Body: `{ email: string, password: string }`
+  - Retourne: `{ user, accessToken, refreshToken }`
+  
+- `GET /auth/login` - Obtenir les infos de l'utilisateur authentifié
+  - Headers: `Authorization: Bearer {token}`
+  
+- `POST /auth/register` - Inscription nouveau utilisateur
+  - Body: `{ email: string, password: string, username: string }`
+  - Retourne: `{ user, accessToken, refreshToken }`
+  
+- `GET /auth/me` - Obtenir l'utilisateur actuellement connecté
+  - Headers: `Authorization: Bearer {token}`
+  
+- `POST /auth/refresh-token` - Rafraîchir le token JWT
+  - Body: `{ refreshToken: string }`
+  
+- `POST /auth/requestResetPassword` - Demander une réinitialisation de mot de passe
+  - Body: `{ email: string }`
+  
+- `POST /auth/resetPassword` - Réinitialiser le mot de passe
+  - Body: `{ token: string, password: string }`
+
+#### 👤 Users (`/users`)
+- `GET /users` - Liste des utilisateurs
+  - Query: `page, limit, search`
+  
+- `GET /users/:id` - Obtenir un utilisateur
+- `PUT /users/:id` - Mettre à jour un utilisateur
+- `DELETE /users/:id` - Supprimer un utilisateur
+- `PUT /users/:id/password` - Changer le mot de passe
+  - Body: `{ oldPassword, newPassword }`
+  
+- `GET /users/:id/lastPendingProject` - Dernier projet en cours
+
+#### 📁 Projects (`/projects`)
+- `GET /projects` - Liste de tous les projets
+  - Query: `page, limit, search, getIsPublic`
+  
+- `POST /projects` - Créer un nouveau projet
+  - Body: `{ name, description, items[], ownerId, isPublic? }`
+  
+- `GET /projects/{id}` - Obtenir un projet par ID
+- `PUT /projects/{id}` - Mettre à jour un projet
+- `DELETE /projects/{id}` - Supprimer un projet
+- `GET /projects/owner/{ownerId}` - Obtenir tous les projets d'un propriétaire
+
+#### 📸 Project Items (`/project-items`)
+- `GET /project-items` - Obtenir tous les items de projet
+- `POST /project-items` - Créer un nouvel item avec upload de fichier
+  - Body: FormData avec image + `{ projectId, labels[{ name, position[] }] }`
+  - Position: `[centerX, centerY, width, height, rotation]`
+  
+- `GET /project-items/{id}` - Obtenir un item par ID
+- `PUT /project-items/{id}` - Mettre à jour un item
+- `DELETE /project-items/{id}` - Supprimer un item
+- `GET /project-items/{id}/image-url` - Obtenir l'URL de l'image pour un item
+- `GET /project-items/project/{projectId}` - Obtenir tous les items d'un projet
+
+#### 🏷️ Labels (`/labels`)
+- `GET /labels` - Obtenir tous les labels
+- `POST /labels` - Créer un nouveau label
+  - Body: `{ name, ownerId, isPublic? }`
+  
+- `GET /labels/{id}` - Obtenir un label par ID
+- `PUT /labels/{id}` - Mettre à jour un label
+- `DELETE /labels/{id}` - Supprimer un label
+- `GET /labels/owner/{ownerId}` - Obtenir tous les labels d'un propriétaire
+
+#### 📂 Categories (`/categories`)
+- `GET /categories` - Obtenir toutes les catégories
+- `POST /categories` - Créer une nouvelle catégorie
+  - Body: `{ name, labels[]?, ownerId, isPublic? }`
+  
+- `GET /categories/{id}` - Obtenir une catégorie par ID
+- `PUT /categories/{id}` - Mettre à jour une catégorie
+- `DELETE /categories/{id}` - Supprimer une catégorie
+- `PUT /categories/{id}/labels/{labelId}` - Ajouter un label à une catégorie
+- `GET /categories/owner/{ownerId}` - Obtenir toutes les catégories d'un propriétaire
+
+#### 📤 Exports (`/exports`)
+- `GET /exports` - Obtenir tous les exports
+- `POST /exports` - Créer un nouvel export
+  - Body: `{ ownerId, fromProjectId, type }`
+  - Types: `yolo, yolo-v8-obb, json, json-min, csv, tsv, coco, pascal-voc`
+  
+- `GET /exports/{id}` - Obtenir un export par ID
+- `PUT /exports/{id}` - Mettre à jour un export
+- `DELETE /exports/{id}` - Supprimer un export
+
+#### 👥 Teams (`/teams`)
+- `GET /teams` - Obtenir toutes les équipes
+- `POST /teams` - Créer une nouvelle équipe
+  - Body: `{ name, projectId[], description, members[], ownerId }`
+  
+- `GET /teams/{id}` - Obtenir une équipe par ID
+- `PUT /teams/{id}` - Mettre à jour une équipe
+- `DELETE /teams/{id}` - Supprimer une équipe
+- `GET /teams/owner/{ownerId}` - Obtenir toutes les équipes d'un propriétaire
+- `GET /teams/{id}/projects` - Obtenir tous les projets d'une équipe
+- `POST /teams/{id}/add-member` - Ajouter un membre à l'équipe
+  - Body: `{ email: string }`
+  - Vérifie: existence équipe, utilisateur par email, canBeAddedToTeam, pas déjà membre
+  
+- `GET /teams/{id}/members` - Obtenir les membres de l'équipe
+
+#### 💰 Options (`/options`) - Gestion des options de tarification
+- `GET /options` - Obtenir toutes les options
+- `POST /options` - Créer une nouvelle option
+- `GET /options/{id}` - Obtenir une option par ID
+- `PUT /options/{id}` - Mettre à jour une option
+- `DELETE /options/{id}` - Supprimer une option
+
+#### 🛒 Orders (`/orders`) - Gestion des commandes
+- `GET /orders` - Obtenir toutes les commandes
+- `POST /orders` - Créer une nouvelle commande
+- `GET /orders/{id}` - Obtenir une commande par ID
+- `PUT /orders/{id}` - Mettre à jour une commande
+- `DELETE /orders/{id}` - Supprimer une commande
+
+#### 💡 Recommendations (`/recommendations`) - Gestion des recommandations
+- `GET /recommendations` - Obtenir toutes les recommandations
+- `POST /recommendations` - Créer une nouvelle recommandation
+- `GET /recommendations/{id}` - Obtenir une recommandation par ID
+- `PUT /recommendations/{id}` - Mettre à jour une recommandation
+- `DELETE /recommendations/{id}` - Supprimer une recommandation
+
+### Notes sur l'API
+- **Authentication** : Token JWT requis dans header `Authorization: Bearer {token}`
+- **Pagination** : Paramètres `page` et `limit` sur toutes les listes
+- **Recherche** : Paramètre `search` disponible sur la plupart des GET
+- **Upload** : Images via multipart/form-data
+- **Positions** : Format `[centerX, centerY, width, height, rotation]` (valeurs 0-1)
+- **Exports** : Génération asynchrone, téléchargement après traitement
+- **Format des paramètres** : Les IDs dans les routes utilisent `{id}` au lieu de `:id`
+
 ## Notes importantes
 
 - Toujours créer des fichiers de types
 - Pas de commentaires dans le code sauf si demandé
 - Utiliser l'architecture définie strictement
+- Respecter les patterns établis
+- Performance et UX avant tout
 - **IMPORTANT** : Quand l'utilisateur donne des informations utiles au projet, les ajouter automatiquement dans ce fichier CLAUDE.md pour maintenir la documentation à jour
