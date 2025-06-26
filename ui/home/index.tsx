@@ -24,30 +24,16 @@ interface MenuItem {
 export const HomeScreen: React.FC = () => {
   const menuItems: MenuItem[] = [
     {
-      id: "create-project",
-      title: "Créer un projet",
-      icon: "add-circle",
-      onPress: homeActions.handleCreateProject,
-      color: theme.colors.primary,
-    },
-    {
-      id: "select-project",
-      title: "Sélectionner un projet",
-      icon: "folder-open",
+      id: "projects",
+      title: "Projets",
+      icon: "folder",
       onPress: homeActions.handleSelectProject,
       color: theme.colors.primary,
     },
     {
-      id: "create-team",
-      title: "Créer une équipe",
+      id: "teams",
+      title: "Équipes",
       icon: "people",
-      onPress: homeActions.handleCreateTeam,
-      color: theme.colors.primary,
-    },
-    {
-      id: "select-team",
-      title: "Sélectionner une équipe",
-      icon: "people-circle",
       onPress: homeActions.handleSelectTeam,
       color: theme.colors.primary,
     },

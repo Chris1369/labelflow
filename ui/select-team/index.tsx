@@ -105,15 +105,24 @@ export const SelectTeamScreen: React.FC = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        <FlatList
-          data={filteredTeams}
-          keyExtractor={(item) => item._id || item.id}
-          renderItem={renderTeam}
-          contentContainerStyle={styles.listContent}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          ListEmptyComponent={renderEmptyState}
-          showsVerticalScrollIndicator={false}
-        />
+        <>
+          <FlatList
+            data={filteredTeams}
+            keyExtractor={(item) => item._id || item.id}
+            renderItem={renderTeam}
+            contentContainerStyle={styles.listContent}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListEmptyComponent={renderEmptyState}
+            showsVerticalScrollIndicator={false}
+          />
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={selectTeamActions.createNewTeam}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="add" size={32} color={theme.colors.secondary} />
+          </TouchableOpacity>
+        </>
       )}
 
     </SafeAreaView>
@@ -254,5 +263,21 @@ const styles = StyleSheet.create({
     color: theme.colors.secondary,
     fontSize: theme.fontSize.md,
     fontWeight: '600',
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: theme.spacing.xl,
+    right: theme.spacing.xl,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
   },
 });

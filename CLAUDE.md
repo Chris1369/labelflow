@@ -10,7 +10,6 @@ labelflow-app/
 ├── app/                    # Routes expo-router
 ├── assets/                 # Ressources statiques (fonts, images, icons)
 ├── components/             # Composants réutilisables (Atomic Design)
-├── constants/              # Constantes globales (StorageKeys)
 ├── contexts/               # Contextes React (AuthContext)
 ├── helpers/                # Utilitaires et fonctions helpers
 ├── hooks/                  # Hooks personnalisés (useErrorHandler, etc.)
@@ -58,13 +57,23 @@ labelflow-app/
     
   - Dossiers existants :
     - `auth/` : Écrans d'authentification
-    - `main/` : Écrans principaux (home, projets, équipes)
-    - `project/` : Écrans liés aux projets
-    - `team/` : Écrans liés aux équipes
+    - `home/` : Menu principal regroupé
+    - `create-project/` : Formulaire de création de projet
+    - `select-project/` : Liste et sélection de projets (avec bouton + flottant)
+    - `create-team/` : Formulaire de création d'équipe
+    - `select-team/` : Liste et sélection d'équipes (avec bouton + flottant)
+    - `project/` : Écran principal d'un projet
+    - `team/` : Écran principal d'une équipe
+    - `team-members/` : Gestion des membres d'équipe
+    - `team-projects/` : Gestion des projets d'équipe
     - `add-items/` : Logique de capture et labellisation
     - `view-items/` : Visualisation des items
     - `export/` : Export de données
     - `import/` : Import de données
+    - `categories/` : Gestion des catégories
+    - `labels/` : Gestion des labels
+    - `dictionary/` : Dictionnaire de labels
+    - `settings/` : Paramètres application
 
 ### Routes et navigation (expo-router)
 
@@ -247,16 +256,17 @@ create<State & Actions>((set, get) => ({
 ### Menu Principal
 
 3. **Page Home** (`/(main)/home`)
-   - Menu avec 4 options : Créer projet, Sélectionner projet, Paramètres, Aide
-   - Navigation vers les différents screens
+   - Menu avec 4 options : Projets, Équipes, Dictionnaire, Paramètres
+   - Navigation vers les écrans de sélection avec boutons flottants pour création
 
 ### Gestion des Projets
 
 4. **Page Select Project** (`/(main)/select-project`)
 
-   - Liste des projets mockés
+   - Liste des projets de l'utilisateur
    - Recherche de projets
    - Navigation vers un projet spécifique
+   - Bouton flottant + pour créer un nouveau projet
 
 5. **Page Projet** (`/(project)/[id]`)
    - Menu avec 6 options : Ajouter items, Voir items, Exporter, Importer, Réinitialiser, Supprimer
@@ -331,6 +341,7 @@ const { apiUrl, environment, version } = getEnvironmentConfig();
 - **responseHelper.ts** : Gestion standardisée des réponses et erreurs
 - **baseAPI.ts** : Classe abstraite pour les opérations CRUD standard
 - **auth.api.ts** : API d'authentification
+- **team.api.ts** : Gestion des équipes avec méthode `updateProjects` pour ajout/suppression en masse
 - Autres APIs suivent le pattern : `[feature].api.ts`
 
 ### Pattern API standard
@@ -403,6 +414,7 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
   - `getTeamProjects(teamId)` : Projets de l'équipe
   - `addProject(teamId, projectId)` : Ajouter projet
   - `removeProject(teamId, projectId)` : Retirer projet
+  - `updateProjects(teamId, action, projectIds[])` : Ajouter ou supprimer plusieurs projets en masse
   
 - **category.api.ts** : Gestion des catégories
   - CRUD standard hérité de BaseAPI
