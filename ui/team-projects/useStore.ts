@@ -136,13 +136,14 @@ export const useTeamProjectsStore = create<
       const toAdd = selectedIds.filter((id) => !currentIds.includes(id));
       const toRemove = currentIds.filter((id) => !selectedIds.includes(id));
 
-      // Effectuer les modifications
-      for (const projectId of toAdd) {
-        await teamAPI.addProject(teamId, projectId);
+      // Utiliser la méthode bulk updateProjects pour ajouter
+      if (toAdd.length > 0) {
+        await teamAPI.updateProjects(teamId, 'add', toAdd);
       }
 
-      for (const projectId of toRemove) {
-        await teamAPI.removeProject(teamId, projectId);
+      // Utiliser la méthode bulk updateProjects pour supprimer
+      if (toRemove.length > 0) {
+        await teamAPI.updateProjects(teamId, 'remove', toRemove);
       }
 
       // Recharger les projets de la team

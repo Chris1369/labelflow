@@ -1,15 +1,13 @@
 import { BaseAPI } from "./baseAPI";
 import axiosInstance from "./axiosInstance";
 import { handleApiResponse, handleApiError } from "./responseHelper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StorageKeys } from "@/helpers/StorageKeys";
+import { getCurrentUserId } from "@/helpers/getCurrentUser";
 import {
   Team,
   CreateTeamRequest,
   UpdateTeamRequest,
   TeamMember,
 } from "@/types/team";
-import { User } from "@/types/auth";
 import { Project } from "@/types/project";
 import { AxiosError } from "axios";
 
@@ -19,18 +17,15 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
   // Override create pour ajouter l'owner automatiquement
   async create(data: CreateTeamRequest): Promise<Team> {
     try {
-      // Récupérer l'utilisateur actuel
-      const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
-      if (!userDataStr) throw new Error("User not authenticated");
-
-      const user: User = JSON.parse(userDataStr);
+      // Récupérer l'ID de l'utilisateur actuel
+      const userId = await getCurrentUserId();
 
       // Ajouter l'ownerId et initialiser les tableaux vides
       const requestData = {
         ...data,
-        ownerId: user.id,
+        ownerId: userId,
         projectId: data.projectId || [],
-        members: data.members || [user.id], // Ajouter automatiquement le créateur comme membre
+        members: data.members || [userId], // Ajouter automatiquement le créateur comme membre
       };
 
       const response = await axiosInstance.post(this.basePath, requestData);
@@ -43,15 +38,12 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
   // Méthodes spécifiques aux teams
   async getMyTeams(): Promise<Team[]> {
     try {
-      // Récupérer l'utilisateur actuel
-      const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
-      if (!userDataStr) throw new Error("User not authenticated");
-
-      const user: User = JSON.parse(userDataStr);
+      // Récupérer l'ID de l'utilisateur actuel
+      const userId = await getCurrentUserId();
 
       // Utiliser l'endpoint /teams/owner/:ownerId
       const response = await axiosInstance.get(
-        `${this.basePath}/owner/${user.id}`
+        `${this.basePath}/owner/${userId}`
       );
 
       // La réponse peut avoir une structure paginée similaire aux projects
@@ -204,6 +196,25 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
         { emails }
       );
       handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  async updateProjects(
+    teamId: string,
+    action: 'add' | 'remove',
+    projectIds: string[]
+  ): Promise<Team> {
+    try {
+      const response = await axiosInstance.put(
+        `${this.basePath}/${teamId}/update-projects`,
+        {
+          action,
+          projectIds
+        }
+      );
+      return handleApiResponse<Team>(response);
     } catch (error) {
       throw handleApiError(error);
     }

@@ -27,7 +27,7 @@ export const teamProjectsActions = {
         [
           {
             text: 'OK',
-            onPress: () => router.replace('/(team)/[id]', { id: teamId }),
+            onPress: () => router.replace(`/(team)/${teamId}`),
           },
         ]
       );
@@ -39,7 +39,7 @@ export const teamProjectsActions = {
     }
   },
 
-  cancel: () => {
+  cancel: (teamId: string) => {
     Alert.alert(
       'Annuler',
       'Êtes-vous sûr de vouloir annuler les modifications ?',
@@ -47,7 +47,7 @@ export const teamProjectsActions = {
         { text: 'Non', style: 'cancel' },
         {
           text: 'Oui',
-          onPress: () => router.replace('/(team)/[id]'),
+          onPress: () => router.replace(`/(team)/${teamId}`),
         },
       ]
     );

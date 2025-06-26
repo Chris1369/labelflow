@@ -128,7 +128,7 @@ export const TeamProjectsScreen: React.FC<TeamProjectsScreenProps> = ({ teamId }
         </Button>
         <TouchableOpacity
           style={styles.cancelButton}
-          onPress={teamProjectsActions.cancel}
+          onPress={() => teamProjectsActions.cancel(teamId)}
           disabled={isUpdating}
         >
           <Text style={styles.cancelButtonText}>Annuler</Text>

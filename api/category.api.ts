@@ -1,10 +1,8 @@
 import { BaseAPI } from "./baseAPI";
 import axiosInstance from "./axiosInstance";
 import { handleApiResponse, handleApiError } from "./responseHelper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StorageKeys } from "@/helpers/StorageKeys";
 import { Category, CreateCategoryRequest, UpdateCategoryRequest } from "@/types/category";
-import { User } from "@/types/auth";
+import { getCurrentUserId } from "@/helpers/getCurrentUser";
 import { Label } from "@/types/label";
 
 class CategoryAPI extends BaseAPI<Category, CreateCategoryRequest, UpdateCategoryRequest> {
@@ -13,16 +11,13 @@ class CategoryAPI extends BaseAPI<Category, CreateCategoryRequest, UpdateCategor
   // Override create pour ajouter l'ownerId automatiquement
   async create(data: CreateCategoryRequest): Promise<Category> {
     try {
-      // Récupérer l'utilisateur actuel
-      const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
-      if (!userDataStr) throw new Error("User not authenticated");
-
-      const user: User = JSON.parse(userDataStr);
+      // Récupérer l'ID de l'utilisateur actuel
+      const userId = await getCurrentUserId();
 
       // Ajouter l'ownerId et initialiser les tableaux
       const requestData = {
         ...data,
-        ownerId: user.id,
+        ownerId: userId,
         labels: data.labels || [],
         isPublic: data.isPublic ?? false,
       };
@@ -37,14 +32,11 @@ class CategoryAPI extends BaseAPI<Category, CreateCategoryRequest, UpdateCategor
   // Méthodes spécifiques aux catégories
   async getMyCategories(includePublic: boolean = true): Promise<Category[]> {
     try {
-      // Récupérer l'utilisateur actuel
-      const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
-      if (!userDataStr) throw new Error("User not authenticated");
-
-      const user: User = JSON.parse(userDataStr);
+      // Récupérer l'ID de l'utilisateur actuel
+      const userId = await getCurrentUserId();
 
       // Utiliser l'endpoint /categories/owner/:ownerId avec le paramètre getIsPublic
-      const response = await axiosInstance.get(`${this.basePath}/owner/${user.id}`, {
+      const response = await axiosInstance.get(`${this.basePath}/owner/${userId}`, {
         params: {
           getIsPublic: includePublic
         }

@@ -31,8 +31,10 @@ export enum AuthAccessType {
 
 export interface User {
   id: string;
+  _id?: string; // MongoDB ID
   email: string;
   name: string;
+  username?: string;
   avatar?: string;
   canBeAddedToTeam?: boolean;
   role: AuthAccessType;

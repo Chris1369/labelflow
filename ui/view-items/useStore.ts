@@ -2,8 +2,7 @@ import { create } from 'zustand';
 import { ProjectItem, Project } from '@/types/project';
 import { projectItemAPI } from '@/api/projectItem.api';
 import { projectAPI } from '@/api/project.api';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StorageKeys } from '@/helpers/StorageKeys';
+import { getCurrentUser } from '@/helpers/getCurrentUser';
 import { User } from '@/types/auth';
 
 interface ViewItemsState {
@@ -58,18 +57,18 @@ export const useViewItemsStore = create<ViewItemsState & ViewItemsActions>((set,
     set({ isLoading: true, error: null });
 
     try {
-      // Charger les informations du projet et de l'utilisateur
-      const [project, userDataStr] = await Promise.all([
-        projectAPI.getOne(projectId),
-        AsyncStorage.getItem(StorageKeys.USER_DATA)
-      ]);
+      // Charger les informations du projet
+      const project = await projectAPI.getOne(projectId);
 
       let currentUser: User | null = null;
       let isOwner = false;
 
-      if (userDataStr) {
-        currentUser = JSON.parse(userDataStr);
-        isOwner = currentUser.id === project.ownerId;
+      try {
+        currentUser = await getCurrentUser();
+        const userId = currentUser._id || currentUser.id;
+        isOwner = userId === project.ownerId;
+      } catch (error) {
+        console.warn('Could not get current user:', error);
       }
 
       const response = await projectItemAPI.getProjectItems(projectId, {

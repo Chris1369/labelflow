@@ -20,7 +20,7 @@ class AuthAPI {
   async login(data: LoginRequest): Promise<AuthResponse> {
     try {
       const response = await axiosInstance.post(`${this.basePath}/login`, data);
-      // console.log('response', JSON.stringify(response.data, null, 2))
+      console.log('Login response:', JSON.stringify(response.data, null, 2));
       const authData = handleApiResponse<AuthResponse>(response);
 
       // Store tokens and user data

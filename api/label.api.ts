@@ -1,10 +1,8 @@
 import { BaseAPI } from "./baseAPI";
 import axiosInstance from "./axiosInstance";
 import { handleApiResponse, handleApiError } from "./responseHelper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StorageKeys } from "@/helpers/StorageKeys";
 import { Label, CreateLabelRequest, UpdateLabelRequest } from "@/types/label";
-import { User } from "@/types/auth";
+import { getCurrentUserId } from "@/helpers/getCurrentUser";
 
 class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
   protected basePath = "/labels";
@@ -12,16 +10,13 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
   // Override create pour ajouter l'ownerId automatiquement
   async create(data: CreateLabelRequest): Promise<Label> {
     try {
-      // Récupérer l'utilisateur actuel
-      const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
-      if (!userDataStr) throw new Error("User not authenticated");
-
-      const user: User = JSON.parse(userDataStr);
+      // Récupérer l'ID de l'utilisateur actuel
+      const userId = await getCurrentUserId();
 
       // Ajouter l'ownerId
       const requestData = {
         ...data,
-        ownerId: user.id,
+        ownerId: userId,
         isPublic: data.isPublic ?? false,
       };
 
@@ -35,14 +30,11 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
   // Méthodes spécifiques aux labels
   async getMyLabels(includePublic: boolean = true): Promise<Label[]> {
     try {
-      // Récupérer l'utilisateur actuel
-      const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
-      if (!userDataStr) throw new Error("User not authenticated");
-
-      const user: User = JSON.parse(userDataStr);
+      // Récupérer l'ID de l'utilisateur actuel
+      const userId = await getCurrentUserId();
 
       // Utiliser l'endpoint /labels/owner/:ownerId avec le paramètre getIsPublic
-      const response = await axiosInstance.get(`${this.basePath}/owner/${user.id}`, {
+      const response = await axiosInstance.get(`${this.basePath}/owner/${userId}`, {
         params: {
           getIsPublic: includePublic
         }

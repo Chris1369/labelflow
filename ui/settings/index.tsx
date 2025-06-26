@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, Text, StyleSheet, ScrollView, Switch } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/types/theme";
 import { useSettingsStore } from "./useStore";
+import { settingsActions } from "./actions";
 
 export const SettingsScreen: React.FC = () => {
   const {
@@ -15,6 +16,11 @@ export const SettingsScreen: React.FC = () => {
     setIncludePublicProjects,
     setCanBeAddedToTeam,
   } = useSettingsStore();
+
+  useEffect(() => {
+    // Charger les paramètres utilisateur au montage
+    settingsActions.loadUserSettings();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -52,20 +58,24 @@ export const SettingsScreen: React.FC = () => {
 
           <View style={styles.settingItem}>
             <View style={styles.settingInfo}>
-              <Text style={styles.settingLabel}>Ajouter à un équipe</Text>
+              <Text style={styles.settingLabel}>
+                Peut être ajouté à une équipe
+              </Text>
               <Text style={styles.settingDescription}>
                 Permettre à d'autres utilisateurs de vous ajouter à leur équipe
               </Text>
             </View>
             <Switch
               value={canBeAddedToTeam}
-              onValueChange={setCanBeAddedToTeam}
+              onValueChange={(value) =>
+                settingsActions.updateCanBeAddedToTeam(value)
+              }
               trackColor={{
                 false: theme.colors.border,
                 true: theme.colors.primary + "80",
               }}
               thumbColor={
-                includePublicLabels
+                canBeAddedToTeam
                   ? theme.colors.primary
                   : theme.colors.backgroundSecondary
               }

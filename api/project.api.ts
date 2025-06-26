@@ -1,14 +1,12 @@
 import { BaseAPI } from "./baseAPI";
 import axiosInstance from "./axiosInstance";
 import { handleApiResponse, handleApiError } from "./responseHelper";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { StorageKeys } from "@/helpers/StorageKeys";
+import { getCurrentUserId } from "@/helpers/getCurrentUser";
 import {
   Project,
   CreateProjectRequest,
   UpdateProjectRequest,
 } from "@/types/project";
-import { User } from "@/types/auth";
 
 class ProjectAPI extends BaseAPI<
   Project,
@@ -20,16 +18,13 @@ class ProjectAPI extends BaseAPI<
   // Override create pour ajouter l'ownerId automatiquement
   async create(data: CreateProjectRequest): Promise<Project> {
     try {
-      // Récupérer l'utilisateur actuel
-      const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
-      if (!userDataStr) throw new Error("User not authenticated");
-      
-      const user: User = JSON.parse(userDataStr);
+      // Récupérer l'ID de l'utilisateur actuel
+      const userId = await getCurrentUserId();
       
       // Ajouter l'ownerId et isPublic par défaut
       const requestData = {
         ...data,
-        ownerId: user.id,
+        ownerId: userId,
         isPublic: data.isPublic ?? false, // false par défaut
         items: [] // Initialiser avec un tableau vide
       };
@@ -44,14 +39,11 @@ class ProjectAPI extends BaseAPI<
   // Méthodes spécifiques aux projets
   async getMyProjects(): Promise<Project[]> {
     try {
-      // Récupérer l'utilisateur actuel
-      const userDataStr = await AsyncStorage.getItem(StorageKeys.USER_DATA);
-      if (!userDataStr) throw new Error("User not authenticated");
-      
-      const user: User = JSON.parse(userDataStr);
+      // Récupérer l'ID de l'utilisateur actuel
+      const userId = await getCurrentUserId();
       
       // Utiliser l'endpoint spécifique /projects/owner/:ownerId
-      const response = await axiosInstance.get(`${this.basePath}/owner/${user.id}`);
+      const response = await axiosInstance.get(`${this.basePath}/owner/${userId}`);
       
       // La réponse a une structure paginée avec projects array
       const result = handleApiResponse<{
