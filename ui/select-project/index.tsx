@@ -128,8 +128,7 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.lg,
   },
   title: {
-    fontSize: theme.fontSize.xxl,
-    fontWeight: 'bold',
+    ...theme.fonts.title,
     color: theme.colors.text,
     marginBottom: theme.spacing.lg,
   },
@@ -160,8 +159,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
   },
   projectName: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: '600',
+    ...theme.fonts.subtitle,
     color: theme.colors.text,
   },
   publicBadge: {
@@ -171,12 +169,11 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.sm,
   },
   publicText: {
-    fontSize: theme.fontSize.xs,
+    ...theme.fonts.label,
     color: theme.colors.info,
-    fontWeight: '600',
   },
   projectDescription: {
-    fontSize: theme.fontSize.sm,
+    ...theme.fonts.caption,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
   },
@@ -190,7 +187,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.xs,
   },
   statText: {
-    fontSize: theme.fontSize.xs,
+    ...theme.fonts.label,
     color: theme.colors.textSecondary,
   },
   separator: {
@@ -203,7 +200,7 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.xxl,
   },
   emptyText: {
-    fontSize: theme.fontSize.lg,
+    ...theme.fonts.subtitle,
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.md,
     marginBottom: theme.spacing.xl,
@@ -215,9 +212,8 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   createButtonText: {
+    ...theme.fonts.button,
     color: theme.colors.secondary,
-    fontSize: theme.fontSize.md,
-    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,
@@ -225,8 +221,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
+    ...theme.fonts.body,
     marginTop: theme.spacing.md,
-    fontSize: theme.fontSize.md,
     color: theme.colors.textSecondary,
   },
   errorContainer: {
@@ -236,7 +232,7 @@ const styles = StyleSheet.create({
     padding: theme.spacing.xl,
   },
   errorText: {
-    fontSize: theme.fontSize.md,
+    ...theme.fonts.body,
     color: theme.colors.error,
     textAlign: 'center',
     marginBottom: theme.spacing.lg,
@@ -248,8 +244,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   retryText: {
+    ...theme.fonts.button,
     color: theme.colors.secondary,
-    fontSize: theme.fontSize.md,
-    fontWeight: '600',
   },
 });

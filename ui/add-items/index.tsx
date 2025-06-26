@@ -35,11 +35,15 @@ export const AddItemsScreen: React.FC = () => {
     let mounted = true;
 
     (async () => {
-      if (mounted) {
-        const hasPermission = await addItemsActions.checkCameraPermission();
-        if (!hasPermission && mounted) {
-          await addItemsActions.requestCameraPermission();
+      try {
+        if (mounted) {
+          const hasPermission = await addItemsActions.checkCameraPermission();
+          if (!hasPermission && mounted) {
+            await addItemsActions.requestCameraPermission();
+          }
         }
+      } catch (error) {
+        console.error("Error checking camera permission:", error);
       }
     })();
 
@@ -47,9 +51,13 @@ export const AddItemsScreen: React.FC = () => {
     return () => {
       mounted = false;
       // Reset capture state when unmounting
-      useAddItemsStore.getState().resetCapture();
-      // Reset label colors to avoid memory leaks
-      resetLabelColors();
+      try {
+        useAddItemsStore.getState().resetCapture();
+        // Reset label colors to avoid memory leaks
+        resetLabelColors();
+      } catch (error) {
+        console.error("Error during cleanup:", error);
+      }
     };
   }, []);
 

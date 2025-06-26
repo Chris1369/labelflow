@@ -48,10 +48,10 @@ export const addItemsActions = {
 
     try {
       useAddItemsStore.getState().setIsCapturing(true);
-      
+
       // Add a small delay to ensure camera is ready
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       const photo = await cameraRef.takePictureAsync({
         quality: 1,
         base64: false,
@@ -64,18 +64,20 @@ export const addItemsActions = {
       }
 
       // Get image dimensions
-      const { width, height } = await new Promise((resolve, reject) => {
-        Image.getSize(
-          photo.uri, 
-          (w, h) => resolve({ width: w, height: h }),
-          (error) => reject(error)
-        );
-      });
+      const dimensions = await new Promise<{ width: number; height: number }>(
+        (resolve, reject) => {
+          Image.getSize(
+            photo.uri,
+            (w, h) => resolve({ width: w, height: h }),
+            (error) => reject(error)
+          );
+        }
+      );
 
       // Calculate square crop from center
-      const smallerDimension = Math.min(width, height);
-      const cropX = (width - smallerDimension) / 2;
-      const cropY = (height - smallerDimension) / 2;
+      const smallerDimension = Math.min(dimensions.width, dimensions.height);
+      const cropX = (dimensions.width - smallerDimension) / 2;
+      const cropY = (dimensions.height - smallerDimension) / 2;
 
       // Crop to square and resize to 640x640
       const result = await ImageManipulator.manipulateAsync(
@@ -86,30 +88,47 @@ export const addItemsActions = {
               originX: Math.round(cropX),
               originY: Math.round(cropY),
               width: Math.round(smallerDimension),
-              height: Math.round(smallerDimension)
-            }
+              height: Math.round(smallerDimension),
+            },
           },
-          { resize: { width: 640, height: 640 } }
+          { resize: { width: 640, height: 640 } },
         ],
         { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
       );
 
       useAddItemsStore.getState().setCapturedImage(result.uri);
+      // Reset capturing state after successful capture
+      useAddItemsStore.getState().setIsCapturing(false);
     } catch (error) {
       console.error("Error taking picture:", error);
       // Ensure we reset capturing state even on error
       useAddItemsStore.getState().setIsCapturing(false);
-      
+
       // Show specific error message
-      const errorMessage = error instanceof Error ? error.message : "Impossible de prendre la photo";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Impossible de prendre la photo";
       Alert.alert("Erreur", errorMessage);
     }
   },
 
   retakePicture: () => {
-    useAddItemsStore.getState().resetCapture();
+    try {
+      console.log("Retaking picture...");
+      // Force reset isCapturing if needed
+      const { isCapturing } = useAddItemsStore.getState();
+      if (isCapturing) {
+        console.warn("Force resetting isCapturing state");
+        useAddItemsStore.getState().setIsCapturing(false);
+      }
+      
+      useAddItemsStore.getState().resetCapture();
+      console.log("Reset capture completed");
+    } catch (error) {
+      console.error("Error in retakePicture:", error);
+    }
   },
-
 
   validateCurrentBox: () => {
     const { currentBoxId } = useAddItemsStore.getState();
@@ -136,7 +155,19 @@ export const addItemsActions = {
     setIsSaving(true);
 
     try {
+      console.log("Starting saveAllItems with:", {
+        projectId,
+        capturedImageUri,
+        completedBoxesCount: completedBoxes.length,
+      });
+      
       const formData = new FormData();
+      
+      // Ensure the image URI is valid
+      if (!capturedImageUri) {
+        throw new Error("No image URI available");
+      }
+      
       formData.append("file", {
         uri: capturedImageUri,
         name: "image.jpg",
@@ -144,18 +175,22 @@ export const addItemsActions = {
       } as any);
       formData.append("projectId", projectId);
       const labels = completedBoxes.map((box) => {
-        // Log les valeurs brutes avec toute leur précision
-        console.log(`Box ${box.label} - Valeurs brutes:`, {
+        // Debug log for each box
+        console.log(`Processing box ${box.id}:`, {
+          label: box.label,
           centerX: box.centerX,
           centerY: box.centerY,
           width: box.width,
           height: box.height,
           rotation: box.rotation,
-          centerX_string: box.centerX.toString(),
-          centerY_string: box.centerY.toString(),
-          centerX_precision: box.centerX.toPrecision(20),
-          centerY_precision: box.centerY.toPrecision(20),
+          rotationType: typeof box.rotation,
         });
+        
+        // Ensure rotation is in proper range (0-360 degrees)
+        const normalizedRotation = ((box.rotation % 360) + 360) % 360;
+        
+        console.log(`Normalized rotation: ${normalizedRotation}`);
+        
         return {
           name: box.label,
           position: [
@@ -163,20 +198,37 @@ export const addItemsActions = {
             box.centerY.toString(), // Y center as percentage
             box.width.toString(), // Width as percentage
             box.height.toString(), // Height as percentage
-            box.rotation.toString(), // Rotation in degrees
+            normalizedRotation.toString(), // Rotation in degrees (0-360)
           ],
         };
       });
       console.log("Labels to send:", JSON.stringify(labels, null, 2));
+      
+      // Validate labels before sending
+      for (const label of labels) {
+        if (!label.name || label.position.length !== 5) {
+          throw new Error(`Invalid label data: ${JSON.stringify(label)}`);
+        }
+        
+        // Validate position values are numbers
+        for (const pos of label.position) {
+          if (isNaN(parseFloat(pos))) {
+            throw new Error(`Invalid position value: ${pos}`);
+          }
+        }
+      }
+      
       formData.append("labels", JSON.stringify(labels));
-
+      
+      console.log("Sending request to API...");
       await projectItemAPI.addProjectItems(formData);
+      console.log("API request completed successfully");
 
       // Reset saving state first
       setIsSaving(false);
 
       // Small delay to ensure state is updated
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Afficher un message de succès
       Alert.alert(
@@ -188,30 +240,62 @@ export const addItemsActions = {
           {
             text: "Continuer",
             onPress: async () => {
-              // Small delay before reset to avoid state conflicts
-              await new Promise(resolve => setTimeout(resolve, 100));
-              // Réinitialiser pour permettre de capturer une nouvelle image
-              useAddItemsStore.getState().resetCapture();
+              try {
+                console.log("User chose to continue...");
+                // Small delay before reset to avoid state conflicts
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                // Réinitialiser pour permettre de capturer une nouvelle image
+                useAddItemsStore.getState().resetCapture();
+                console.log("State reset completed");
+              } catch (error) {
+                console.error("Error in Continue action:", error);
+              }
             },
           },
           {
             text: "Terminer",
             onPress: async () => {
-              // Reset state before navigation
-              useAddItemsStore.getState().resetCapture();
-              // Small delay before navigation
-              await new Promise(resolve => setTimeout(resolve, 100));
-              // Retourner à la page précédente
-              router.back();
+              try {
+                console.log("User chose to finish...");
+                // Reset state before navigation
+                useAddItemsStore.getState().resetCapture();
+                // Small delay before navigation
+                await new Promise((resolve) => setTimeout(resolve, 100));
+                // Retourner à la page précédente
+                console.log("Navigating back...");
+                router.back();
+              } catch (error) {
+                console.error("Error in Finish action:", error);
+              }
             },
             style: "cancel",
           },
         ]
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error saving items:", error);
       setIsSaving(false);
-      Alert.alert("Erreur", "Impossible d'enregistrer les objets");
+      
+      // Log detailed error information
+      const errorDetails = {
+        message: error.message || "Unknown error",
+        response: error.response?.data,
+        status: error.response?.status,
+        config: {
+          url: error.config?.url,
+          method: error.config?.method,
+          data: error.config?.data,
+        }
+      };
+      
+      console.error("Error details:", JSON.stringify(errorDetails, null, 2));
+      
+      // Show more detailed error message
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          "Impossible d'enregistrer les objets";
+      
+      Alert.alert("Erreur", errorMessage);
     }
   },
 

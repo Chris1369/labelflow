@@ -82,15 +82,8 @@ export const Button: React.FC<ButtonProps> = ({
     }
   };
 
-  const getTextSize = (): number => {
-    switch (size) {
-      case 'small':
-        return theme.fontSize.sm;
-      case 'large':
-        return theme.fontSize.lg;
-      default:
-        return theme.fontSize.md;
-    }
+  const getTextStyle = () => {
+    return theme.fonts.button;
   };
 
   return (
@@ -116,10 +109,9 @@ export const Button: React.FC<ButtonProps> = ({
           {title && (
             <Text
               style={[
-                styles.text,
+                getTextStyle(),
                 {
                   color: getTextColor(),
-                  fontSize: getTextSize(),
                   marginLeft: icon ? theme.spacing.sm : 0,
                 },
                 textStyle,
@@ -140,9 +132,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: theme.borderRadius.md,
-  },
-  text: {
-    fontWeight: '600',
   },
   disabled: {
     opacity: 0.5,

@@ -16,10 +16,10 @@ interface EnvironmentValues {
 export function getEnvironmentValues(): EnvironmentValues {
   if (IS_DEV) {
     return {
-      name: "Labeltool Dev",
+      name: "Labelflow Dev",
       icon: "./assets/icon.png", // Using existing icon for now
       adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
-      package: "com.labeltool.dev",
+      package: "com.labelflow.dev",
       BASE_URL: `http://${IP}:3000/`,
       VERSION: "v1.0",
       PROJECT_NAME: "labelflow-api",
@@ -27,22 +27,22 @@ export function getEnvironmentValues(): EnvironmentValues {
   }
   if (IS_STAGING) {
     return {
-      name: "Labeltool Staging",
+      name: "Labelflow Staging",
       icon: "./assets/icon.png", // Using existing icon for now
       adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
-      package: "com.labeltool.staging",
-      BASE_URL: "https://staging-api.labeltool.com/",
+      package: "com.labelflow.staging",
+      BASE_URL: "https://staging-api.labelflow.com/",
       VERSION: "v1.0",
       PROJECT_NAME: "labelflow-api",
     };
   }
   // Production
   return {
-    name: "Labeltool",
+    name: "Labelflow",
     icon: "./assets/icon.png",
     adaptiveIcon: "./assets/adaptive-icon.png",
-    package: "com.labeltool.app",
-    BASE_URL: "https://api.labeltool.com/",
+    package: "com.labelflow.app",
+    BASE_URL: "https://api.labelflow.com/",
     VERSION: "v1.0",
     PROJECT_NAME: "labelflow-api",
   };
@@ -103,7 +103,7 @@ export default {
         origin: false,
       },
       eas: {
-        projectId: "your-project-id-here", // TODO: Replace with actual EAS project ID
+        projectId: "1aebec92-8023-4824-abd7-7bf26725af78", // TODO: Replace with actual EAS project ID
       },
       environment: environment,
       apiUrl: getEnvironmentValues().BASE_URL,
@@ -130,6 +130,6 @@ export default {
         },
       ],
     ],
-    owner: "labeltool", // TODO: Replace with actual owner
+    owner: "labelflow", // TODO: Replace with actual owner
   },
 };

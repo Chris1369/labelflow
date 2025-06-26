@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StorageKeys } from "@/helpers/StorageKeys";
 import { getEnvironmentValues } from "@/app.config";
+import { errorHandler } from "@/helpers/errorHandler";
 
 const { BASE_URL, VERSION, PROJECT_NAME } = getEnvironmentValues();
 
@@ -30,6 +31,11 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error) => {
+    errorHandler.logError({
+      type: 'api',
+      message: `Request config error: ${error.message}`,
+      context: { config: error.config },
+    });
     return Promise.reject(error);
   }
 );
@@ -69,6 +75,12 @@ axiosInstance.interceptors.response.use(
         }
       } catch (refreshError) {
         // Refresh failed, redirect to login
+        errorHandler.logError({
+          type: 'api',
+          message: 'Token refresh failed',
+          context: { refreshError },
+        });
+        
         await AsyncStorage.multiRemove([
           StorageKeys.ACCESS_TOKEN,
           StorageKeys.REFRESH_TOKEN,

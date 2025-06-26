@@ -97,10 +97,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   label: {
-    fontSize: theme.fontSize.sm,
+    ...theme.fonts.label,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
-    fontWeight: '500',
   },
   inputContainer: {
     flexDirection: 'row',
@@ -123,7 +122,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     paddingVertical: theme.spacing.md,
-    fontSize: theme.fontSize.md,
+    ...theme.fonts.body,
     color: theme.colors.text,
   },
   eyeIcon: {
@@ -131,7 +130,7 @@ const styles = StyleSheet.create({
     marginLeft: theme.spacing.sm,
   },
   error: {
-    fontSize: theme.fontSize.xs,
+    ...theme.fonts.label,
     color: theme.colors.error,
     marginTop: theme.spacing.xs,
   },

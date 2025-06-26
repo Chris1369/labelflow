@@ -1,5 +1,6 @@
 import { AxiosError, AxiosResponse } from "axios";
 import { ApiResponse, ApiError } from "@/types/api";
+import { errorHandler } from "@/helpers/errorHandler";
 
 export const handleApiResponse = <T = any>(
   response: AxiosResponse<ApiResponse<T>>
@@ -23,12 +24,18 @@ export const handleApiResponse = <T = any>(
   throw new Error(response.data?.message || "Une erreur est survenue");
 };
 
-export const handleApiError = (error: unknown): ApiError => {
+export const handleApiError = (error: unknown, endpoint?: string): ApiError => {
+  let apiError: ApiError;
+  
   if (error instanceof AxiosError) {
     console.log("error", error);
+    
+    // Log to error handler
+    errorHandler.handleApiError(error, endpoint || error.config?.url);
+    
     if (error.response) {
       // Server responded with error
-      return {
+      apiError = {
         message: error.response.data?.message || "Une erreur est survenue",
         code: error.response.data?.code,
         statusCode: error.response.status,
@@ -36,19 +43,33 @@ export const handleApiError = (error: unknown): ApiError => {
       };
     } else if (error.request) {
       // Request made but no response
-      return {
+      apiError = {
         message: "Impossible de contacter le serveur",
         code: "NETWORK_ERROR",
       };
+    } else {
+      // Error in request configuration
+      apiError = {
+        message: error.message,
+        code: "REQUEST_ERROR",
+      };
     }
+  } else {
+    // Other errors
+    errorHandler.logError({
+      type: 'api',
+      message: error instanceof Error ? error.message : String(error),
+      context: { endpoint },
+    });
+    
+    apiError = {
+      message:
+        error instanceof Error
+          ? error.message
+          : "Une erreur inconnue est survenue",
+      code: "UNKNOWN_ERROR",
+    };
   }
-
-  // Other errors
-  return {
-    message:
-      error instanceof Error
-        ? error.message
-        : "Une erreur inconnue est survenue",
-    code: "UNKNOWN_ERROR",
-  };
+  
+  return apiError;
 };

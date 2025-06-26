@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   noPermissionText: {
-    fontSize: theme.fontSize.lg,
+    ...theme.fonts.subtitle,
     color: theme.colors.text,
     textAlign: "center",
     marginBottom: theme.spacing.lg,

@@ -53,13 +53,13 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
       [
         {
           text: "Annuler",
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "Supprimer",
           style: "destructive",
-          onPress: () => deleteItem(item.id)
-        }
+          onPress: () => deleteItem(item.id),
+        },
       ]
     );
   };
@@ -73,9 +73,13 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
           disabled={deletingItemId === item.id}
         >
           {deletingItemId === item.id ? (
-            <ActivityIndicator size="small" color={theme.colors.secondary} />
+            <ActivityIndicator size='small' color={theme.colors.secondary} />
           ) : (
-            <Ionicons name="trash-outline" size={20} color={theme.colors.secondary} />
+            <Ionicons
+              name='trash-outline'
+              size={20}
+              color={theme.colors.secondary}
+            />
           )}
         </TouchableOpacity>
       )}
@@ -86,7 +90,7 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
       />
       <View style={styles.itemInfo}>
         <Text style={styles.itemLabel} numberOfLines={1}>
-          {item.labels.map(label => label.name).join(', ')}
+          {item.labels.map((label) => label.name).join(", ")}
         </Text>
         {item.labels && item.labels.length > 0 && (
           <Text style={styles.itemPositionCount}>
@@ -156,7 +160,6 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
       </SafeAreaView>
     );
   }
-  console.log(JSON.stringify(items, null, 2));
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>

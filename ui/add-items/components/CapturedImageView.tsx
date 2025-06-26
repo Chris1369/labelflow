@@ -155,9 +155,8 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.sm,
   },
   labelText: {
+    ...theme.fonts.label,
     color: theme.colors.secondary,
-    fontSize: theme.fontSize.xs,
-    fontWeight: "600",
   },
   infoContainer: {
     position: "absolute",
@@ -180,14 +179,12 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   infoText: {
+    ...theme.fonts.caption,
     color: theme.colors.secondary,
-    fontSize: theme.fontSize.sm,
-    fontWeight: "600",
   },
   infoTextSmall: {
+    ...theme.fonts.label,
     color: theme.colors.secondary,
-    fontSize: theme.fontSize.xs,
-    fontWeight: "500",
     marginTop: 2,
   },
 });

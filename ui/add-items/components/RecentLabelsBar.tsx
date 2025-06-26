@@ -68,9 +68,8 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
   },
   title: {
+    ...theme.fonts.label,
     color: theme.colors.secondary,
-    fontSize: theme.fontSize.xs,
-    fontWeight: "600",
     marginBottom: theme.spacing.sm,
     opacity: 0.7,
   },
@@ -84,8 +83,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   labelText: {
+    ...theme.fonts.button,
     color: theme.colors.secondary,
-    fontSize: theme.fontSize.sm,
-    fontWeight: "600",
   },
 });

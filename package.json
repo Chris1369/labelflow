@@ -25,6 +25,7 @@
     "expo-router": "^5.1.0",
     "expo-splash-screen": "^0.30.9",
     "expo-status-bar": "~2.2.3",
+    "expo-updates": "^0.28.15",
     "react": "19.0.0",
     "react-native": "0.79.4",
     "react-native-gesture-handler": "^2.26.0",

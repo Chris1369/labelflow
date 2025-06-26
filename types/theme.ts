@@ -36,11 +36,43 @@ export interface Theme {
     xl: number;
     xxl: number;
   };
+  fonts: {
+    title: {
+      fontSize: number;
+      fontWeight: string;
+      lineHeight: number;
+    };
+    subtitle: {
+      fontSize: number;
+      fontWeight: string;
+      lineHeight: number;
+    };
+    body: {
+      fontSize: number;
+      fontWeight: string;
+      lineHeight: number;
+    };
+    caption: {
+      fontSize: number;
+      fontWeight: string;
+      lineHeight: number;
+    };
+    button: {
+      fontSize: number;
+      fontWeight: string;
+      lineHeight: number;
+    };
+    label: {
+      fontSize: number;
+      fontWeight: string;
+      lineHeight: number;
+    };
+  };
 }
 
 export const theme: Theme = {
   colors: {
-    primary: "#AF47D2",
+    primary: "#FF6D7E",
     secondary: "#fff",
     error: "#DC2626",
     success: "#16A34A",
@@ -75,5 +107,37 @@ export const theme: Theme = {
     lg: 18,
     xl: 24,
     xxl: 32,
+  },
+  fonts: {
+    title: {
+      fontSize: 28,
+      fontWeight: "700",
+      lineHeight: 36,
+    },
+    subtitle: {
+      fontSize: 20,
+      fontWeight: "600",
+      lineHeight: 28,
+    },
+    body: {
+      fontSize: 16,
+      fontWeight: "400",
+      lineHeight: 24,
+    },
+    caption: {
+      fontSize: 14,
+      fontWeight: "400",
+      lineHeight: 20,
+    },
+    button: {
+      fontSize: 16,
+      fontWeight: "600",
+      lineHeight: 24,
+    },
+    label: {
+      fontSize: 12,
+      fontWeight: "600",
+      lineHeight: 16,
+    },
   },
 };

@@ -325,11 +325,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   title: {
-    fontSize: theme.fontSize.xl,
-    fontWeight: 'bold',
+    ...theme.fonts.title,
     textAlign: 'center',
     marginBottom: theme.spacing.lg,
-    color: theme.colors.text,
   },
   searchContainer: {
     paddingHorizontal: theme.spacing.lg,
@@ -348,9 +346,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.sm,
   },
   switchLabel: {
-    fontSize: theme.fontSize.sm,
-    color: theme.colors.text,
-    fontWeight: '500',
+    ...theme.fonts.body,
   },
   addButton: {
     flexDirection: 'row',
@@ -364,9 +360,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.border,
   },
   addButtonText: {
+    ...theme.fonts.button,
     marginLeft: theme.spacing.sm,
     color: theme.colors.primary,
-    fontWeight: '600',
   },
   addButtonTextDisabled: {
     color: theme.colors.textSecondary,
@@ -397,7 +393,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   categoryText: {
-    fontSize: theme.fontSize.sm,
+    ...theme.fonts.caption,
     color: theme.colors.text,
   },
   categoryTextActive: {
@@ -422,15 +418,14 @@ const styles = StyleSheet.create({
     borderBottomColor: theme.colors.border,
   },
   labelText: {
-    fontSize: theme.fontSize.md,
-    color: theme.colors.text,
-    fontWeight: '500',
+    ...theme.fonts.body,
   },
   labelCategory: {
-    fontSize: theme.fontSize.sm,
+    ...theme.fonts.caption,
     color: theme.colors.textSecondary,
   },
   emptyText: {
+    ...theme.fonts.body,
     textAlign: 'center',
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.xl,

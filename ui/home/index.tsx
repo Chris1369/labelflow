@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -6,11 +6,12 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../types/theme';
-import { homeActions } from './actions';
+  TextStyle,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "../../types/theme";
+import { homeActions } from "./actions";
 
 interface MenuItem {
   id: string;
@@ -23,53 +24,46 @@ interface MenuItem {
 export const HomeScreen: React.FC = () => {
   const menuItems: MenuItem[] = [
     {
-      id: 'create-project',
-      title: 'Créer un projet',
-      icon: 'add-circle',
+      id: "create-project",
+      title: "Créer un projet",
+      icon: "add-circle",
       onPress: homeActions.handleCreateProject,
       color: theme.colors.primary,
     },
     {
-      id: 'select-project',
-      title: 'Sélectionner un projet',
-      icon: 'folder-open',
+      id: "select-project",
+      title: "Sélectionner un projet",
+      icon: "folder-open",
       onPress: homeActions.handleSelectProject,
-      color: theme.colors.info,
+      color: theme.colors.primary,
     },
     {
-      id: 'create-team',
-      title: 'Créer une équipe',
-      icon: 'people',
+      id: "create-team",
+      title: "Créer une équipe",
+      icon: "people",
       onPress: homeActions.handleCreateTeam,
       color: theme.colors.primary,
     },
     {
-      id: 'select-team',
-      title: 'Sélectionner une équipe',
-      icon: 'people-circle',
+      id: "select-team",
+      title: "Sélectionner une équipe",
+      icon: "people-circle",
       onPress: homeActions.handleSelectTeam,
-      color: theme.colors.success,
+      color: theme.colors.primary,
     },
     {
-      id: 'dictionary',
-      title: 'Dictionnaire',
-      icon: 'book',
+      id: "dictionary",
+      title: "Dictionnaire",
+      icon: "book",
       onPress: homeActions.handleDictionary,
-      color: theme.colors.warning,
+      color: theme.colors.primary,
     },
     {
-      id: 'settings',
-      title: 'Paramètres',
-      icon: 'settings',
+      id: "settings",
+      title: "Paramètres",
+      icon: "settings",
       onPress: homeActions.handleSettings,
-      color: theme.colors.textSecondary,
-    },
-    {
-      id: 'help',
-      title: 'Aide',
-      icon: 'help-circle',
-      onPress: homeActions.handleHelp,
-      color: theme.colors.info,
+      color: theme.colors.primary,
     },
   ];
 
@@ -82,13 +76,13 @@ export const HomeScreen: React.FC = () => {
             onPress={homeActions.handleLogout}
             activeOpacity={0.7}
           >
-            <Ionicons name="log-out" size={24} color={theme.colors.text} />
+            <Ionicons name='log-out' size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <View style={styles.logoContainer}>
-            <Image 
-              source={require('@/assets/logo.png')} 
+            <Image
+              source={require("@/assets/logo.png")}
               style={styles.logo}
-              resizeMode="contain"
+              resizeMode='contain'
             />
             <Text style={styles.title}>Labelflow</Text>
           </View>
@@ -103,7 +97,12 @@ export const HomeScreen: React.FC = () => {
               onPress={item.onPress}
               activeOpacity={0.7}
             >
-              <View style={[styles.iconContainer, item.color && { backgroundColor: item.color + '20' }]}>
+              <View
+                style={[
+                  styles.iconContainer,
+                  item.color && { backgroundColor: item.color + "20" },
+                ]}
+              >
                 <Ionicons
                   name={item.icon}
                   size={48}
@@ -129,13 +128,13 @@ const styles = StyleSheet.create({
     padding: theme.spacing.lg,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: theme.spacing.xl,
     marginBottom: theme.spacing.xxl,
-    position: 'relative',
+    position: "relative",
   },
   logoutButton: {
-    position: 'absolute',
+    position: "absolute",
     top: -theme.spacing.md,
     right: 0,
     padding: theme.spacing.sm,
@@ -143,8 +142,8 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.md,
   },
   logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: theme.spacing.xs,
   },
   logo: {
@@ -153,23 +152,22 @@ const styles = StyleSheet.create({
     marginRight: theme.spacing.sm,
   },
   title: {
-    fontSize: theme.fontSize.xxl,
-    fontWeight: 'bold',
+    ...theme.fonts.title,
     color: theme.colors.text,
-  },
+  } as TextStyle,
   subtitle: {
-    fontSize: theme.fontSize.lg,
+    ...(theme.fonts.subtitle as TextStyle),
     color: theme.colors.textSecondary,
   },
   menuGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     paddingHorizontal: theme.spacing.md,
   },
   menuItem: {
-    width: '47%',
-    alignItems: 'center',
+    width: "47%",
+    alignItems: "center",
     marginBottom: theme.spacing.xl,
   },
   iconContainer: {
@@ -177,16 +175,15 @@ const styles = StyleSheet.create({
     height: 100,
     borderRadius: theme.borderRadius.lg,
     backgroundColor: theme.colors.backgroundSecondary,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: theme.spacing.md,
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
   menuItemText: {
-    fontSize: theme.fontSize.md,
+    ...theme.fonts.body,
     color: theme.colors.text,
-    fontWeight: '500',
-    textAlign: 'center',
-  },
+    textAlign: "center",
+  } as TextStyle,
 });

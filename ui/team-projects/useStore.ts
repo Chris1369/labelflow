@@ -1,7 +1,7 @@
-import { create } from 'zustand';
-import { Project } from '@/types/project';
-import { teamAPI } from '@/api/team.api';
-import { projectAPI } from '@/api/project.api';
+import { create } from "zustand";
+import { Project } from "@/types/project";
+import { teamAPI } from "@/api/team.api";
+import { projectAPI } from "@/api/project.api";
 
 interface TeamProjectsState {
   teamProjects: Project[]; // Projets actuellement liés à la team
@@ -25,12 +25,14 @@ interface TeamProjectsActions {
   saveChanges: (teamId: string) => Promise<void>;
 }
 
-export const useTeamProjectsStore = create<TeamProjectsState & TeamProjectsActions>((set, get) => ({
+export const useTeamProjectsStore = create<
+  TeamProjectsState & TeamProjectsActions
+>((set, get) => ({
   teamProjects: [],
   allProjects: [],
   selectedProjects: new Set(),
   filteredProjects: [],
-  searchQuery: '',
+  searchQuery: "",
   isLoading: false,
   isUpdating: false,
   error: null,
@@ -38,49 +40,44 @@ export const useTeamProjectsStore = create<TeamProjectsState & TeamProjectsActio
   loadTeamProjects: async (teamId: string) => {
     set({ isLoading: true, error: null });
     try {
-      console.log('Loading team projects for team:', teamId);
-      
       // Charger d'abord les détails de la team pour obtenir les IDs des projets
       const team = await teamAPI.getOne(teamId);
-      console.log('Team details:', team);
-      
+
       // Stocker les IDs des projets actuellement associés à la team
       const teamProjectIds = team.projectId || [];
-      
+
       // Pas besoin de charger les projets ici, on va les charger dans loadAllProjects
       // On stocke juste les IDs sélectionnés
-      
-      set({ 
+
+      set({
         teamProjects: [], // On va les charger avec loadAllProjects
         selectedProjects: new Set(teamProjectIds),
-        isLoading: false 
+        isLoading: false,
       });
     } catch (error: any) {
-      console.error('Error loading team projects:', error);
-      set({ 
-        error: error.message || 'Failed to load team projects',
-        isLoading: false 
+      console.error("Error loading team projects:", error);
+      set({
+        error: error.message || "Failed to load team projects",
+        isLoading: false,
       });
     }
   },
 
   loadAllProjects: async () => {
     try {
-      console.log('Loading all user projects');
       // Charger tous les projets de l'utilisateur
       const projects = await projectAPI.getMyProjects();
-      console.log('All projects loaded:', projects);
-      
+
       // S'assurer que projects est un tableau
       const projectArray = Array.isArray(projects) ? projects : [];
-      set({ 
+      set({
         allProjects: projectArray,
-        filteredProjects: projectArray 
+        filteredProjects: projectArray,
       });
     } catch (error: any) {
-      console.error('Error loading all projects:', error);
-      set({ 
-        error: error.message || 'Failed to load projects',
+      console.error("Error loading all projects:", error);
+      set({
+        error: error.message || "Failed to load projects",
       });
     }
   },
@@ -99,13 +96,13 @@ export const useTeamProjectsStore = create<TeamProjectsState & TeamProjectsActio
   toggleProject: (projectId) => {
     const { selectedProjects } = get();
     const newSelected = new Set(selectedProjects);
-    
+
     if (newSelected.has(projectId)) {
       newSelected.delete(projectId);
     } else {
       newSelected.add(projectId);
     }
-    
+
     set({ selectedProjects: newSelected });
   },
 
@@ -129,35 +126,30 @@ export const useTeamProjectsStore = create<TeamProjectsState & TeamProjectsActio
     set({ isUpdating: true });
     try {
       const { selectedProjects } = get();
-      
+
       // Récupérer la team pour avoir les IDs actuels
       const team = await teamAPI.getOne(teamId);
       const currentIds = team.projectId || [];
       const selectedIds = Array.from(selectedProjects);
-      
+
       // Déterminer les projets à ajouter et à supprimer
-      const toAdd = selectedIds.filter(id => !currentIds.includes(id));
-      const toRemove = currentIds.filter(id => !selectedIds.includes(id));
-      
-      console.log('Current project IDs:', currentIds);
-      console.log('Selected project IDs:', selectedIds);
-      console.log('To add:', toAdd);
-      console.log('To remove:', toRemove);
-      
+      const toAdd = selectedIds.filter((id) => !currentIds.includes(id));
+      const toRemove = currentIds.filter((id) => !selectedIds.includes(id));
+
       // Effectuer les modifications
       for (const projectId of toAdd) {
         await teamAPI.addProject(teamId, projectId);
       }
-      
+
       for (const projectId of toRemove) {
         await teamAPI.removeProject(teamId, projectId);
       }
-      
+
       // Recharger les projets de la team
       await get().loadTeamProjects(teamId);
     } catch (error: any) {
-      console.error('Error saving changes:', error);
-      set({ error: error.message || 'Failed to update team projects' });
+      console.error("Error saving changes:", error);
+      set({ error: error.message || "Failed to update team projects" });
       throw error;
     } finally {
       set({ isUpdating: false });

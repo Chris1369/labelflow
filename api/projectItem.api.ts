@@ -41,13 +41,14 @@ class ProjectItemAPI extends BaseAPI<
 
   async addProjectItems(formData: FormData): Promise<void> {
     try {
-      await axiosInstance.post(`${this.basePath}`, formData, {
+      const response = await axiosInstance.post(`${this.basePath}`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
+      handleApiResponse(response);
     } catch (error) {
-      throw handleApiError(error);
+      throw handleApiError(error, `${this.basePath} - addProjectItems`);
     }
   }
 
