@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { Team } from "@/types/team";
 import { teamAPI } from "@/api/team.api";
+import { debounce } from 'lodash';
 
 interface SelectTeamState {
   teams: Team[];
@@ -8,25 +9,70 @@ interface SelectTeamState {
   searchQuery: string;
   selectedTeam: Team | null;
   isLoading: boolean;
+  isSearching: boolean;
   error: string | null;
 }
 
 interface SelectTeamActions {
   setTeams: (teams: Team[]) => void;
   setSearchQuery: (query: string) => void;
-  filterTeams: () => void;
+  searchTeams: (query: string) => Promise<void>;
   selectTeam: (team: Team) => void;
   resetSelection: () => void;
   loadTeams: () => Promise<void>;
 }
 
 export const useSelectTeamStore = create<SelectTeamState & SelectTeamActions>(
-  (set, get) => ({
+  (set, get) => {
+    // Create debounced search function
+    const debouncedSearch = debounce(async (query: string) => {
+      if (!query || query.trim().length < 2) {
+        const { teams } = get();
+        set({ filteredTeams: teams, isSearching: false });
+        return;
+      }
+
+      set({ isSearching: true });
+      try {
+        const searchResults = await teamAPI.getAll({
+          search: query,
+          limit: 50
+        });
+        
+        // Handle both array and paginated response
+        let teams: Team[] = [];
+        if (Array.isArray(searchResults)) {
+          teams = searchResults;
+        } else if (searchResults && 'teams' in searchResults) {
+          teams = searchResults.teams || [];
+        }
+        
+        set({ 
+          filteredTeams: teams,
+          isSearching: false 
+        });
+      } catch (error) {
+        console.error('Search error:', error);
+        // Fallback to local search
+        const { teams } = get();
+        const filtered = teams.filter(team => 
+          team.name.toLowerCase().includes(query.toLowerCase()) ||
+          team.description?.toLowerCase().includes(query.toLowerCase())
+        );
+        set({ 
+          filteredTeams: filtered,
+          isSearching: false 
+        });
+      }
+    }, 300);
+
+    return {
     teams: [],
     filteredTeams: [],
     searchQuery: "",
     selectedTeam: null,
     isLoading: false,
+    isSearching: false,
     error: null,
 
     setTeams: (teams) => {
@@ -35,23 +81,11 @@ export const useSelectTeamStore = create<SelectTeamState & SelectTeamActions>(
 
     setSearchQuery: (searchQuery) => {
       set({ searchQuery });
-      get().filterTeams();
+      debouncedSearch(searchQuery);
     },
 
-    filterTeams: () => {
-      const { teams, searchQuery } = get();
-      if (!searchQuery.trim()) {
-        set({ filteredTeams: teams });
-        return;
-      }
-
-      const query = searchQuery.toLowerCase();
-      const filtered = teams.filter(
-        (team) =>
-          team.name.toLowerCase().includes(query) ||
-          team.description.toLowerCase().includes(query)
-      );
-      set({ filteredTeams: filtered });
+    searchTeams: async (query: string) => {
+      debouncedSearch(query);
     },
 
     selectTeam: (team) => set({ selectedTeam: team }),
@@ -79,5 +113,6 @@ export const useSelectTeamStore = create<SelectTeamState & SelectTeamActions>(
         });
       }
     },
-  })
+  };
+  }
 );

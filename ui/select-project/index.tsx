@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -6,17 +6,19 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { Input } from '@/components/atoms';
-import { theme } from '@/types/theme';
-import { useSelectProjectStore } from './useStore';
-import { selectProjectActions } from './actions';
-import { Project } from '@/types/project';
+  TextStyle,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { Input } from "@/components/atoms";
+import { theme } from "@/types/theme";
+import { useSelectProjectStore } from "./useStore";
+import { selectProjectActions } from "./actions";
+import { Project } from "@/types/project";
 
 export const SelectProjectScreen: React.FC = () => {
-  const { filteredProjects, searchQuery, isLoading, error } = useSelectProjectStore();
+  const { filteredProjects, searchQuery, isLoading, isSearching, error } =
+    useSelectProjectStore();
 
   useEffect(() => {
     selectProjectActions.loadProjects();
@@ -38,22 +40,32 @@ export const SelectProjectScreen: React.FC = () => {
           )}
         </View>
         <Ionicons
-          name="chevron-forward"
+          name='chevron-forward'
           size={24}
           color={theme.colors.textSecondary}
         />
       </View>
-      <Text style={styles.projectDescription} numberOfLines={2}>
+      <Text style={styles.projectDescription as TextStyle} numberOfLines={2}>
         {item.description}
       </Text>
       <View style={styles.projectStats}>
         <View style={styles.stat}>
-          <Ionicons name="images" size={16} color={theme.colors.textSecondary} />
+          <Ionicons
+            name='images'
+            size={16}
+            color={theme.colors.textSecondary}
+          />
           <Text style={styles.statText}>{item.items?.length || 0} items</Text>
         </View>
         <View style={styles.stat}>
-          <Ionicons name="calendar" size={16} color={theme.colors.textSecondary} />
-          <Text style={styles.statText}>{new Date(item.updatedAt).toLocaleDateString('fr-FR')}</Text>
+          <Ionicons
+            name='calendar'
+            size={16}
+            color={theme.colors.textSecondary}
+          />
+          <Text style={styles.statText}>
+            {new Date(item.updatedAt).toLocaleDateString("fr-FR")}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -61,9 +73,13 @@ export const SelectProjectScreen: React.FC = () => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="folder-open" size={64} color={theme.colors.textSecondary} />
-      <Text style={styles.emptyText}>
-        {searchQuery ? 'Aucun projet trouvé' : 'Aucun projet disponible'}
+      <Ionicons
+        name='folder-open'
+        size={64}
+        color={theme.colors.textSecondary}
+      />
+      <Text style={styles.emptyText as TextStyle}>
+        {searchQuery ? "Aucun projet trouvé" : "Aucun projet disponible"}
       </Text>
       <TouchableOpacity
         style={styles.createButton}
@@ -73,29 +89,37 @@ export const SelectProjectScreen: React.FC = () => {
       </TouchableOpacity>
     </View>
   );
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Sélectionner un projet</Text>
+        <Text style={styles.title as TextStyle}>Sélectionner un projet</Text>
         <Input
-          placeholder="Rechercher un projet..."
+          placeholder='Rechercher un projet...'
           value={searchQuery}
           onChangeText={selectProjectActions.handleSearchChange}
-          icon="search"
+          icon='search'
           containerStyle={styles.searchInput}
         />
       </View>
 
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={styles.loadingText}>Chargement des projets...</Text>
+          <ActivityIndicator size='large' color={theme.colors.primary} />
+          <Text style={styles.loadingText as TextStyle}>
+            Chargement des projets...
+          </Text>
+        </View>
+      ) : isSearching ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size='large' color={theme.colors.primary} />
+          <Text style={styles.loadingText as TextStyle}>
+            Recherche en cours...
+          </Text>
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity 
+          <Text style={styles.errorText as TextStyle}>{error}</Text>
+          <TouchableOpacity
             style={styles.retryButton}
             onPress={() => selectProjectActions.loadProjects()}
           >
@@ -118,7 +142,7 @@ export const SelectProjectScreen: React.FC = () => {
             onPress={() => selectProjectActions.createNewProject()}
             activeOpacity={0.8}
           >
-            <Ionicons name="add" size={32} color={theme.colors.secondary} />
+            <Ionicons name='add' size={32} color={theme.colors.secondary} />
           </TouchableOpacity>
         </>
       )}
@@ -156,23 +180,23 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
   },
   projectHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.spacing.sm,
   },
   projectInfo: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.sm,
   },
   projectName: {
     ...theme.fonts.subtitle,
     color: theme.colors.text,
-  },
+  } as TextStyle,
   publicBadge: {
-    backgroundColor: theme.colors.info + '20',
+    backgroundColor: theme.colors.info + "20",
     paddingHorizontal: theme.spacing.sm,
     paddingVertical: theme.spacing.xs,
     borderRadius: theme.borderRadius.sm,
@@ -180,32 +204,32 @@ const styles = StyleSheet.create({
   publicText: {
     ...theme.fonts.label,
     color: theme.colors.info,
-  },
+  } as TextStyle,
   projectDescription: {
     ...theme.fonts.caption,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
   },
   projectStats: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.spacing.lg,
   },
   stat: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.xs,
   },
   statText: {
     ...theme.fonts.label,
     color: theme.colors.textSecondary,
-  },
+  } as TextStyle,
   separator: {
     height: theme.spacing.md,
   },
   emptyContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingTop: theme.spacing.xxl,
   },
   emptyText: {
@@ -223,11 +247,11 @@ const styles = StyleSheet.create({
   createButtonText: {
     ...theme.fonts.button,
     color: theme.colors.secondary,
-  },
+  } as TextStyle,
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     ...theme.fonts.body,
@@ -236,14 +260,14 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.xl,
   },
   errorText: {
     ...theme.fonts.body,
     color: theme.colors.error,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: theme.spacing.lg,
   },
   retryButton: {
@@ -255,19 +279,19 @@ const styles = StyleSheet.create({
   retryText: {
     ...theme.fonts.button,
     color: theme.colors.secondary,
-  },
+  } as TextStyle,
   floatingButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: theme.spacing.xl,
     right: theme.spacing.xl,
     width: 56,
     height: 56,
     borderRadius: 28,
     backgroundColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,

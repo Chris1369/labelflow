@@ -1,4 +1,5 @@
 import React, { useCallback, useMemo, useRef, useState, forwardRef, useImperativeHandle, useEffect } from 'react';
+import { debounce } from 'lodash';
 import {
   View,
   Text,
@@ -46,6 +47,8 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
     const [categoryLabels, setCategoryLabels] = useState<{ [categoryId: string]: Label[] }>({});
     const [recentLabels, setRecentLabels] = useState<string[]>([]);
     const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const [searchResults, setSearchResults] = useState<Label[]>([]);
+    const [isSearching, setIsSearching] = useState(false);
     
     const categories = useMemo(() => {
       const dynamicCategories = userCategories.map(cat => ({
@@ -65,6 +68,58 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       // Create a map to track if a label is dynamic (user-created)
       const userLabelNames = new Set(userLabels.map(l => l.name.toLowerCase()));
       
+      // If searching with API results or still searching
+      if (searchQuery && searchQuery.trim().length >= 2) {
+        // If we have API results, use them
+        if (searchResults.length > 0) {
+          // Convert API results to ObjectLabel format
+          const formattedResults = searchResults.map(label => ({
+            id: label.id || label._id || `api-${label.name}`,
+            name: label.name,
+            category: 'Résultats de recherche',
+            icon: 'search' as any,
+            isDynamic: true, // API results are user labels
+          }));
+          
+          // Also check recent labels
+          const query = searchQuery.toLowerCase().trim();
+          const recentMatches = recentLabels
+            .filter(labelName => labelName.toLowerCase().includes(query))
+            .map(labelName => {
+              const existingResult = formattedResults.find(l => l.name.toLowerCase() === labelName.toLowerCase());
+              if (existingResult) return null;
+              return {
+                id: `recent-${labelName}`,
+                name: labelName,
+                category: 'Récents',
+                icon: 'time' as any,
+                isDynamic: userLabelNames.has(labelName.toLowerCase()),
+                isRecent: true,
+              };
+            })
+            .filter(Boolean) as ObjectLabel[];
+          
+          return [...recentMatches, ...formattedResults];
+        }
+        
+        // If still searching, show loading or empty state
+        if (isSearching) {
+          return [];
+        }
+        
+        // If search returned no results, also search in local data
+        const query = searchQuery.toLowerCase().trim();
+        const localLabels = [...mockObjectLabels, ...userLabels];
+        const localMatches = localLabels
+          .filter(label => label.name.toLowerCase().includes(query))
+          .map(label => ({
+            ...label,
+            isDynamic: userLabelNames.has(label.name.toLowerCase())
+          }));
+        
+        return localMatches;
+      }
+      
       // If a dynamic category is selected, show its labels
       if (selectedCategory && userCategories.some(cat => cat.id === selectedCategory)) {
         const catLabels = categoryLabels[selectedCategory] || [];
@@ -76,11 +131,6 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
           isDynamic: true,
         }));
         
-        if (searchQuery) {
-          return formatted.filter(label =>
-            label.name.toLowerCase().includes(searchQuery.toLowerCase())
-          );
-        }
         return formatted;
       }
       
@@ -93,7 +143,12 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
         isDynamic: userLabelNames.has(label.name.toLowerCase())
       }));
       
-      // If showing all labels and no search query, show recent labels first
+      // Filter by category first if selected
+      if (selectedCategory && selectedCategory !== 'Tous') {
+        allLabels = allLabels.filter(label => label.category === selectedCategory);
+      }
+      
+      // If no search query and showing all labels, show recent labels first
       if (!selectedCategory && !searchQuery && recentLabels.length > 0) {
         const recentLabelObjects: ObjectLabel[] = recentLabels
           .map(labelName => {
@@ -117,20 +172,8 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
         return [...recentLabelObjects, ...otherLabels];
       }
       
-      // Filter by category
-      if (selectedCategory && selectedCategory !== 'Tous') {
-        allLabels = allLabels.filter(label => label.category === selectedCategory);
-      }
-      
-      // Filter by search query
-      if (searchQuery) {
-        allLabels = allLabels.filter(label =>
-          label.name.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-      
       return allLabels;
-    }, [searchQuery, selectedCategory, userLabels, userCategories, categoryLabels, recentLabels]);
+    }, [searchQuery, selectedCategory, userLabels, userCategories, categoryLabels, recentLabels, searchResults, isSearching]);
 
     useImperativeHandle(ref, () => ({
       open: () => {
@@ -187,7 +230,40 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
         console.error('Failed to load user data:', error);
       }
     };
+
+    // Debounced search function
+    const searchLabels = useCallback(
+      debounce(async (query: string) => {
+        if (!query || query.trim().length < 2) {
+          setSearchResults([]);
+          setIsSearching(false);
+          return;
+        }
+
+        setIsSearching(true);
+        try {
+          const results = await labelAPI.searchLabels(query);
+          setSearchResults(results);
+        } catch (error) {
+          console.error('Search error:', error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      }, 300),
+      []
+    );
     
+    // Trigger search when query changes
+    useEffect(() => {
+      if (searchQuery.trim().length >= 2) {
+        searchLabels(searchQuery);
+      } else {
+        setSearchResults([]);
+        setIsSearching(false);
+      }
+    }, [searchQuery, searchLabels]);
+
     // Load category labels when a category is selected
     useEffect(() => {
       if (selectedCategory && userCategories.some(cat => cat.id === selectedCategory)) {
@@ -311,7 +387,13 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.keyboardView}
           >
-            <View style={[styles.container, { maxHeight: screenHeight * 0.9 - keyboardHeight }]}>
+            <View style={[
+              styles.container, 
+              { 
+                maxHeight: screenHeight * 0.9 - keyboardHeight,
+                minHeight: Math.min(screenHeight * 0.5, screenHeight * 0.9 - keyboardHeight)
+              }
+            ]}>
               <View style={styles.handle} />
               
               <Text style={styles.title}>Sélectionner un label</Text>
@@ -351,15 +433,17 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
                 )}
               </View>
 
-              <FlatList
-                horizontal
-                data={categories}
-                keyExtractor={(item) => item.id}
-                renderItem={renderCategory}
-                style={styles.categoriesList}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ alignItems: 'center' }}
-              />
+              {!searchQuery && (
+                <FlatList
+                  horizontal
+                  data={categories}
+                  keyExtractor={(item) => item.id}
+                  renderItem={renderCategory}
+                  style={styles.categoriesList}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ alignItems: 'center' }}
+                />
+              )}
 
               <FlatList
                 data={filteredLabels}
@@ -369,7 +453,7 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
                 showsVerticalScrollIndicator={false}
                 ListEmptyComponent={
                   <Text style={styles.emptyText}>
-                    Aucun label trouvé
+                    {isSearching ? 'Recherche en cours...' : 'Aucun label trouvé'}
                   </Text>
                 }
               />
@@ -404,7 +488,7 @@ const styles = StyleSheet.create({
     borderTopRightRadius: theme.borderRadius.lg,
     minHeight: screenHeight * 0.5,
     maxHeight: screenHeight * 0.9,
-    paddingBottom: 40,
+    paddingBottom: 20,
   },
   handle: {
     width: 40,

@@ -115,16 +115,14 @@ export const addItemsActions = {
 
   retakePicture: () => {
     try {
-      console.log("Retaking picture...");
       // Force reset isCapturing if needed
       const { isCapturing } = useAddItemsStore.getState();
       if (isCapturing) {
         console.warn("Force resetting isCapturing state");
         useAddItemsStore.getState().setIsCapturing(false);
       }
-      
+
       useAddItemsStore.getState().resetCapture();
-      console.log("Reset capture completed");
     } catch (error) {
       console.error("Error in retakePicture:", error);
     }
@@ -160,14 +158,14 @@ export const addItemsActions = {
         capturedImageUri,
         completedBoxesCount: completedBoxes.length,
       });
-      
+
       const formData = new FormData();
-      
+
       // Ensure the image URI is valid
       if (!capturedImageUri) {
         throw new Error("No image URI available");
       }
-      
+
       formData.append("file", {
         uri: capturedImageUri,
         name: "image.jpg",
@@ -185,12 +183,10 @@ export const addItemsActions = {
           rotation: box.rotation,
           rotationType: typeof box.rotation,
         });
-        
+
         // Ensure rotation is in proper range (0-360 degrees)
         const normalizedRotation = ((box.rotation % 360) + 360) % 360;
-        
-        console.log(`Normalized rotation: ${normalizedRotation}`);
-        
+
         return {
           name: box.label,
           position: [
@@ -202,14 +198,13 @@ export const addItemsActions = {
           ],
         };
       });
-      console.log("Labels to send:", JSON.stringify(labels, null, 2));
-      
+
       // Validate labels before sending
       for (const label of labels) {
         if (!label.name || label.position.length !== 5) {
           throw new Error(`Invalid label data: ${JSON.stringify(label)}`);
         }
-        
+
         // Validate position values are numbers
         for (const pos of label.position) {
           if (isNaN(parseFloat(pos))) {
@@ -217,12 +212,10 @@ export const addItemsActions = {
           }
         }
       }
-      
+
       formData.append("labels", JSON.stringify(labels));
-      
-      console.log("Sending request to API...");
+
       await projectItemAPI.addProjectItems(formData);
-      console.log("API request completed successfully");
 
       // Reset saving state first
       setIsSaving(false);
@@ -241,12 +234,10 @@ export const addItemsActions = {
             text: "Continuer",
             onPress: async () => {
               try {
-                console.log("User chose to continue...");
                 // Small delay before reset to avoid state conflicts
                 await new Promise((resolve) => setTimeout(resolve, 100));
                 // Réinitialiser pour permettre de capturer une nouvelle image
                 useAddItemsStore.getState().resetCapture();
-                console.log("State reset completed");
               } catch (error) {
                 console.error("Error in Continue action:", error);
               }
@@ -256,13 +247,11 @@ export const addItemsActions = {
             text: "Terminer",
             onPress: async () => {
               try {
-                console.log("User chose to finish...");
                 // Reset state before navigation
                 useAddItemsStore.getState().resetCapture();
                 // Longer delay before navigation to ensure cleanup
                 await new Promise((resolve) => setTimeout(resolve, 300));
                 // Retourner à la page précédente
-                console.log("Navigating back...");
                 router.back();
               } catch (error) {
                 console.error("Error in Finish action:", error);
@@ -275,7 +264,7 @@ export const addItemsActions = {
     } catch (error: any) {
       console.error("Error saving items:", error);
       setIsSaving(false);
-      
+
       // Log detailed error information
       const errorDetails = {
         message: error.message || "Unknown error",
@@ -285,16 +274,17 @@ export const addItemsActions = {
           url: error.config?.url,
           method: error.config?.method,
           data: error.config?.data,
-        }
+        },
       };
-      
+
       console.error("Error details:", JSON.stringify(errorDetails, null, 2));
-      
+
       // Show more detailed error message
-      const errorMessage = error.response?.data?.message || 
-                          error.message || 
-                          "Impossible d'enregistrer les objets";
-      
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Impossible d'enregistrer les objets";
+
       Alert.alert("Erreur", errorMessage);
     }
   },

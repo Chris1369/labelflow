@@ -23,6 +23,7 @@ export const CategoriesScreen: React.FC = () => {
     expandedCategories,
     searchQuery,
     isLoading,
+    isSearching,
     error,
     loadCategories,
     setSearchQuery,
@@ -70,6 +71,11 @@ export const CategoriesScreen: React.FC = () => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>Chargement des catégories...</Text>
+        </View>
+      ) : isSearching ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Recherche en cours...</Text>
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>

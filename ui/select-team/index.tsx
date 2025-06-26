@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -6,17 +6,18 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { Input } from '@/components/atoms';
-import { theme } from '@/types/theme';
-import { useSelectTeamStore } from './useStore';
-import { selectTeamActions } from './actions';
-import { Team } from '@/types/team';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import { Input } from "@/components/atoms";
+import { theme } from "@/types/theme";
+import { useSelectTeamStore } from "./useStore";
+import { selectTeamActions } from "./actions";
+import { Team } from "@/types/team";
 
 export const SelectTeamScreen: React.FC = () => {
-  const { filteredTeams, searchQuery, isLoading, error } = useSelectTeamStore();
+  const { filteredTeams, searchQuery, isLoading, isSearching, error } =
+    useSelectTeamStore();
 
   useEffect(() => {
     useSelectTeamStore.getState().loadTeams();
@@ -36,7 +37,7 @@ export const SelectTeamScreen: React.FC = () => {
           <Text style={styles.teamName}>{item.name}</Text>
         </View>
         <Ionicons
-          name="chevron-forward"
+          name='chevron-forward'
           size={24}
           color={theme.colors.textSecondary}
         />
@@ -46,16 +47,34 @@ export const SelectTeamScreen: React.FC = () => {
       </Text>
       <View style={styles.teamStats}>
         <View style={styles.stat}>
-          <Ionicons name="people" size={16} color={theme.colors.textSecondary} />
-          <Text style={styles.statText}>{item.members?.length || 0} membres</Text>
+          <Ionicons
+            name='people'
+            size={16}
+            color={theme.colors.textSecondary}
+          />
+          <Text style={styles.statText}>
+            {item.members?.length || 0} membres
+          </Text>
         </View>
         <View style={styles.stat}>
-          <Ionicons name="folder" size={16} color={theme.colors.textSecondary} />
-          <Text style={styles.statText}>{item.projectId?.length || 0} projets</Text>
+          <Ionicons
+            name='folder'
+            size={16}
+            color={theme.colors.textSecondary}
+          />
+          <Text style={styles.statText}>
+            {item.projectId?.length || 0} projets
+          </Text>
         </View>
         <View style={styles.stat}>
-          <Ionicons name="calendar" size={16} color={theme.colors.textSecondary} />
-          <Text style={styles.statText}>{new Date(item.createdAt).toLocaleDateString('fr-FR')}</Text>
+          <Ionicons
+            name='calendar'
+            size={16}
+            color={theme.colors.textSecondary}
+          />
+          <Text style={styles.statText}>
+            {new Date(item.createdAt).toLocaleDateString("fr-FR")}
+          </Text>
         </View>
       </View>
     </TouchableOpacity>
@@ -63,9 +82,9 @@ export const SelectTeamScreen: React.FC = () => {
 
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="people" size={64} color={theme.colors.textSecondary} />
+      <Ionicons name='people' size={64} color={theme.colors.textSecondary} />
       <Text style={styles.emptyText}>
-        {searchQuery ? 'Aucune équipe trouvée' : 'Aucune équipe disponible'}
+        {searchQuery ? "Aucune équipe trouvée" : "Aucune équipe disponible"}
       </Text>
       <TouchableOpacity
         style={styles.createButton}
@@ -75,29 +94,33 @@ export const SelectTeamScreen: React.FC = () => {
       </TouchableOpacity>
     </View>
   );
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Sélectionner une équipe</Text>
         <Input
-          placeholder="Rechercher une équipe..."
+          placeholder='Rechercher une équipe...'
           value={searchQuery}
           onChangeText={selectTeamActions.searchTeams}
-          icon="search"
+          icon='search'
           containerStyle={styles.searchInput}
         />
       </View>
 
       {isLoading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <ActivityIndicator size='large' color={theme.colors.primary} />
           <Text style={styles.loadingText}>Chargement des équipes...</Text>
+        </View>
+      ) : isSearching ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size='large' color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Recherche en cours...</Text>
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.retryButton}
             onPress={() => useSelectTeamStore.getState().loadTeams()}
           >
@@ -120,11 +143,10 @@ export const SelectTeamScreen: React.FC = () => {
             onPress={selectTeamActions.createNewTeam}
             activeOpacity={0.8}
           >
-            <Ionicons name="add" size={32} color={theme.colors.secondary} />
+            <Ionicons name='add' size={32} color={theme.colors.secondary} />
           </TouchableOpacity>
         </>
       )}
-
     </SafeAreaView>
   );
 };
@@ -141,7 +163,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: theme.fontSize.xxl,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.lg,
   },
@@ -160,20 +182,20 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
   },
   teamHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.spacing.sm,
   },
   teamInfo: {
     flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.sm,
   },
   teamName: {
     fontSize: theme.fontSize.lg,
-    fontWeight: '600',
+    fontWeight: "600",
     color: theme.colors.text,
   },
   ownerBadge: {
@@ -185,7 +207,7 @@ const styles = StyleSheet.create({
   ownerText: {
     fontSize: theme.fontSize.xs,
     color: theme.colors.secondary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   teamDescription: {
     fontSize: theme.fontSize.sm,
@@ -193,12 +215,12 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   teamStats: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.spacing.lg,
   },
   stat: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.xs,
   },
   statText: {
@@ -210,8 +232,8 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingTop: theme.spacing.xxl,
   },
   emptyText: {
@@ -229,12 +251,12 @@ const styles = StyleSheet.create({
   createButtonText: {
     color: theme.colors.secondary,
     fontSize: theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     marginTop: theme.spacing.md,
@@ -243,14 +265,14 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     padding: theme.spacing.xl,
   },
   errorText: {
     fontSize: theme.fontSize.md,
     color: theme.colors.error,
-    textAlign: 'center',
+    textAlign: "center",
     marginBottom: theme.spacing.lg,
   },
   retryButton: {
@@ -262,20 +284,20 @@ const styles = StyleSheet.create({
   retryText: {
     color: theme.colors.secondary,
     fontSize: theme.fontSize.md,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   floatingButton: {
-    position: 'absolute',
+    position: "absolute",
     bottom: theme.spacing.xl,
     right: theme.spacing.xl,
     width: 56,
     height: 56,
     borderRadius: 28,
     backgroundColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     elevation: 4,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 4,

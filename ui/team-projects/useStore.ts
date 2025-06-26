@@ -3,6 +3,7 @@ import { Project } from "@/types/project";
 import { teamAPI } from "@/api/team.api";
 import { projectAPI } from "@/api/project.api";
 import { useSettingsStore } from "@/ui/settings/useStore";
+import { debounce } from 'lodash';
 
 interface TeamProjectsState {
   teamProjects: Project[]; // Projets actuellement liés à la team
@@ -12,6 +13,7 @@ interface TeamProjectsState {
   searchQuery: string;
   isLoading: boolean;
   isUpdating: boolean;
+  isSearching: boolean;
   error: string | null;
 }
 
@@ -22,13 +24,58 @@ interface TeamProjectsActions {
   setSearchQuery: (query: string) => void;
   setIsUpdating: (isUpdating: boolean) => void;
   toggleProject: (projectId: string) => void;
-  filterProjects: () => void;
+  searchProjects: (query: string) => Promise<void>;
   saveChanges: (teamId: string) => Promise<void>;
 }
 
 export const useTeamProjectsStore = create<
   TeamProjectsState & TeamProjectsActions
->((set, get) => ({
+>((set, get) => {
+  // Create debounced search function
+  const debouncedSearch = debounce(async (query: string) => {
+    if (!query || query.trim().length < 2) {
+      const { allProjects } = get();
+      set({ filteredProjects: allProjects, isSearching: false });
+      return;
+    }
+
+    set({ isSearching: true });
+    try {
+      const includePublic = useSettingsStore.getState().includePublicProjects;
+      const searchResults = await projectAPI.getAll({
+        search: query,
+        limit: 50,
+        getIsPublic: includePublic
+      });
+      
+      // Handle both array and paginated response
+      let projects: Project[] = [];
+      if (Array.isArray(searchResults)) {
+        projects = searchResults;
+      } else if (searchResults && 'projects' in searchResults) {
+        projects = searchResults.projects || [];
+      }
+      
+      set({ 
+        filteredProjects: projects,
+        isSearching: false 
+      });
+    } catch (error) {
+      console.error('Search error:', error);
+      // Fallback to local search
+      const { allProjects } = get();
+      const filtered = allProjects.filter(project => 
+        project.name.toLowerCase().includes(query.toLowerCase()) ||
+        project.description?.toLowerCase().includes(query.toLowerCase())
+      );
+      set({ 
+        filteredProjects: filtered,
+        isSearching: false 
+      });
+    }
+  }, 300);
+
+  return {
   teamProjects: [],
   allProjects: [],
   selectedProjects: new Set(),
@@ -36,6 +83,7 @@ export const useTeamProjectsStore = create<
   searchQuery: "",
   isLoading: false,
   isUpdating: false,
+  isSearching: false,
   error: null,
 
   loadTeamProjects: async (teamId: string) => {
@@ -92,7 +140,7 @@ export const useTeamProjectsStore = create<
 
   setSearchQuery: (searchQuery) => {
     set({ searchQuery });
-    get().filterProjects();
+    debouncedSearch(searchQuery);
   },
 
   setIsUpdating: (isUpdating) => set({ isUpdating }),
@@ -110,20 +158,8 @@ export const useTeamProjectsStore = create<
     set({ selectedProjects: newSelected });
   },
 
-  filterProjects: () => {
-    const { allProjects, searchQuery } = get();
-    if (!searchQuery.trim()) {
-      set({ filteredProjects: allProjects });
-      return;
-    }
-
-    const query = searchQuery.toLowerCase();
-    const filtered = allProjects.filter(
-      (project) =>
-        project.name.toLowerCase().includes(query) ||
-        project.description?.toLowerCase().includes(query)
-    );
-    set({ filteredProjects: filtered });
+  searchProjects: async (query: string) => {
+    debouncedSearch(query);
   },
 
   saveChanges: async (teamId: string) => {
@@ -160,4 +196,5 @@ export const useTeamProjectsStore = create<
       set({ isUpdating: false });
     }
   },
-}));
+};
+});

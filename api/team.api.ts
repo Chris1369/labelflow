@@ -132,12 +132,9 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
 
   async getTeamProjects(teamId: string): Promise<Project[]> {
     try {
-      console.log("Getting projects for team:", teamId);
       const response = await axiosInstance.get(
         `${this.basePath}/${teamId}/projects`
       );
-      console.log("Team projects response:", response.data);
-
       // Gérer différentes structures de réponse possibles
       if (Array.isArray(response.data)) {
         return response.data;
@@ -203,7 +200,7 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
 
   async updateProjects(
     teamId: string,
-    action: 'add' | 'remove',
+    action: "add" | "remove",
     projectIds: string[]
   ): Promise<Team> {
     try {
@@ -211,7 +208,7 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
         `${this.basePath}/${teamId}/update-projects`,
         {
           action,
-          projectIds
+          projectIds,
         }
       );
       return handleApiResponse<Team>(response);

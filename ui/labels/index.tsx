@@ -21,6 +21,7 @@ export const LabelsScreen: React.FC = () => {
     filteredLabels,
     searchQuery,
     isLoading,
+    isSearching,
     error,
     loadLabels,
     setSearchQuery,
@@ -67,6 +68,11 @@ export const LabelsScreen: React.FC = () => {
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
           <Text style={styles.loadingText}>Chargement des labels...</Text>
+        </View>
+      ) : isSearching ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>Recherche en cours...</Text>
         </View>
       ) : error ? (
         <View style={styles.errorContainer}>

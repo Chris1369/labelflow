@@ -34,21 +34,27 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
       const userId = await getCurrentUserId();
 
       // Utiliser l'endpoint /labels/owner/:ownerId avec le paramètre getIsPublic
-      const response = await axiosInstance.get(`${this.basePath}/owner/${userId}`, {
-        params: {
-          getIsPublic: includePublic
+      const response = await axiosInstance.get(
+        `${this.basePath}/owner/${userId}`,
+        {
+          params: {
+            getIsPublic: includePublic,
+          },
         }
-      });
+      );
 
       // La réponse peut avoir une structure paginée
-      const result = handleApiResponse<{
-        labels?: Label[];
-        total?: number;
-        totalPage?: number;
-        page?: number;
-        limit?: number;
-      } | Label[]>(response);
-      
+      const result = handleApiResponse<
+        | {
+            labels?: Label[];
+            total?: number;
+            totalPage?: number;
+            page?: number;
+            limit?: number;
+          }
+        | Label[]
+      >(response);
+
       // Gérer les deux types de réponse possibles
       if (Array.isArray(result)) {
         return result;
@@ -62,13 +68,16 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
   async getPublicLabels(): Promise<Label[]> {
     try {
       const response = await axiosInstance.get(`${this.basePath}/public`);
-      
-      const result = handleApiResponse<{
-        labels?: Label[];
-        total?: number;
-        totalPage?: number;
-      } | Label[]>(response);
-      
+
+      const result = handleApiResponse<
+        | {
+            labels?: Label[];
+            total?: number;
+            totalPage?: number;
+          }
+        | Label[]
+      >(response);
+
       if (Array.isArray(result)) {
         return result;
       }
@@ -80,12 +89,27 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
 
   async searchLabels(query: string): Promise<Label[]> {
     try {
-      const response = await axiosInstance.get(`${this.basePath}/search`, {
-        params: { q: query }
+      const response = await axiosInstance.get(this.basePath, {
+        params: {
+          search: query,
+          limit: 50, // Limit results for performance
+        },
       });
-      
-      const result = handleApiResponse<Label[]>(response);
-      return result;
+
+      const result = handleApiResponse<
+        | {
+            labels?: Label[];
+            total?: number;
+            totalPage?: number;
+            page?: number;
+            limit?: number;
+          }
+        | Label[]
+      >(response);
+      if (Array.isArray(result)) {
+        return result;
+      }
+      return result.labels || [];
     } catch (error) {
       throw handleApiError(error);
     }

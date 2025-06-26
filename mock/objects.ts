@@ -19,6 +19,7 @@ export const mockObjectLabels: ObjectLabel[] = [
   { id: '8', name: 'Brocoli', category: 'Légumes' },
   { id: '9', name: 'Concombre', category: 'Légumes' },
   { id: '10', name: 'Salade', category: 'Légumes' },
+  { id: '51', name: 'Champignon', category: 'Légumes' },
   
   // Véhicules
   { id: '11', name: 'Voiture', category: 'Véhicules' },
