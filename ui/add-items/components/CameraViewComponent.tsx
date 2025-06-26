@@ -30,6 +30,14 @@ export const CameraViewComponent: React.FC<CameraViewComponentProps> = ({
   flashMode,
   onFlashModeChange,
 }) => {
+  const [isMounted, setIsMounted] = React.useState(true);
+  
+  React.useEffect(() => {
+    setIsMounted(true);
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
   const getNextFlashMode = (): FlashMode => {
     switch (flashMode) {
       case "off":

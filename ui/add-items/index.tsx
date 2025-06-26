@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { LabelBottomSheet, LabelBottomSheetRef } from "@/components/organisms";
 import { theme } from "@/types/theme";
@@ -19,6 +19,7 @@ export const AddItemsScreen: React.FC = () => {
   const { id: projectId } = useLocalSearchParams();
   const cameraRef = useRef<any>(null);
   const bottomSheetRef = useRef<LabelBottomSheetRef>(null);
+  const [isCameraReady, setIsCameraReady] = React.useState(false);
   const {
     hasPermission,
     capturedImageUri,
@@ -34,22 +35,36 @@ export const AddItemsScreen: React.FC = () => {
   useEffect(() => {
     let mounted = true;
 
-    (async () => {
+    const initializeCamera = async () => {
       try {
+        if (!mounted) return;
+        
+        // Add delay to prevent immediate camera access
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
         if (mounted) {
           const hasPermission = await addItemsActions.checkCameraPermission();
           if (!hasPermission && mounted) {
             await addItemsActions.requestCameraPermission();
           }
+          
+          // Mark camera as ready after another small delay
+          if (mounted) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            setIsCameraReady(true);
+          }
         }
       } catch (error) {
         console.error("Error checking camera permission:", error);
       }
-    })();
+    };
+
+    initializeCamera();
 
     // Cleanup function
     return () => {
       mounted = false;
+      setIsCameraReady(false);
       // Reset capture state when unmounting
       try {
         useAddItemsStore.getState().resetCapture();
@@ -161,7 +176,16 @@ export const AddItemsScreen: React.FC = () => {
     );
   }
 
-  // Show camera view
+  // Show camera view only when ready
+  if (!isCameraReady) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={styles.loadingText}>Préparation de la caméra...</Text>
+      </View>
+    );
+  }
+  
   return (
     <CameraViewComponent
       cameraRef={cameraRef}
@@ -178,5 +202,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    ...theme.fonts.body,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.md,
   },
 });

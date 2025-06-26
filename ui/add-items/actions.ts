@@ -259,8 +259,8 @@ export const addItemsActions = {
                 console.log("User chose to finish...");
                 // Reset state before navigation
                 useAddItemsStore.getState().resetCapture();
-                // Small delay before navigation
-                await new Promise((resolve) => setTimeout(resolve, 100));
+                // Longer delay before navigation to ensure cleanup
+                await new Promise((resolve) => setTimeout(resolve, 300));
                 // Retourner à la page précédente
                 console.log("Navigating back...");
                 router.back();

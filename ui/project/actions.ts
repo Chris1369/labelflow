@@ -3,7 +3,9 @@ import { useProjectStore } from './useStore';
 import { Alert } from 'react-native';
 
 export const projectActions = {
-  handleAddItems: (projectId: string) => {
+  handleAddItems: async (projectId: string) => {
+    // Add delay to prevent immediate camera access
+    await new Promise(resolve => setTimeout(resolve, 100));
     router.push({
       pathname: '/(project)/[id]/add-items',
       params: { id: projectId }
