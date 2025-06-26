@@ -130,6 +130,6 @@ export default {
         },
       ],
     ],
-    owner: "labelflow", // TODO: Replace with actual owner
+    owner: "chriskakashi",
   },
 };
