@@ -85,9 +85,18 @@ export const teamMembersActions = {
           'Le membre a été ajouté à l\'équipe avec succès'
         );
       } catch (error: any) {
-        const errorMessage = error?.response?.data?.message || 
-                           error?.message || 
-                           'Erreur lors de l\'ajout du membre';
+        let errorMessage = 'Erreur lors de l\'ajout du membre';
+        
+        if (error?.response?.status === 403) {
+          errorMessage = 'Cet utilisateur n\'autorise pas l\'ajout aux équipes. L\'utilisateur doit activer cette option dans son profil.';
+        } else if (error?.response?.data?.message) {
+          errorMessage = error.response.data.message;
+        } else if (error?.response?.data?.error) {
+          errorMessage = error.response.data.error;
+        } else if (error?.message) {
+          errorMessage = error.message;
+        }
+        
         useTeamMembersStore.getState().setError(errorMessage);
       } finally {
         useTeamMembersStore.getState().setIsAddingMember(false);

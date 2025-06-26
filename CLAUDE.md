@@ -874,6 +874,7 @@ export const loadData = createSafeAction(
 - `POST /teams/{id}/add-member` - Ajouter un membre à l'équipe
   - Body: `{ email: string }`
   - Vérifie: existence équipe, utilisateur par email, canBeAddedToTeam, pas déjà membre
+  - Erreur 403: Si l'utilisateur a `canBeAddedToTeam: false`
   
 - `GET /teams/{id}/members` - Obtenir les membres de l'équipe
 
@@ -906,6 +907,46 @@ export const loadData = createSafeAction(
 - **Positions** : Format `[centerX, centerY, width, height, rotation]` (valeurs 0-1)
 - **Exports** : Génération asynchrone, téléchargement après traitement
 - **Format des paramètres** : Les IDs dans les routes utilisent `{id}` au lieu de `:id`
+
+## Gestion des permissions utilisateur
+
+### canBeAddedToTeam
+
+Les utilisateurs ont une propriété `canBeAddedToTeam` qui contrôle s'ils peuvent être ajoutés aux équipes :
+
+- **true** : L'utilisateur peut être ajouté aux équipes
+- **false** : L'utilisateur ne peut pas être ajouté (erreur 403)
+
+#### Implémentation côté front
+
+1. **Vérifier avant l'ajout** :
+```typescript
+if (user.canBeAddedToTeam) {
+  // Permettre l'ajout à l'équipe
+}
+```
+
+2. **Gérer l'erreur 403** :
+```typescript
+if (error?.response?.status === 403) {
+  // Message: "Cet utilisateur n'autorise pas l'ajout aux équipes"
+}
+```
+
+3. **Permettre la mise à jour du profil** :
+```typescript
+await userAPI.update(userId, {
+  canBeAddedToTeam: true
+});
+```
+
+### Gestion des erreurs d'ajout de membres
+
+Le front gère automatiquement les différents cas d'erreur :
+- **403** : L'utilisateur n'autorise pas l'ajout aux équipes
+- **404** : Utilisateur ou équipe non trouvée
+- **409** : L'utilisateur est déjà membre de l'équipe
+- Autres erreurs : Message générique ou message du serveur
 
 ## Notes importantes
 
