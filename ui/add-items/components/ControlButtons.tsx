@@ -20,6 +20,7 @@ interface ControlButtonsProps {
   onRetake: () => void;
   onAddBox: () => void;
   onValidate: () => void;
+  onPredict: () => void;
 }
 
 export const ControlButtons: React.FC<ControlButtonsProps> = ({
@@ -32,6 +33,7 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
   onRetake,
   onAddBox,
   onValidate,
+  onPredict,
 }) => {
   return (
     <>
@@ -64,6 +66,21 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
               ? theme.colors.textSecondary
               : theme.colors.primary
           }
+        />
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[
+          styles.predictButton,
+          isSaving && styles.disabledButton,
+        ]}
+        onPress={onPredict}
+        disabled={isSaving}
+      >
+        <Ionicons
+          name='sparkles'
+          size={32}
+          color={theme.colors.secondary}
         />
       </TouchableOpacity>
 
@@ -129,6 +146,17 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     opacity: 0.5,
+  },
+  predictButton: {
+    position: "absolute",
+    top: 210,
+    right: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
   },
   bottomControls: {
     position: "absolute",

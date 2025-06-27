@@ -1,7 +1,7 @@
 export const environment = process.env.APP_VARIANT || "development";
 const IS_DEV = environment === "development";
 const IS_STAGING = environment === "staging";
-const IP = "192.168.1.33";
+const IP = "172.20.10.6";
 
 interface EnvironmentValues {
   name: string;
@@ -11,6 +11,7 @@ interface EnvironmentValues {
   BASE_URL: string;
   VERSION: string;
   PROJECT_NAME: string;
+  PREDICTION_API_URL: string;
 }
 
 export function getEnvironmentValues(): EnvironmentValues {
@@ -23,6 +24,7 @@ export function getEnvironmentValues(): EnvironmentValues {
       BASE_URL: `http://${IP}:3000/`,
       VERSION: "v1.0",
       PROJECT_NAME: "bboxly-api",
+      PREDICTION_API_URL: `http://${IP}:8000`,
     };
   }
   if (IS_STAGING) {
@@ -34,6 +36,7 @@ export function getEnvironmentValues(): EnvironmentValues {
       BASE_URL: "https://staging-api.bboxly.com/",
       VERSION: "v1.0",
       PROJECT_NAME: "bboxly-api",
+      PREDICTION_API_URL: "https://staging-prediction.bboxly.com",
     };
   }
   // Production
@@ -45,6 +48,7 @@ export function getEnvironmentValues(): EnvironmentValues {
     BASE_URL: "https://api.bboxly.com/",
     VERSION: "v1.0",
     PROJECT_NAME: "bboxly-api",
+    PREDICTION_API_URL: "https://prediction.bboxly.com",
   };
 }
 
@@ -109,6 +113,7 @@ export default {
       apiUrl: getEnvironmentValues().BASE_URL,
       version: getEnvironmentValues().VERSION,
       projectName: getEnvironmentValues().PROJECT_NAME,
+      predictionApiUrl: getEnvironmentValues().PREDICTION_API_URL,
     },
     plugins: [
       "expo-font",

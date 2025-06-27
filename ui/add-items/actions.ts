@@ -6,6 +6,7 @@ import { Alert, Image } from "react-native";
 import { projectItemAPI } from "@/api/projectItem.api";
 import { router } from "expo-router";
 import { resizeImageTo640x640 } from "@/helpers/imageResizer";
+import { predictionAPI } from "@/api/prediction.api";
 
 export const addItemsActions = {
   requestCameraPermission: async () => {
@@ -332,6 +333,84 @@ export const addItemsActions = {
     } catch (error) {
       console.error("Error importing image:", error);
       Alert.alert("Erreur", "Impossible d'importer l'image");
+    }
+  },
+
+  predictBoundingBoxes: async (imageUri: string) => {
+    try {
+      console.log("Starting prediction for image:", imageUri);
+      
+      // Call prediction API
+      const response = await predictionAPI.predict(imageUri);
+      console.log("Prediction response:", response);
+      
+      // Process detections if any
+      if (response.detections && response.detections.length > 0) {
+        const store = useAddItemsStore.getState();
+        
+        // Clear existing boxes and prepare for new ones
+        const newBoundingBoxes: any[] = [];
+        
+        // Process predicted boxes
+        response.detections.forEach((detection, index) => {
+          // Convert API bbox format (x1,y1,x2,y2) to our format (centerX, centerY, width, height in 0-1 range)
+          const width = detection.bbox.x2 - detection.bbox.x1;
+          const height = detection.bbox.y2 - detection.bbox.y1;
+          const centerX = (detection.bbox.x1 + width / 2) / response.image_size.width;
+          const centerY = (detection.bbox.y1 + height / 2) / response.image_size.height;
+          const normalizedWidth = width / response.image_size.width;
+          const normalizedHeight = height / response.image_size.height;
+          
+          console.log(`Detection ${index + 1} - ${detection.label}:`, {
+            original: {
+              x1: detection.bbox.x1,
+              y1: detection.bbox.y1,
+              x2: detection.bbox.x2,
+              y2: detection.bbox.y2,
+            },
+            calculated: {
+              centerX: centerX.toFixed(4),
+              centerY: centerY.toFixed(4),
+              width: normalizedWidth.toFixed(4),
+              height: normalizedHeight.toFixed(4),
+            },
+            debug: {
+              width_px: width,
+              height_px: height,
+              center_x_px: detection.bbox.x1 + width / 2,
+              center_y_px: detection.bbox.y1 + height / 2,
+            },
+            imageSize: response.image_size,
+          });
+          
+          // Create new box with prediction data
+          const newBox = {
+            id: `pred_${Date.now()}_${index}`,
+            centerX,
+            centerY,
+            width: normalizedWidth,
+            height: normalizedHeight,
+            rotation: 0,
+            label: detection.label,
+            isComplete: true,
+          };
+          
+          newBoundingBoxes.push(newBox);
+        });
+        
+        // Update store with all new boxes at once
+        store.setBoundingBoxes(newBoundingBoxes);
+        
+        Alert.alert(
+          "Prédiction terminée",
+          `${response.detections.length} objet${response.detections.length > 1 ? 's' : ''} détecté${response.detections.length > 1 ? 's' : ''}`
+        );
+      } else {
+        Alert.alert("Aucun objet détecté", "La prédiction n'a trouvé aucun objet dans l'image.");
+      }
+    } catch (error) {
+      console.error("Error in predictBoundingBoxes:", error);
+      Alert.alert("Erreur", "Impossible d'effectuer la prédiction. Vérifiez que le serveur est en ligne.");
     }
   },
 };

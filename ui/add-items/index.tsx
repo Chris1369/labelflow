@@ -161,6 +161,7 @@ export const AddItemsScreen: React.FC = () => {
           onRetake={addItemsActions.retakePicture}
           onAddBox={handleAddBox}
           onValidate={handleValidate}
+          onPredict={() => addItemsActions.predictBoundingBoxes(capturedImageUri)}
         />
 
         <RecentLabelsBar

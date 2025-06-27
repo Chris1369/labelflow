@@ -28,6 +28,8 @@ interface AddItemsActions {
   deleteBoundingBox: (id: string) => void;
   setLabelForBox: (id: string, label: string) => void;
   resetCapture: () => void;
+  resetBoundingBoxes: () => void;
+  setBoundingBoxes: (boxes: BoundingBox[]) => void;
   setFlashMode: (mode: FlashMode) => void;
 }
 
@@ -124,6 +126,21 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
         showSaveButton: false,
         isCapturing: false,
         isSaving: false,
+      });
+    },
+
+    resetBoundingBoxes: () => {
+      set({
+        boundingBoxes: [],
+        currentBoxId: null,
+      });
+    },
+
+    setBoundingBoxes: (boxes) => {
+      set({
+        boundingBoxes: boxes,
+        currentBoxId: null,
+        showSaveButton: boxes.length > 0,
       });
     },
 
