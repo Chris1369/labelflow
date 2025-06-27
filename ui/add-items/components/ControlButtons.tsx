@@ -110,7 +110,7 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
             disabled={isSaving}
           >
             {isSaving && hasCompletedBoxes && !currentBoxId ? (
-              <ActivityIndicator size='medium' color={theme.colors.secondary} />
+              <ActivityIndicator color={theme.colors.secondary} />
             ) : (
               <>
                 <Ionicons
