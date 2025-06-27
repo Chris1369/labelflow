@@ -122,6 +122,15 @@ export const AddItemsScreen: React.FC = () => {
     }
   };
 
+  const handleDeleteBox = (id: string) => {
+    useAddItemsStore.getState().deleteBoundingBox(id);
+  };
+
+  const handleEditLabel = (id: string) => {
+    useAddItemsStore.getState().setCurrentBox(id);
+    bottomSheetRef.current?.open();
+  };
+
   const handleAddBox = () => {
     useAddItemsStore.getState().addBoundingBox();
   };
@@ -149,6 +158,8 @@ export const AddItemsScreen: React.FC = () => {
           currentBoxId={currentBoxId}
           onBoxUpdate={handleBoxUpdate}
           onSelectBox={handleSelectBox}
+          onDeleteBox={handleDeleteBox}
+          onEditLabel={handleEditLabel}
         />
 
         <ControlButtons
@@ -172,6 +183,7 @@ export const AddItemsScreen: React.FC = () => {
         <LabelBottomSheet
           ref={bottomSheetRef}
           onSelectLabel={handleSelectLabel}
+          hasExistingLabel={currentBoxId ? boundingBoxes.find(b => b.id === currentBoxId)?.isComplete ?? false : false}
         />
       </View>
     );

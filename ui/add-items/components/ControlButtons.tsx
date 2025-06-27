@@ -2,7 +2,7 @@ import React from "react";
 import {
   View,
   TouchableOpacity,
-  // Text,
+  Text,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
@@ -37,78 +37,95 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
 }) => {
   return (
     <>
-      {/* Top controls */}
-      <TouchableOpacity
-        style={[styles.retakeButton, isSaving && styles.disabledButton]}
-        onPress={onRetake}
-        disabled={isSaving}
-      >
-        <Ionicons
-          name='camera-reverse'
-          size={32}
-          color={theme.colors.secondary}
-        />
-      </TouchableOpacity>
+      {/* Top left - Retake button */}
+      <View style={styles.topLeftContainer}>
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            styles.secondaryButton,
+            isSaving && styles.disabledButton,
+          ]}
+          onPress={onRetake}
+          disabled={isSaving}
+        >
+          <Ionicons name='arrow-back' size={24} color={theme.colors.text} />
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity
-        style={[
-          styles.addBoxButton,
-          (hasUncompletedBoxes || isSaving) && styles.disabledButton,
-        ]}
-        onPress={onAddBox}
-        disabled={hasUncompletedBoxes || isSaving}
-      >
-        <Ionicons
-          name='add-circle'
-          size={48}
-          color={
-            hasUncompletedBoxes
-              ? theme.colors.textSecondary
-              : theme.colors.primary
-          }
-        />
-      </TouchableOpacity>
+      {/* Top right - Add button */}
+      <View style={styles.topRightContainer}>
+        <TouchableOpacity
+          style={[
+            styles.actionButton,
+            (hasUncompletedBoxes || isSaving) && styles.disabledButton,
+          ]}
+          onPress={onAddBox}
+          disabled={hasUncompletedBoxes || isSaving}
+        >
+          <Ionicons
+            name='add'
+            size={28}
+            color={
+              hasUncompletedBoxes
+                ? theme.colors.textSecondary
+                : theme.colors.secondary
+            }
+          />
+        </TouchableOpacity>
+      </View>
 
-      <TouchableOpacity
-        style={[
-          styles.predictButton,
-          isSaving && styles.disabledButton,
-        ]}
-        onPress={onPredict}
-        disabled={isSaving}
-      >
-        <Ionicons
-          name='sparkles'
-          size={32}
-          color={theme.colors.secondary}
-        />
-      </TouchableOpacity>
+      {/* Bottom left - Auto detect button */}
+      <View style={styles.bottomLeftContainer}>
+        <View style={styles.buttonWrapper}>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              styles.magicButton,
+              isSaving && styles.disabledButton,
+            ]}
+            onPress={onPredict}
+            disabled={isSaving}
+          >
+            <Ionicons
+              name='sparkles'
+              size={20}
+              color={theme.colors.secondary}
+            />
+          </TouchableOpacity>
+          <Text style={styles.buttonLabel}>Auto</Text>
+        </View>
+      </View>
 
       {/* Bottom controls */}
       {showSaveButton && (
         <View style={styles.bottomControls}>
           <TouchableOpacity
             style={[
-              styles.saveButton,
-              hasCompletedBoxes && !currentBoxId && styles.saveAllButton,
-              currentBoxId && styles.validateButton,
+              styles.bottomButton,
+              currentBoxId ? styles.validateButton : styles.saveAllButton,
+              isSaving && styles.disabledButton,
             ]}
             onPress={onValidate}
             activeOpacity={0.8}
             disabled={isSaving}
           >
             {isSaving && hasCompletedBoxes && !currentBoxId ? (
-              <ActivityIndicator size='large' color={theme.colors.secondary} />
+              <ActivityIndicator size='medium' color={theme.colors.secondary} />
             ) : (
-              <Ionicons
-                name={currentBoxId ? "checkmark-circle" : "save-outline"}
-                size={currentBoxId ? 56 : 32}
-                color={
-                  hasCompletedBoxes && !currentBoxId
-                    ? theme.colors.secondary
-                    : theme.colors.primary
-                }
-              />
+              <>
+                <Ionicons
+                  name={currentBoxId ? "checkmark" : "save"}
+                  size={24}
+                  color={theme.colors.secondary}
+                />
+                {!currentBoxId && hasCompletedBoxes && (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>
+                      {boundingBoxes.filter((b) => b.isComplete).length}
+                    </Text>
+                  </View>
+                )}
+              </>
             )}
           </TouchableOpacity>
         </View>
@@ -128,35 +145,56 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
 };
 
 const styles = StyleSheet.create({
-  retakeButton: {
+  topLeftContainer: {
     position: "absolute",
-    top: 140,
+    top: 100,
     left: 20,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+  },
+  topRightContainer: {
+    position: "absolute",
+    top: 100,
+    right: 20,
+  },
+  bottomLeftContainer: {
+    position: "absolute",
+    bottom: 40,
+    left: 20,
+  },
+  buttonWrapper: {
+    alignItems: "center",
+  },
+  buttonLabel: {
+    marginTop: 4,
+    fontSize: 11,
+    color: theme.colors.textSecondary,
+    fontWeight: "500",
+  },
+  actionButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: theme.colors.primary,
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 3.84,
+    elevation: 3,
   },
-  addBoxButton: {
-    position: "absolute",
-    top: 140,
-    right: 20,
+  secondaryButton: {
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  magicButton: {
+    backgroundColor: "#9333EA",
   },
   disabledButton: {
     opacity: 0.5,
-  },
-  predictButton: {
-    position: "absolute",
-    top: 210,
-    right: 20,
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: theme.colors.primary,
-    justifyContent: "center",
-    alignItems: "center",
   },
   bottomControls: {
     position: "absolute",
@@ -165,21 +203,46 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: "center",
   },
-  saveButton: {
-    backgroundColor: theme.colors.secondary,
-    borderRadius: 30,
-    padding: 4,
-  },
-  saveAllButton: {
-    backgroundColor: theme.colors.primary,
-    padding: theme.spacing.md,
+  bottomButton: {
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 4.65,
+    elevation: 8,
   },
   validateButton: {
     width: 64,
     height: 64,
     borderRadius: 32,
+    backgroundColor: theme.colors.success || theme.colors.primary,
+  },
+  saveAllButton: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: theme.colors.primary,
+  },
+  badge: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: theme.colors.error,
+    borderRadius: 12,
+    minWidth: 24,
+    height: 24,
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: 6,
+  },
+  badgeText: {
+    color: theme.colors.secondary,
+    fontSize: 12,
+    fontWeight: "bold",
   },
   boxCounter: {
     position: "absolute",

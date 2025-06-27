@@ -28,6 +28,7 @@ const { height: screenHeight } = Dimensions.get('window');
 
 interface LabelBottomSheetProps {
   onSelectLabel: (label: string) => void;
+  hasExistingLabel?: boolean;
 }
 
 export interface LabelBottomSheetRef {
@@ -36,7 +37,7 @@ export interface LabelBottomSheetRef {
 }
 
 export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheetProps>(
-  ({ onSelectLabel }, ref) => {
+  ({ onSelectLabel, hasExistingLabel = false }, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -394,9 +395,20 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
                 minHeight: Math.min(screenHeight * 0.5, screenHeight * 0.9 - keyboardHeight)
               }
             ]}>
+              {hasExistingLabel && (
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setIsVisible(false)}
+                >
+                  <Ionicons name="close" size={24} color={theme.colors.text} />
+                </TouchableOpacity>
+              )}
+              
               <View style={styles.handle} />
               
-              <Text style={styles.title}>Sélectionner un label</Text>
+              <View style={styles.header}>
+                <Text style={styles.title}>Sélectionner un label</Text>
+              </View>
               
               <View style={styles.searchContainer}>
                 <Input
@@ -499,10 +511,20 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.sm,
     marginBottom: theme.spacing.md,
   },
+  header: {
+    alignItems: 'center',
+    marginBottom: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+  },
   title: {
     ...theme.fonts.title,
     textAlign: 'center',
-    marginBottom: theme.spacing.lg,
+  },
+  closeButton: {
+    position: 'absolute',
+    right: theme.spacing.md,
+    top: theme.spacing.md,
+    padding: theme.spacing.xs,
   },
   searchContainer: {
     paddingHorizontal: theme.spacing.lg,

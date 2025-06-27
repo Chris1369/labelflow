@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "../../types/theme";
 import { homeActions } from "./actions";
+import { ErrorDebugPanel } from "@/components/organisms/ErrorDebugPanel";
 
 interface MenuItem {
   id: string;
@@ -100,6 +101,7 @@ export const HomeScreen: React.FC = () => {
           ))}
         </View>
       </ScrollView>
+      {__DEV__ && <ErrorDebugPanel />}
     </SafeAreaView>
   );
 };

@@ -4,6 +4,7 @@ import { StableBoundingBox } from "@/components/molecules";
 import { theme } from "@/types/theme";
 import { BoundingBox } from "../types";
 import { getLabelColor } from "@/helpers/labelColors";
+import { Ionicons } from "@expo/vector-icons";
 
 interface CapturedImageViewProps {
   capturedImageUri: string;
@@ -18,6 +19,8 @@ interface CapturedImageViewProps {
     rotation: number
   ) => void;
   onSelectBox: (id: string) => void;
+  onDeleteBox?: (id: string) => void;
+  onEditLabel?: (id: string) => void;
 }
 
 export const CapturedImageView: React.FC<CapturedImageViewProps> = ({
@@ -26,6 +29,8 @@ export const CapturedImageView: React.FC<CapturedImageViewProps> = ({
   currentBoxId,
   onBoxUpdate,
   onSelectBox,
+  onDeleteBox,
+  onEditLabel,
 }) => {
   const [containerSize, setContainerSize] = React.useState({ width: 0, height: 0 });
   const [originalImageSize, setOriginalImageSize] = React.useState({ width: 0, height: 0 });
@@ -73,45 +78,62 @@ export const CapturedImageView: React.FC<CapturedImageViewProps> = ({
 
       {/* Render all bounding boxes */}
       {actualImageSize.width > 0 && actualImageSize.height > 0 && boundingBoxes.map((box) => (
-        <TouchableOpacity
-          key={box.id}
-          onPress={() => onSelectBox(box.id)}
-          activeOpacity={1}
-        >
-          <StableBoundingBox
-            centerX={imageOffset.x + box.centerX * actualImageSize.width}
-            centerY={imageOffset.y + box.centerY * actualImageSize.height}
-            width={box.width * actualImageSize.width}
-            height={box.height * actualImageSize.height}
-            rotation={box.rotation}
-            isSelected={box.id === currentBoxId}
-            isComplete={box.isComplete}
-            label={box.label}
-            onUpdate={(x, y, w, h, r) => onBoxUpdate(
-              box.id, 
-              (x - imageOffset.x) / actualImageSize.width, 
-              (y - imageOffset.y) / actualImageSize.height, 
-              w / actualImageSize.width, 
-              h / actualImageSize.height, 
-              r
-            )}
-          />
-          {/* Label display */}
+        <View key={box.id}>
+          <TouchableOpacity
+            activeOpacity={1}
+            onPress={() => onSelectBox(box.id)}
+          >
+            <StableBoundingBox
+              centerX={imageOffset.x + box.centerX * actualImageSize.width}
+              centerY={imageOffset.y + box.centerY * actualImageSize.height}
+              width={box.width * actualImageSize.width}
+              height={box.height * actualImageSize.height}
+              rotation={box.rotation}
+              isSelected={box.id === currentBoxId}
+              isComplete={box.isComplete}
+              label={box.label}
+              onUpdate={(x, y, w, h, r) => onBoxUpdate(
+                box.id, 
+                (x - imageOffset.x) / actualImageSize.width, 
+                (y - imageOffset.y) / actualImageSize.height, 
+                w / actualImageSize.width, 
+                h / actualImageSize.height, 
+                r
+              )}
+            />
+          </TouchableOpacity>
+          {/* Label display with delete button */}
           {box.label && (
             <View
               style={[
-                styles.labelBadge,
+                styles.labelContainer,
                 {
                   left: imageOffset.x + (box.centerX * actualImageSize.width) - (box.width * actualImageSize.width) / 2,
                   top: imageOffset.y + (box.centerY * actualImageSize.height) - (box.height * actualImageSize.height) / 2 - 30,
-                  backgroundColor: getLabelColor(box.label),
                 }
               ]}
             >
-              <Text style={styles.labelText}>{box.label}</Text>
+              <TouchableOpacity
+                style={[
+                  styles.labelBadge,
+                  { backgroundColor: getLabelColor(box.label) }
+                ]}
+                onPress={() => onEditLabel?.(box.id)}
+                onLongPress={() => onSelectBox(box.id)}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.labelText}>{box.label}</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteButton}
+                onPress={() => onDeleteBox?.(box.id)}
+                activeOpacity={0.8}
+              >
+                <Ionicons name="close-circle" size={20} color={theme.colors.error} />
+              </TouchableOpacity>
             </View>
           )}
-        </TouchableOpacity>
+        </View>
       ))}
       
       {/* Info display in bottom right */}
@@ -147,12 +169,19 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "contain",
   },
-  labelBadge: {
+  labelContainer: {
     position: "absolute",
-    backgroundColor: theme.colors.primary,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  labelBadge: {
     paddingHorizontal: theme.spacing.sm,
     paddingVertical: theme.spacing.xs,
     borderRadius: theme.borderRadius.sm,
+  },
+  deleteButton: {
+    padding: 2,
   },
   labelText: {
     ...theme.fonts.label,
