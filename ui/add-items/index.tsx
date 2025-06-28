@@ -108,6 +108,13 @@ export const AddItemsScreen: React.FC = () => {
     if (currentBoxId) {
       // Validate current box - open label selector
       bottomSheetRef.current?.open();
+    } else if (hasUnknownBoxes) {
+      // If there are unknown boxes, select the first one
+      const firstUnknownBox = boundingBoxes.find(box => box.label === "???");
+      if (firstUnknownBox) {
+        useAddItemsStore.getState().setCurrentBox(firstUnknownBox.id);
+        bottomSheetRef.current?.open();
+      }
     } else {
       // Save all items
       addItemsActions.saveAllItems(projectId as string);
@@ -141,6 +148,7 @@ export const AddItemsScreen: React.FC = () => {
 
   const hasCompletedBoxes = boundingBoxes.some(box => box.isComplete);
   const hasUncompletedBoxes = boundingBoxes.some(box => !box.isComplete);
+  const hasUnknownBoxes = boundingBoxes.some(box => box.label === "???" || box.label === "Objet non identifié");
 
   // Handle permission states
   if (hasPermission === null || hasPermission === false) {
@@ -168,6 +176,7 @@ export const AddItemsScreen: React.FC = () => {
           showSaveButton={showSaveButton}
           hasCompletedBoxes={hasCompletedBoxes}
           hasUncompletedBoxes={hasUncompletedBoxes}
+          hasUnknownBoxes={hasUnknownBoxes}
           isSaving={isSaving}
           onRetake={addItemsActions.retakePicture}
           onAddBox={handleAddBox}

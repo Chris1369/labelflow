@@ -33,14 +33,15 @@ interface AddItemsActions {
   setFlashMode: (mode: FlashMode) => void;
 }
 
-const createInitialBox = (): BoundingBox => ({
+const createInitialBox = (withUnknownLabel: boolean = false): BoundingBox => ({
   id: Date.now().toString(),
   centerX: 0.5, // 50% of image width
   centerY: 0.5, // 50% of image height
   width: 0.3, // 30% of image width
   height: 0.3, // 30% of image height
   rotation: 0,
-  isComplete: false,
+  isComplete: withUnknownLabel,
+  label: withUnknownLabel ? "???" : undefined,
 });
 
 export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
@@ -85,7 +86,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     setShowSaveButton: (show) => set({ showSaveButton: show }),
 
     addBoundingBox: () => {
-      const newBox = createInitialBox();
+      const newBox = createInitialBox(true); // Create with ??? label
       set((state) => ({
         boundingBoxes: [...state.boundingBoxes, newBox],
         currentBoxId: newBox.id,
@@ -114,7 +115,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
         boundingBoxes: state.boundingBoxes.map((box) =>
           box.id === id ? { ...box, label, isComplete: true } : box
         ),
-        currentBoxId: null, // Deselect after labeling
+        currentBoxId: label === "???" ? state.currentBoxId : null, // Keep selected if ???, deselect otherwise
       }));
     },
 

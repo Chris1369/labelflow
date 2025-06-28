@@ -5,6 +5,7 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
+  TextStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/types/theme";
@@ -16,6 +17,7 @@ interface ControlButtonsProps {
   showSaveButton: boolean;
   hasCompletedBoxes: boolean;
   hasUncompletedBoxes: boolean;
+  hasUnknownBoxes?: boolean;
   isSaving: boolean;
   onRetake: () => void;
   onAddBox: () => void;
@@ -29,6 +31,7 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
   showSaveButton,
   hasCompletedBoxes,
   hasUncompletedBoxes,
+  hasUnknownBoxes = false,
   isSaving,
   onRetake,
   onAddBox,
@@ -131,15 +134,6 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
         </View>
       )}
 
-      {/* Box count indicator */}
-      {/* {boundingBoxes.length > 0 && (
-        <View style={styles.boxCounter}>
-          <Text style={styles.boxCounterText}>
-            {boundingBoxes.filter((b) => b.isComplete).length}/
-            {boundingBoxes.length} objets ede
-          </Text>
-        </View>
-      )} */}
     </>
   );
 };

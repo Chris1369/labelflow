@@ -240,10 +240,11 @@ export const StableBoundingBox: React.FC<StableBoundingBoxProps> = ({
           <View style={[
             styles.boxBorder,
             isComplete ? styles.completeBorder : (isSelected ? styles.selectedBorder : styles.unselectedBorder),
-            { borderColor: boxColor }
+            label === "???" && styles.unknownBorder,
+            { borderColor: label === "???" ? theme.colors.error : boxColor }
           ]}>
             {/* Semi-transparent overlay */}
-            <View style={[styles.overlay, { backgroundColor: boxColor, opacity: 0.15 }]} />
+            <View style={[styles.overlay, { backgroundColor: label === "???" ? theme.colors.error : boxColor, opacity: label === "???" ? 0.2 : 0.15 }]} />
           </View>
         </View>
 
@@ -340,5 +341,9 @@ const styles = StyleSheet.create({
   rotateHandleDot: {
     backgroundColor: '#4CAF50',
     borderColor: '#2E7D32',
+  },
+  unknownBorder: {
+    borderStyle: 'dashed',
+    borderWidth: 3,
   },
 });

@@ -426,8 +426,8 @@ export const addItemsActions = {
             width: normalizedWidth,
             height: normalizedHeight,
             rotation: 0,
-            label: detection.label,
-            isComplete: true,
+            label: detection.confidence < 0.7 ? "???" : detection.label,
+            isComplete: true,  // Always mark as complete, even for ??? boxes
           };
           
           newBoundingBoxes.push(newBox);
@@ -435,6 +435,12 @@ export const addItemsActions = {
         
         // Update store with all new boxes at once
         store.setBoundingBoxes(newBoundingBoxes);
+        
+        // Auto-select first unknown box if any
+        const firstUnknownBox = newBoundingBoxes.find(box => box.label === "???");
+        if (firstUnknownBox) {
+          store.setCurrentBox(firstUnknownBox.id);
+        }
         
         Alert.alert(
           "Prédiction terminée",
