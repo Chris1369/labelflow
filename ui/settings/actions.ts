@@ -7,6 +7,7 @@ import { User } from "@/types/auth";
 import axiosInstance from "@/api/axiosInstance";
 import { handleApiResponse, handleApiError } from "@/api/responseHelper";
 import { authAPI } from "@/api/auth.api";
+import { trainingAPI } from "@/api/training.api";
 
 export const settingsActions = {
   updateCanBeAddedToTeam: createSafeAction(
@@ -96,6 +97,44 @@ export const settingsActions = {
         } catch (storageError) {
           console.error("Erreur AsyncStorage:", storageError);
         }
+      }
+    },
+    {
+      showAlert: false,
+      componentName: "Settings",
+    }
+  ),
+
+  startModelTraining: createSafeAction(
+    async (setIsTraining: (value: boolean) => void) => {
+      setIsTraining(true);
+      
+      try {
+        const response = await trainingAPI.startTraining({
+          epochs: 100,
+          batch_size: 8,
+          use_hybrid: true
+        });
+        
+        Alert.alert(
+          "Entraînement démarré",
+          response.message || "Le modèle est en cours d'entraînement. Cela peut prendre plusieurs minutes.",
+          [
+            {
+              text: "OK",
+              onPress: () => setIsTraining(false)
+            }
+          ]
+        );
+      } catch (error: any) {
+        setIsTraining(false);
+        
+        const errorMessage = error?.response?.data?.detail || 
+                           error?.response?.data?.message || 
+                           error?.message || 
+                           "Impossible de démarrer l'entraînement";
+        
+        Alert.alert("Erreur", errorMessage);
       }
     },
     {

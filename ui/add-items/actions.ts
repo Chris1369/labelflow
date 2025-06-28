@@ -7,6 +7,7 @@ import { projectItemAPI } from "@/api/projectItem.api";
 import { router } from "expo-router";
 import { resizeImageTo640x640 } from "@/helpers/imageResizer";
 import { predictionAPI } from "@/api/prediction.api";
+import { trainingAnnotationAPI } from "@/api/trainingAnnotation.api";
 
 export const addItemsActions = {
   requestCameraPermission: async () => {
@@ -217,6 +218,40 @@ export const addItemsActions = {
       formData.append("labels", JSON.stringify(labels));
 
       await projectItemAPI.addProjectItems(formData);
+
+      // Send annotations for training (fire and forget - don't wait for response)
+      try {
+        // Get image dimensions (we know it's 640x640 from resizing)
+        const imageWidth = 640;
+        const imageHeight = 640;
+        
+        // Convert bounding boxes to training format
+        const annotations = trainingAnnotationAPI.convertBoundingBoxFormat(
+          completedBoxes.map(box => ({
+            centerX: box.centerX,
+            centerY: box.centerY,
+            width: box.width,
+            height: box.height,
+            label: box.label || 'unknown',
+          }))
+        );
+        
+        // Send annotations asynchronously (don't await)
+        trainingAnnotationAPI.sendAnnotations(
+          capturedImageUri,
+          imageWidth,
+          imageHeight,
+          annotations
+        ).then(() => {
+          console.log('Training annotations sent successfully');
+        }).catch(error => {
+          console.error('Failed to send training annotations:', error);
+          // Don't show error to user - training is optional
+        });
+      } catch (error) {
+        console.error('Error preparing training annotations:', error);
+        // Don't fail the save operation
+      }
 
       // Reset saving state first
       setIsSaving(false);

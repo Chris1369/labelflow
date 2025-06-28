@@ -23,6 +23,7 @@ import { categoryAPI } from '@/api/category.api';
 import { Category } from '@/types/category';
 import { Label } from '@/types/label';
 import { RecentLabelsManager } from '@/helpers/recentLabels';
+import { trainingClassAPI } from '@/api/trainingClass.api';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -297,6 +298,18 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       // Add to recent labels
       await RecentLabelsManager.addRecentLabel(label.name);
       
+      // Ensure training class exists for this label
+      try {
+        await trainingClassAPI.getOrCreate(
+          label.name,
+          `Label: ${label.name} - Catégorie: ${label.category || 'Non classé'}`
+        );
+        console.log(`Training class verified for label: ${label.name}`);
+      } catch (classError) {
+        // Log but don't fail if training class check fails
+        console.error('Failed to verify training class:', classError);
+      }
+      
       onSelectLabel(label.name);
       setIsVisible(false);
       setSearchQuery('');
@@ -307,21 +320,36 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       if (searchQuery.trim()) {
         setIsCreating(true);
         try {
+          const labelName = searchQuery.trim();
+          
+          // Create label in our database
           await labelAPI.create({
-            name: searchQuery.trim(),
+            name: labelName,
             isPublic,
           });
           
+          // Create corresponding training class for AI model
+          try {
+            await trainingClassAPI.create({
+              name: labelName,
+              description: `Label personnalisé créé depuis l'app BBoxly`,
+            });
+            console.log(`Training class created for label: ${labelName}`);
+          } catch (classError) {
+            // Log but don't fail if training class creation fails
+            console.error('Failed to create training class:', classError);
+          }
+          
           // Add to recent labels
-          await RecentLabelsManager.addRecentLabel(searchQuery.trim());
+          await RecentLabelsManager.addRecentLabel(labelName);
           
           // Add to selection and close
-          onSelectLabel(searchQuery.trim());
+          onSelectLabel(labelName);
           setIsVisible(false);
           setSearchQuery('');
           setIsPublic(false);
           
-          Alert.alert('Succès', `Label "${searchQuery.trim()}" créé avec succès`);
+          Alert.alert('Succès', `Label "${labelName}" créé avec succès`);
         } catch (error: any) {
           Alert.alert('Erreur', error.message || 'Impossible de créer le label');
         } finally {

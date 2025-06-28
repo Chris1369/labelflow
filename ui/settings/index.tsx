@@ -1,9 +1,10 @@
-import React, { useEffect } from "react";
-import { View, Text, StyleSheet, ScrollView, Switch } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, ScrollView, Switch, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/types/theme";
 import { useSettingsStore } from "./useStore";
 import { settingsActions } from "./actions";
+import { Ionicons } from "@expo/vector-icons";
 
 export const SettingsScreen: React.FC = () => {
   const {
@@ -17,10 +18,29 @@ export const SettingsScreen: React.FC = () => {
     setCanBeAddedToTeam,
   } = useSettingsStore();
 
+  const [isTraining, setIsTraining] = useState(false);
+
   useEffect(() => {
     // Charger les paramètres utilisateur au montage
     settingsActions.loadUserSettings();
   }, []);
+
+  const handleStartTraining = () => {
+    Alert.alert(
+      "Démarrer l'entraînement",
+      "Voulez-vous démarrer l'entraînement du modèle IA avec vos données annotées ?\n\nCela peut prendre plusieurs minutes.",
+      [
+        {
+          text: "Annuler",
+          style: "cancel"
+        },
+        {
+          text: "Démarrer",
+          onPress: () => settingsActions.startModelTraining(setIsTraining)
+        }
+      ]
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -135,6 +155,33 @@ export const SettingsScreen: React.FC = () => {
           </View>
         </View>
 
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Modèle IA</Text>
+          
+          <TouchableOpacity
+            style={[styles.trainingButton, isTraining && styles.trainingButtonDisabled]}
+            onPress={handleStartTraining}
+            disabled={isTraining}
+          >
+            {isTraining ? (
+              <>
+                <ActivityIndicator size="small" color={theme.colors.secondary} style={styles.buttonIcon} />
+                <Text style={styles.trainingButtonText}>Entraînement en cours...</Text>
+              </>
+            ) : (
+              <>
+                <Ionicons name="fitness" size={24} color={theme.colors.secondary} style={styles.buttonIcon} />
+                <Text style={styles.trainingButtonText}>Démarrer l'entraînement</Text>
+              </>
+            )}
+          </TouchableOpacity>
+          
+          <Text style={styles.trainingInfo}>
+            Entraîne le modèle de détection avec toutes vos annotations.
+            Epochs: 100, Batch size: 8, Mode: Hybride
+          </Text>
+        </View>
+
         <View style={styles.infoSection}>
           <Text style={styles.infoText}>
             Ces paramètres sont stockés localement et s'appliquent uniquement à
@@ -209,5 +256,31 @@ const styles = StyleSheet.create({
     color: theme.colors.info,
     textAlign: "center",
     lineHeight: theme.fontSize.sm * 1.5,
+  },
+  trainingButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.primary,
+    paddingVertical: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+    borderRadius: theme.borderRadius.md,
+    marginBottom: theme.spacing.md,
+  },
+  trainingButtonDisabled: {
+    opacity: 0.7,
+  },
+  trainingButtonText: {
+    ...theme.fonts.button,
+    color: theme.colors.secondary,
+  },
+  buttonIcon: {
+    marginRight: theme.spacing.sm,
+  },
+  trainingInfo: {
+    ...theme.fonts.caption,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    lineHeight: theme.fontSize.sm * 1.4,
   },
 });
