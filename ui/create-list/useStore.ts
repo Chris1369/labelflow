@@ -1,0 +1,37 @@
+import { create } from 'zustand';
+
+interface CreateListState {
+  listName: string;
+  selectedImages: string[];
+  isCreating: boolean;
+  error: string | null;
+}
+
+interface CreateListActions {
+  setListName: (name: string) => void;
+  setSelectedImages: (images: string[]) => void;
+  setIsCreating: (isCreating: boolean) => void;
+  setError: (error: string | null) => void;
+  reset: () => void;
+}
+
+export const useStore = create<CreateListState & CreateListActions>((set, get) => ({
+  // state
+  listName: '',
+  selectedImages: [],
+  isCreating: false,
+  error: null,
+
+  // actions
+  setListName: (name) => set({ listName: name, error: null }),
+  setSelectedImages: (images) => set({ selectedImages: images }),
+  setIsCreating: (isCreating) => set({ isCreating }),
+  setError: (error) => set({ error }),
+  
+  reset: () => set({
+    listName: '',
+    selectedImages: [],
+    isCreating: false,
+    error: null,
+  }),
+}));

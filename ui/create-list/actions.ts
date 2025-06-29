@@ -1,0 +1,120 @@
+import * as ImagePicker from 'expo-image-picker';
+import * as ImageManipulator from 'expo-image-manipulator';
+import { Alert } from 'react-native';
+import { router } from 'expo-router';
+import { useStore } from './useStore';
+import { unlabeledListAPI } from '@/api/unlabeledList.api';
+import { createSafeAction } from '@/helpers/safeAction';
+
+export const createListActions = {
+  setListName: (name: string) => {
+    useStore.getState().setListName(name);
+  },
+
+  setError: (error: string | null) => {
+    useStore.getState().setError(error);
+  },
+
+  removeImage: (index: number) => {
+    const store = useStore.getState();
+    const newImages = [...store.selectedImages];
+    newImages.splice(index, 1);
+    store.setSelectedImages(newImages);
+  },
+
+  createList: (projectId: string) => createList(projectId),
+
+  selectImages: async (projectId: string) => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+      if (status !== 'granted') {
+        Alert.alert(
+          'Permission refusée',
+          'L\'accès à la galerie est nécessaire pour ajouter des images.',
+          [{ text: 'OK' }]
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1], // Force square aspect ratio
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets[0]) {
+        const asset = result.assets[0];
+        
+        // Crop and resize to 640x640
+        const manipResult = await ImageManipulator.manipulateAsync(
+          asset.uri,
+          [
+            { resize: { width: 640, height: 640 } }
+          ],
+          { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+        );
+
+        // Store the image locally
+        const store = useStore.getState();
+        const currentImages = store.selectedImages;
+        store.setSelectedImages([...currentImages, manipResult.uri]);
+      }
+    } catch (error) {
+      console.error('Error selecting image:', error);
+      Alert.alert('Erreur', 'Impossible de sélectionner l\'image');
+    }
+  },
+};
+
+
+const createList = createSafeAction(
+  async (projectId: string) => {
+    const { listName, selectedImages, setIsCreating } = useStore.getState();
+    
+    if (selectedImages.length === 0) {
+      Alert.alert('Erreur', 'Veuillez sélectionner au moins une image');
+      return;
+    }
+    
+    setIsCreating(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('name', listName.trim());
+      formData.append('projectId', projectId);
+      
+      // Append all images
+      selectedImages.forEach((imageUri, index) => {
+        formData.append('files', {
+          uri: imageUri,
+          name: `image_${index}.jpg`,
+          type: 'image/jpeg',
+        } as any);
+      });
+
+      // Create the unlabeled list
+      const response = await unlabeledListAPI.create(formData);
+
+      // Reset store
+      useStore.getState().reset();
+
+      // Navigate to the list
+      const listId = response.id || response._id;
+      router.replace(`/(project)/${projectId}/label-list?listId=${listId}`);
+      
+    } catch (error) {
+      console.error('Error creating list:', error);
+      throw error;
+    } finally {
+      setIsCreating(false);
+    }
+  },
+  {
+    showAlert: true,
+    alertTitle: 'Erreur',
+    componentName: 'CreateList',
+  }
+);
+

@@ -118,6 +118,7 @@ bboxly-app/
     - `category.api.ts` : CRUD catégories de labels
     - `label.api.ts` : CRUD labels personnalisés
     - `export.api.ts` : Gestion des exports (8 formats)
+    - `unlabeledList.api.ts` : Gestion des listes non labelisées
 
 ### Types TypeScript
 
@@ -415,6 +416,14 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
   - `downloadExport(exportId)` : Télécharger fichier
   - `listExports(projectId)` : Liste des exports
   - `deleteExport(exportId)` : Supprimer export
+- **unlabeledList.api.ts** : Gestion des listes non labelisées
+  - `create(formData)` : Créer une liste avec images (multipart)
+  - `getAll()` : Récupérer toutes les listes
+  - `getByProjectId(projectId)` : Listes d'un projet
+  - `getById(id)` : Récupérer une liste par ID
+  - `addImages(listId, formData)` : Ajouter des images (multipart)
+  - `validateItem(listId, itemId)` : Valider un item (l'enlève de la liste)
+  - `delete(id)` : Supprimer une liste
 
 ### Règles de création d'API
 
@@ -859,6 +868,20 @@ export const loadData = createSafeAction(
 - `GET /exports/{id}` - Obtenir un export par ID
 - `PUT /exports/{id}` - Mettre à jour un export
 - `DELETE /exports/{id}` - Supprimer un export
+
+#### 📋 Unlabeled Lists (`/unlabeled-lists`)
+
+- `GET /unlabeled-lists` - Obtenir toutes les listes non labelisées
+- `POST /unlabeled-lists` - Créer une nouvelle liste avec images
+  - Body: FormData avec `name`, `projectId`, `files[]` (multipart)
+- `GET /unlabeled-lists/{id}` - Obtenir une liste par ID
+- `DELETE /unlabeled-lists/{id}` - Supprimer une liste
+- `GET /unlabeled-lists/project/{projectId}` - Obtenir les listes d'un projet
+- `POST /unlabeled-lists/{id}/add-images` - Ajouter des images à une liste
+  - Body: FormData avec `files[]` (multipart)
+- `POST /unlabeled-lists/{listId}/items/{itemId}/validate` - Valider un item
+  - Crée un ProjectItem et enlève l'item de la liste non labelisée
+  - Retourne: `{ projectItem, message }`
 
 #### 👥 Teams (`/teams`)
 
