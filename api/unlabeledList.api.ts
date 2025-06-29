@@ -85,11 +85,13 @@ class UnlabeledListAPI {
    * Validate an item in the unlabeled list
    * @param listId - The list ID
    * @param itemId - The item ID
+   * @param data - Object with projectId and labels
    */
-  async validateItem(listId: string, itemId: string): Promise<{ projectItem: any; message: string }> {
+  async validateItem(listId: string, itemId: string, data: { projectId: string; labels: Array<{ name: string; position: number[] }> }): Promise<{ projectItem: any; message: string }> {
     try {
       const response = await axiosInstance.post(
-        `${this.basePath}/${listId}/items/${itemId}/validate`
+        `${this.basePath}/${listId}/items/${itemId}/validate`,
+        data
       );
       return handleApiResponse<{ projectItem: any; message: string }>(response);
     } catch (error) {

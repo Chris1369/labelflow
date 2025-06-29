@@ -15,8 +15,19 @@ import {
 import { RecentLabelsManager } from "@/helpers/recentLabels";
 import { resetLabelColors } from "@/helpers/labelColors";
 
-export const AddItemsScreen: React.FC = () => {
-  const { id: projectId } = useLocalSearchParams();
+interface AddItemsScreenProps {
+  projectId?: string;
+  isForUnlabeled?: boolean;
+  unlabeledListId?: string;
+}
+
+export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({ 
+  projectId: propProjectId, 
+  isForUnlabeled = false,
+  unlabeledListId 
+}) => {
+  const params = useLocalSearchParams();
+  const projectId = propProjectId || params.id as string;
   const cameraRef = useRef<any>(null);
   const bottomSheetRef = useRef<LabelBottomSheetRef>(null);
   const [isCameraReady, setIsCameraReady] = React.useState(false);
@@ -30,36 +41,47 @@ export const AddItemsScreen: React.FC = () => {
     isSaving,
     flashMode,
     setFlashMode,
+    unlabeledListItems,
+    currentUnlabeledIndex,
   } = useAddItemsStore();
 
   useEffect(() => {
     let mounted = true;
 
-    const initializeCamera = async () => {
+    const initialize = async () => {
       try {
         if (!mounted) return;
         
-        // Add delay to prevent immediate camera access
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Set the mode in the store
+        useAddItemsStore.getState().setIsForUnlabeled(isForUnlabeled);
         
-        if (mounted) {
-          const hasPermission = await addItemsActions.checkCameraPermission();
-          if (!hasPermission && mounted) {
-            await addItemsActions.requestCameraPermission();
-          }
+        if (isForUnlabeled && unlabeledListId) {
+          // Load UnlabeledList items
+          await addItemsActions.loadUnlabeledList(unlabeledListId);
+        } else {
+          // Normal camera mode
+          // Add delay to prevent immediate camera access
+          await new Promise(resolve => setTimeout(resolve, 300));
           
-          // Mark camera as ready after another small delay
           if (mounted) {
-            await new Promise(resolve => setTimeout(resolve, 200));
-            setIsCameraReady(true);
+            const hasPermission = await addItemsActions.checkCameraPermission();
+            if (!hasPermission && mounted) {
+              await addItemsActions.requestCameraPermission();
+            }
+            
+            // Mark camera as ready after another small delay
+            if (mounted) {
+              await new Promise(resolve => setTimeout(resolve, 200));
+              setIsCameraReady(true);
+            }
           }
         }
       } catch (error) {
-        console.error("Error checking camera permission:", error);
+        console.error("Error during initialization:", error);
       }
     };
 
-    initializeCamera();
+    initialize();
 
     // Cleanup function
     return () => {
@@ -74,7 +96,7 @@ export const AddItemsScreen: React.FC = () => {
         console.error("Error during cleanup:", error);
       }
     };
-  }, []);
+  }, [isForUnlabeled, unlabeledListId]);
 
   const handleCapture = () => {
     if (cameraRef.current && !isCapturing) {
@@ -116,8 +138,13 @@ export const AddItemsScreen: React.FC = () => {
         bottomSheetRef.current?.open();
       }
     } else {
-      // Save all items
-      addItemsActions.saveAllItems(projectId as string);
+      // If in UnlabeledList mode, validate the item and move to next
+      if (isForUnlabeled && unlabeledListId) {
+        addItemsActions.validateUnlabeledItem(projectId, unlabeledListId);
+      } else {
+        // Save all items in normal mode
+        addItemsActions.saveAllItems(projectId as string);
+      }
     }
   };
 
@@ -149,9 +176,16 @@ export const AddItemsScreen: React.FC = () => {
   const hasCompletedBoxes = boundingBoxes.some(box => box.isComplete);
   const hasUncompletedBoxes = boundingBoxes.some(box => !box.isComplete);
   const hasUnknownBoxes = boundingBoxes.some(box => box.label === "???" || box.label === "Objet non identifié");
+  const hasNextImage = isForUnlabeled && currentUnlabeledIndex < unlabeledListItems.length - 1;
 
-  // Handle permission states
-  if (hasPermission === null || hasPermission === false) {
+  const handleNextImage = () => {
+    if (hasNextImage) {
+      addItemsActions.loadNextUnlabeledImage();
+    }
+  };
+
+  // Handle permission states - Skip for UnlabeledList mode
+  if (!isForUnlabeled && (hasPermission === null || hasPermission === false)) {
     return <PermissionView hasPermission={hasPermission} />;
   }
 
@@ -182,7 +216,19 @@ export const AddItemsScreen: React.FC = () => {
           onAddBox={handleAddBox}
           onValidate={handleValidate}
           onPredict={() => addItemsActions.predictBoundingBoxes(capturedImageUri)}
+          isForUnlabeled={isForUnlabeled}
+          hasNextImage={hasNextImage}
+          onNextImage={handleNextImage}
         />
+
+        {/* Progress indicator for UnlabeledList mode - Between bottom buttons */}
+        {isForUnlabeled && (
+          <View style={styles.progressContainer}>
+            <Text style={styles.progressText}>
+              {currentUnlabeledIndex + 1} / {unlabeledListItems.length}
+            </Text>
+          </View>
+        )}
 
         <RecentLabelsBar
           visible={currentBoxId !== null && !boundingBoxes.find(b => b.id === currentBoxId)?.isComplete}
@@ -198,8 +244,18 @@ export const AddItemsScreen: React.FC = () => {
     );
   }
 
-  // Show camera view only when ready
-  if (!isCameraReady) {
+  // Show loading state for UnlabeledList mode
+  if (isForUnlabeled && unlabeledListItems.length === 0) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={styles.loadingText}>Chargement de la liste...</Text>
+      </View>
+    );
+  }
+
+  // Show camera view only when ready (not in UnlabeledList mode)
+  if (!isForUnlabeled && !isCameraReady) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -208,15 +264,26 @@ export const AddItemsScreen: React.FC = () => {
     );
   }
   
+  // Show camera only in normal mode
+  if (!isForUnlabeled) {
+    return (
+      <CameraViewComponent
+        cameraRef={cameraRef}
+        isCapturing={isCapturing}
+        onCapture={handleCapture}
+        onImport={handleImport}
+        flashMode={flashMode}
+        onFlashModeChange={setFlashMode}
+      />
+    );
+  }
+
+  // UnlabeledList mode but no image shown yet
   return (
-    <CameraViewComponent
-      cameraRef={cameraRef}
-      isCapturing={isCapturing}
-      onCapture={handleCapture}
-      onImport={handleImport}
-      flashMode={flashMode}
-      onFlashModeChange={setFlashMode}
-    />
+    <View style={styles.loadingContainer}>
+      <ActivityIndicator size="large" color={theme.colors.primary} />
+      <Text style={styles.loadingText}>Chargement de l'image...</Text>
+    </View>
   );
 };
 
@@ -235,5 +302,20 @@ const styles = StyleSheet.create({
     ...theme.fonts.body,
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.md,
+  },
+  progressContainer: {
+    position: 'absolute',
+    top: 110,
+    left: '50%',
+    transform: [{ translateX: -50 }],
+    backgroundColor: 'rgba(0,0,0,0.8)',
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.sm,
+    borderRadius: theme.borderRadius.lg,
+  },
+  progressText: {
+    ...theme.fonts.caption,
+    color: theme.colors.secondary,
+    fontWeight: '600',
   },
 });

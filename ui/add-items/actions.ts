@@ -8,6 +8,7 @@ import { router } from "expo-router";
 import { resizeImageTo640x640 } from "@/helpers/imageResizer";
 import { predictionAPI } from "@/api/prediction.api";
 import { trainingAnnotationAPI } from "@/api/trainingAnnotation.api";
+import { unlabeledListAPI } from "@/api/unlabeledList.api";
 
 export const addItemsActions = {
   requestCameraPermission: async () => {
@@ -337,6 +338,131 @@ export const addItemsActions = {
 
   updateBoxRotation: (id: string, rotation: number) => {
     useAddItemsStore.getState().updateBoundingBox(id, { rotation });
+  },
+
+  loadUnlabeledList: async (listId: string) => {
+    try {
+      const store = useAddItemsStore.getState();
+      
+      console.log("Loading unlabeled list with ID:", listId);
+      
+      // Load the unlabeled list
+      const response = await unlabeledListAPI.getById(listId);
+      console.log("Unlabeled list response:", response);
+      
+      // The response is the data directly, not wrapped in { data: ... }
+      const list = response;
+      console.log("List items:", list.items);
+      
+      store.setUnlabeledListData(list.items || [], listId);
+      
+      // Load the first image if available
+      if (list.items && list.items.length > 0) {
+        const firstItem = list.items[0];
+        console.log("First item:", firstItem);
+        
+        // Use fileUrl field
+        const imageUrl = firstItem.fileUrl;
+        console.log("Image URL found:", imageUrl);
+        
+        if (imageUrl) {
+          console.log("Setting first image URL:", imageUrl);
+          store.setCurrentUnlabeledImage(imageUrl);
+        } else {
+          console.error("No fileUrl found in item:", firstItem);
+        }
+      } else {
+        console.error("No items found in list");
+      }
+    } catch (error) {
+      console.error("Error loading unlabeled list:", error);
+      Alert.alert("Erreur", "Impossible de charger la liste");
+    }
+  },
+
+  loadNextUnlabeledImage: () => {
+    const store = useAddItemsStore.getState();
+    const { currentUnlabeledIndex, unlabeledListItems } = store;
+    
+    store.nextUnlabeledItem();
+    const nextIndex = currentUnlabeledIndex + 1;
+    
+    if (nextIndex < unlabeledListItems.length) {
+      const nextItem = unlabeledListItems[nextIndex];
+      console.log("Loading next item:", nextItem);
+      
+      // Use fileUrl field
+      const imageUrl = nextItem.fileUrl;
+      
+      if (imageUrl) {
+        store.setCurrentUnlabeledImage(imageUrl);
+      } else {
+        console.error("No fileUrl found in next item:", nextItem);
+      }
+    }
+  },
+
+  validateUnlabeledItem: async (projectId: string, listId: string) => {
+    const store = useAddItemsStore.getState();
+    const { boundingBoxes, currentUnlabeledIndex, unlabeledListItems, setIsSaving } = store;
+    
+    if (!boundingBoxes.length || !listId) return;
+    
+    try {
+      setIsSaving(true);
+      
+      // Get current item
+      const currentItem = unlabeledListItems[currentUnlabeledIndex];
+      if (!currentItem || !currentItem._id) {
+        throw new Error("No current item found");
+      }
+      
+      // Prepare labels with positions
+      const labels = boundingBoxes
+        .filter(box => box.isComplete && box.label)
+        .map(box => ({
+          name: box.label!,
+          position: [box.centerX, box.centerY, box.width, box.height, box.rotation],
+        }));
+      
+      if (labels.length === 0) {
+        Alert.alert("Erreur", "Veuillez ajouter au moins un label");
+        setIsSaving(false);
+        return;
+      }
+      
+      // Call validate API
+      const response = await unlabeledListAPI.validateItem(listId, currentItem._id, {
+        projectId,
+        labels,
+      });
+      
+      if (response.success) {
+        // Check if there are more items
+        if (currentUnlabeledIndex < unlabeledListItems.length - 1) {
+          // Load next image
+          addItemsActions.loadNextUnlabeledImage();
+        } else {
+          // All items processed
+          Alert.alert(
+            "Liste complétée", 
+            "Tous les items ont été labellisés.",
+            [
+              {
+                text: "OK",
+                onPress: () => router.back(),
+              }
+            ]
+          );
+        }
+      }
+      
+      setIsSaving(false);
+    } catch (error: any) {
+      console.error("Error validating item:", error);
+      setIsSaving(false);
+      Alert.alert("Erreur", error.response?.data?.message || "Impossible de valider l'item");
+    }
   },
 
   importFromGallery: async () => {

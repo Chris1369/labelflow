@@ -13,6 +13,11 @@ interface AddItemsState {
   showSaveButton: boolean;
   isSaving: boolean;
   flashMode: FlashMode;
+  // UnlabeledList state
+  unlabeledListItems: any[];
+  currentUnlabeledIndex: number;
+  isForUnlabeled: boolean;
+  unlabeledListId: string | null;
 }
 
 interface AddItemsActions {
@@ -31,6 +36,11 @@ interface AddItemsActions {
   resetBoundingBoxes: () => void;
   setBoundingBoxes: (boxes: BoundingBox[]) => void;
   setFlashMode: (mode: FlashMode) => void;
+  // UnlabeledList actions
+  setUnlabeledListData: (items: any[], listId: string) => void;
+  setIsForUnlabeled: (isFor: boolean) => void;
+  nextUnlabeledItem: () => void;
+  setCurrentUnlabeledImage: (uri: string) => void;
 }
 
 const createInitialBox = (withUnknownLabel: boolean = false): BoundingBox => ({
@@ -55,6 +65,11 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     showSaveButton: false,
     isSaving: false,
     flashMode: 'off',
+    // UnlabeledList state
+    unlabeledListItems: [],
+    currentUnlabeledIndex: 0,
+    isForUnlabeled: false,
+    unlabeledListId: null,
 
     setPermission: (hasPermission) => set({ hasPermission }),
 
@@ -146,5 +161,33 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     },
 
     setFlashMode: (mode) => set({ flashMode: mode }),
+
+    // UnlabeledList actions
+    setUnlabeledListData: (items, listId) => set({ 
+      unlabeledListItems: items, 
+      unlabeledListId: listId,
+      currentUnlabeledIndex: 0 
+    }),
+
+    setIsForUnlabeled: (isFor) => set({ isForUnlabeled: isFor }),
+
+    nextUnlabeledItem: () => {
+      const { currentUnlabeledIndex, unlabeledListItems } = get();
+      if (currentUnlabeledIndex < unlabeledListItems.length - 1) {
+        set({ currentUnlabeledIndex: currentUnlabeledIndex + 1 });
+      }
+    },
+
+    setCurrentUnlabeledImage: (uri) => {
+      console.log("Setting unlabeled image in store:", uri);
+      const initialBox = createInitialBox();
+      set({
+        capturedImageUri: uri,
+        showSaveButton: true,
+        boundingBoxes: [initialBox],
+        currentBoxId: initialBox.id,
+      });
+      console.log("Store state after setting image:", get().capturedImageUri);
+    },
   })
 );

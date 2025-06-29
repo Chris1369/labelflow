@@ -23,6 +23,9 @@ interface ControlButtonsProps {
   onAddBox: () => void;
   onValidate: () => void;
   onPredict: () => void;
+  isForUnlabeled?: boolean;
+  hasNextImage?: boolean;
+  onNextImage?: () => void;
 }
 
 export const ControlButtons: React.FC<ControlButtonsProps> = ({
@@ -37,22 +40,34 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
   onAddBox,
   onValidate,
   onPredict,
+  isForUnlabeled = false,
+  hasNextImage = false,
+  onNextImage,
 }) => {
   return (
     <>
-      {/* Top left - Retake button */}
+      {/* Top left - Retake button or Next image button */}
       <View style={styles.topLeftContainer}>
-        <TouchableOpacity
-          style={[
-            styles.actionButton,
-            styles.secondaryButton,
-            isSaving && styles.disabledButton,
-          ]}
-          onPress={onRetake}
-          disabled={isSaving}
-        >
-          <Ionicons name='arrow-back' size={24} color={theme.colors.text} />
-        </TouchableOpacity>
+        <View style={styles.buttonWrapper}>
+          <TouchableOpacity
+            style={[
+              styles.actionButton,
+              isForUnlabeled && hasNextImage ? styles.nextButton : styles.secondaryButton,
+              isSaving && styles.disabledButton,
+            ]}
+            onPress={isForUnlabeled && hasNextImage ? onNextImage : onRetake}
+            disabled={isSaving}
+          >
+            {isForUnlabeled && hasNextImage ? (
+              <Ionicons name='arrow-forward' size={24} color={theme.colors.secondary} />
+            ) : (
+              <Ionicons name='arrow-back' size={24} color={theme.colors.text} />
+            )}
+          </TouchableOpacity>
+          {isForUnlabeled && hasNextImage && (
+            <Text style={styles.buttonLabel}>Suivante</Text>
+          )}
+        </View>
       </View>
 
       {/* Top right - Add button */}
@@ -77,7 +92,7 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Bottom left - Auto detect button */}
+      {/* Bottom left - Auto detect button - Show in both modes */}
       <View style={styles.bottomLeftContainer}>
         <View style={styles.buttonWrapper}>
           <TouchableOpacity
@@ -253,5 +268,8 @@ const styles = StyleSheet.create({
     color: theme.colors.secondary,
     fontSize: theme.fontSize.sm,
     fontWeight: "600",
+  },
+  nextButton: {
+    backgroundColor: theme.colors.success || '#4CAF50',
   },
 });
