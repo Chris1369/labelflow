@@ -41,6 +41,7 @@ interface AddItemsActions {
   setIsForUnlabeled: (isFor: boolean) => void;
   nextUnlabeledItem: () => void;
   setCurrentUnlabeledImage: (uri: string) => void;
+  setCurrentUnlabeledIndex: (index: number) => void;
 }
 
 const createInitialBox = (withUnknownLabel: boolean = false): BoundingBox => ({
@@ -189,5 +190,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
       });
       console.log("Store state after setting image:", get().capturedImageUri);
     },
+
+    setCurrentUnlabeledIndex: (index) => set({ currentUnlabeledIndex: index }),
   })
 );

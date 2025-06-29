@@ -384,10 +384,10 @@ export const addItemsActions = {
     const store = useAddItemsStore.getState();
     const { currentUnlabeledIndex, unlabeledListItems } = store;
     
-    store.nextUnlabeledItem();
     const nextIndex = currentUnlabeledIndex + 1;
     
     if (nextIndex < unlabeledListItems.length) {
+      store.setCurrentUnlabeledIndex(nextIndex);
       const nextItem = unlabeledListItems[nextIndex];
       console.log("Loading next item:", nextItem);
       
@@ -438,10 +438,25 @@ export const addItemsActions = {
       });
       
       if (response.success) {
+        // Remove the validated item from the local list
+        const updatedItems = [...unlabeledListItems];
+        updatedItems.splice(currentUnlabeledIndex, 1);
+        store.setUnlabeledListData(updatedItems, listId);
+        
         // Check if there are more items
-        if (currentUnlabeledIndex < unlabeledListItems.length - 1) {
-          // Load next image
-          addItemsActions.loadNextUnlabeledImage();
+        if (updatedItems.length > 0) {
+          // If we're at the end of the list, go back to the previous item
+          const newIndex = currentUnlabeledIndex >= updatedItems.length ? updatedItems.length - 1 : currentUnlabeledIndex;
+          
+          // Load the image at the current index (which is now the next item since we removed one)
+          const nextItem = updatedItems[newIndex];
+          if (nextItem && nextItem.fileUrl) {
+            store.setCurrentUnlabeledImage(nextItem.fileUrl);
+            // Update the index if necessary
+            if (newIndex !== currentUnlabeledIndex) {
+              store.setCurrentUnlabeledIndex(newIndex);
+            }
+          }
         } else {
           // All items processed
           Alert.alert(
@@ -501,8 +516,11 @@ export const addItemsActions = {
     try {
       console.log("Starting prediction for image:", imageUri);
       
-      // Call prediction API
-      const response = await predictionAPI.predict(imageUri);
+      // Check if it's a URL (starts with http:// or https://)
+      const isUrl = imageUri.startsWith('http://') || imageUri.startsWith('https://');
+      
+      // Call prediction API with appropriate method
+      const response = await predictionAPI.predict(imageUri, isUrl);
       console.log("Prediction response:", response);
       
       // Process detections if any

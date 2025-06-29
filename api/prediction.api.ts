@@ -32,24 +32,33 @@ class PredictionAPI {
     Constants.expoConfig?.extra?.predictionApiUrl || "http://localhost:8000";
   private apiKey = "OZhvvjHz9BSqJN89fFHEQ7_qDF0524J19q0kNSCKuqU";
 
-  async predict(imageUri: string): Promise<PredictionResponse> {
+  async predict(imageUri: string, isUrl: boolean = false): Promise<PredictionResponse> {
     try {
-      const formData = new FormData();
-
-      // In React Native, we need to format the file object differently
-      formData.append("file", {
-        uri: imageUri,
-        type: "image/jpeg",
-        name: "image.jpg",
-      } as any);
-
-      // Make prediction request
-      const result = await axios.post(`${this.baseURL}/predict`, formData, {
-        headers: {
-          "X-API-Key": this.apiKey,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      let result;
+      
+      if (isUrl) {
+        // If it's a URL, send it as query parameter
+        result = await axios.post(`${this.baseURL}/predict?imageUrl=${encodeURIComponent(imageUri)}`, null, {
+          headers: {
+            "X-API-Key": this.apiKey,
+          },
+        });
+      } else {
+        // If it's a local file, send as FormData
+        const formData = new FormData();
+        formData.append("file", {
+          uri: imageUri,
+          type: "image/jpeg",
+          name: "image.jpg",
+        } as any);
+        
+        result = await axios.post(`${this.baseURL}/predict`, formData, {
+          headers: {
+            "X-API-Key": this.apiKey,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+      }
 
       console.log(
         "Prediction API Response:",
