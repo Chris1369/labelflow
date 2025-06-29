@@ -70,8 +70,8 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
     },
     {
       id: "import",
-      title: "Importer",
-      icon: "cloud-upload",
+      title: "Labeliser une liste",
+      icon: "list",
       onPress: () => projectActions.handleImport(projectId),
     },
     {

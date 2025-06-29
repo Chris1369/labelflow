@@ -84,75 +84,73 @@ export const SelectUnlabeledListScreen: React.FC<SelectUnlabeledListScreenProps>
 
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <Ionicons name="folder-open-outline" size={64} color={theme.colors.textSecondary} />
-      <Text style={styles.emptyTitle}>Aucune liste à labeliser</Text>
+      <Ionicons 
+        name="folder-open" 
+        size={64} 
+        color={theme.colors.textSecondary} 
+      />
       <Text style={styles.emptyText}>
-        Appuyez sur + pour créer votre première liste
+        {searchQuery ? "Aucune liste trouvée" : "Aucune liste disponible"}
       </Text>
-    </View>
-  );
-
-  const renderHeader = () => (
-    <View style={styles.header}>
-      <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+      <TouchableOpacity
+        style={styles.createButton}
+        onPress={() => router.push(`/(project)/${projectId}/create-list`)}
+      >
+        <Text style={styles.createButtonText}>Créer une liste</Text>
       </TouchableOpacity>
-      <Text style={styles.title}>Listes à labeliser</Text>
-      <View style={styles.placeholder} />
     </View>
   );
-
-  if (isLoading && lists.length === 0) {
-    return (
-      <SafeAreaView style={styles.container}>
-        {renderHeader()}
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={styles.loadingText}>Chargement des listes...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView style={styles.container}>
-      {renderHeader()}
-      
-      <View style={styles.searchContainer}>
+      <View style={styles.header}>
+        <Text style={styles.title}>Listes à labeliser</Text>
         <Input
           placeholder="Rechercher une liste..."
           value={searchQuery}
           onChangeText={actions.setSearchQuery}
-          leftIcon={<Ionicons name="search" size={20} color={theme.colors.textSecondary} />}
+          icon="search"
+          containerStyle={styles.searchInput}
         />
       </View>
 
-      {error && (
-        <View style={styles.errorContainer}>
-          <Ionicons name="alert-circle" size={20} color={theme.colors.error} />
-          <Text style={styles.errorText}>{error}</Text>
+      {isLoading ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={styles.loadingText}>
+            Chargement des listes...
+          </Text>
         </View>
+      ) : error ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{error}</Text>
+          <TouchableOpacity
+            style={styles.retryButton}
+            onPress={() => actions.loadLists(projectId)}
+          >
+            <Text style={styles.retryText}>Réessayer</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <>
+          <FlatList
+            data={filteredLists}
+            keyExtractor={(item) => item.id || item._id || ''}
+            renderItem={renderListItem}
+            contentContainerStyle={styles.listContent}
+            ItemSeparatorComponent={() => <View style={styles.separator} />}
+            ListEmptyComponent={renderEmpty}
+            showsVerticalScrollIndicator={false}
+          />
+          <TouchableOpacity
+            style={styles.floatingButton}
+            onPress={() => router.push(`/(project)/${projectId}/create-list`)}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="add" size={32} color={theme.colors.secondary} />
+          </TouchableOpacity>
+        </>
       )}
-
-      <FlatList
-        data={filteredLists}
-        renderItem={renderListItem}
-        keyExtractor={(item) => item.id || item._id || ''}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={renderEmpty}
-        refreshing={isLoading}
-        onRefresh={() => actions.loadLists(projectId)}
-      />
-
-      {/* Floating button to create new list */}
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() => router.push(`/(project)/${projectId}/create-list`)}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="add" size={32} color={theme.colors.secondary} />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -163,59 +161,26 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: theme.spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.border,
-  },
-  backButton: {
-    padding: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.lg,
   },
   title: {
-    ...theme.fonts.subtitle,
+    ...theme.fonts.title,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.lg,
   },
-  placeholder: {
-    width: 40,
-  },
-  searchContainer: {
-    padding: theme.spacing.md,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    ...theme.fonts.body,
-    color: theme.colors.textSecondary,
-    marginTop: theme.spacing.md,
-  },
-  errorContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: `${theme.colors.error}10`,
-    padding: theme.spacing.md,
-    marginHorizontal: theme.spacing.md,
-    borderRadius: theme.borderRadius.md,
-    marginBottom: theme.spacing.md,
-  },
-  errorText: {
-    ...theme.fonts.caption,
-    color: theme.colors.error,
-    marginLeft: theme.spacing.sm,
-    flex: 1,
+  searchInput: {
+    marginBottom: 0,
   },
   listContent: {
-    padding: theme.spacing.md,
-    paddingBottom: 100, // Pour le bouton flottant
+    paddingHorizontal: theme.spacing.lg,
+    paddingBottom: theme.spacing.xxl,
   },
   listCard: {
     backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: theme.borderRadius.lg,
     padding: theme.spacing.lg,
-    marginBottom: theme.spacing.md,
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
@@ -223,6 +188,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: theme.spacing.sm,
   },
   listInfo: {
     flex: 1,
@@ -230,12 +196,12 @@ const styles = StyleSheet.create({
   },
   listName: {
     ...theme.fonts.subtitle,
-    marginBottom: theme.spacing.xs,
+    color: theme.colors.text,
   },
   metaInfo: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.md,
+    gap: theme.spacing.lg,
   },
   countBadge: {
     flexDirection: 'row',
@@ -243,29 +209,69 @@ const styles = StyleSheet.create({
     gap: theme.spacing.xs,
   },
   countText: {
-    ...theme.fonts.caption,
-    color: theme.colors.primary,
+    ...theme.fonts.label,
+    color: theme.colors.textSecondary,
   },
   dateText: {
-    ...theme.fonts.caption,
+    ...theme.fonts.label,
     color: theme.colors.textSecondary,
+  },
+  separator: {
+    height: theme.spacing.md,
   },
   emptyContainer: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: theme.spacing.xxl,
-  },
-  emptyTitle: {
-    ...theme.fonts.subtitle,
-    marginTop: theme.spacing.lg,
-    marginBottom: theme.spacing.sm,
+    justifyContent: 'center',
+    paddingTop: theme.spacing.xxl,
   },
   emptyText: {
+    ...theme.fonts.subtitle,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.xl,
+  },
+  createButton: {
+    paddingHorizontal: theme.spacing.xl,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.primary,
+    borderRadius: theme.borderRadius.md,
+  },
+  createButtonText: {
+    ...theme.fonts.button,
+    color: theme.colors.secondary,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  loadingText: {
     ...theme.fonts.body,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    marginTop: theme.spacing.md,
+  },
+  errorContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: theme.spacing.xl,
+  },
+  errorText: {
+    ...theme.fonts.body,
+    color: theme.colors.error,
+    textAlign: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  retryButton: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.sm,
+    backgroundColor: theme.colors.error,
+    borderRadius: theme.borderRadius.md,
+  },
+  retryText: {
+    ...theme.fonts.button,
+    color: theme.colors.secondary,
   },
   floatingButton: {
     position: 'absolute',
@@ -278,10 +284,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4.65,
     elevation: 8,
