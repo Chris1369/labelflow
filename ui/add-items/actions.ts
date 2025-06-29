@@ -438,7 +438,10 @@ export const addItemsActions = {
         labels,
       });
       
-      if (response.success) {
+      console.log("Validate response:", response);
+      
+      // Check if validation was successful (response exists and no error)
+      if (response && response.projectItem) {
         // Remove the validated item from the local list
         const updatedItems = [...unlabeledListItems];
         updatedItems.splice(currentUnlabeledIndex, 1);
@@ -452,6 +455,8 @@ export const addItemsActions = {
           // Load the image at the current index (which is now the next item since we removed one)
           const nextItem = updatedItems[newIndex];
           if (nextItem && nextItem.fileUrl) {
+            // Reset bounding boxes before loading next image
+            store.resetBoundingBoxes();
             store.setCurrentUnlabeledImage(nextItem.fileUrl);
             // Update the index if necessary
             if (newIndex !== currentUnlabeledIndex) {
