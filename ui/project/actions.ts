@@ -28,7 +28,7 @@ export const projectActions = {
 
   handleImport: (projectId: string) => {
     router.push({
-      pathname: '/(project)/[id]/import',
+      pathname: '/(project)/[id]/select-unlabeled-list',
       params: { id: projectId }
     });
   },

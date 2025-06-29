@@ -98,6 +98,20 @@ class UnlabeledListAPI {
   }
 
   /**
+   * Update an unlabeled list
+   * @param id - The list ID
+   * @param data - Object with name to update
+   */
+  async update(id: string, data: { name: string }): Promise<any> {
+    try {
+      const response = await axiosInstance.put(`${this.basePath}/${id}`, data);
+      return handleApiResponse(response);
+    } catch (error) {
+      throw handleApiError(error, `${this.basePath} - update`);
+    }
+  }
+
+  /**
    * Delete an unlabeled list
    * @param id - The list ID
    */

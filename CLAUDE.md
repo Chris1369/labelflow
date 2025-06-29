@@ -417,13 +417,14 @@ Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
   - `listExports(projectId)` : Liste des exports
   - `deleteExport(exportId)` : Supprimer export
 - **unlabeledList.api.ts** : Gestion des listes non labelisées
-  - `create(formData)` : Créer une liste avec images (multipart)
+  - `create(formData)` : Créer une liste avec images (multipart) - envoie `name`, `projectId`, et `images`
   - `getAll()` : Récupérer toutes les listes
-  - `getByProjectId(projectId)` : Listes d'un projet
+  - `getByProjectId(projectId)` : Listes d'un projet (triées par date, plus récentes d'abord)
   - `getById(id)` : Récupérer une liste par ID
   - `addImages(listId, formData)` : Ajouter des images (multipart)
   - `validateItem(listId, itemId)` : Valider un item (l'enlève de la liste)
   - `delete(id)` : Supprimer une liste
+  - `update(id, data)` : Modifier le nom d'une liste
 
 ### Règles de création d'API
 
@@ -873,12 +874,12 @@ export const loadData = createSafeAction(
 
 - `GET /unlabeled-lists` - Obtenir toutes les listes non labelisées
 - `POST /unlabeled-lists` - Créer une nouvelle liste avec images
-  - Body: FormData avec `name`, `projectId`, `files[]` (multipart)
+  - Body: FormData avec `name`, `projectId`, `images` (multipart, max 50 images)
 - `GET /unlabeled-lists/{id}` - Obtenir une liste par ID
 - `DELETE /unlabeled-lists/{id}` - Supprimer une liste
 - `GET /unlabeled-lists/project/{projectId}` - Obtenir les listes d'un projet
 - `POST /unlabeled-lists/{id}/add-images` - Ajouter des images à une liste
-  - Body: FormData avec `files[]` (multipart)
+  - Body: FormData avec `images` (multipart)
 - `POST /unlabeled-lists/{listId}/items/{itemId}/validate` - Valider un item
   - Crée un ProjectItem et enlève l'item de la liste non labelisée
   - Retourne: `{ projectItem, message }`

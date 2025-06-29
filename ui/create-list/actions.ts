@@ -85,9 +85,9 @@ const createList = createSafeAction(
       formData.append('name', listName.trim());
       formData.append('projectId', projectId);
       
-      // Append all images
+      // Append all images - l'API attend 'images' et non 'files'
       selectedImages.forEach((imageUri, index) => {
-        formData.append('files', {
+        formData.append('images', {
           uri: imageUri,
           name: `image_${index}.jpg`,
           type: 'image/jpeg',
