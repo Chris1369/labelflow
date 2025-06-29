@@ -1,8 +1,8 @@
-import axiosInstance from './axiosInstance';
-import { handleApiResponse, handleApiError } from './responseHelper';
+import axiosInstance from "./axiosInstance";
+import { handleApiResponse, handleApiError } from "./responseHelper";
 
 class UnlabeledListAPI {
-  private basePath = '/unlabeled-lists';
+  private basePath = "/unlabeled-lists";
 
   /**
    * Create a new unlabeled list with images
@@ -12,7 +12,7 @@ class UnlabeledListAPI {
     try {
       const response = await axiosInstance.post(this.basePath, formData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
       });
       return handleApiResponse(response);
@@ -39,7 +39,9 @@ class UnlabeledListAPI {
    */
   async getByProjectId(projectId: string): Promise<any[]> {
     try {
-      const response = await axiosInstance.get(`${this.basePath}/project/${projectId}`);
+      const response = await axiosInstance.get(
+        `${this.basePath}/project/${projectId}`
+      );
       return handleApiResponse<any[]>(response);
     } catch (error) {
       throw handleApiError(error, `${this.basePath} - getByProjectId`);
@@ -66,12 +68,12 @@ class UnlabeledListAPI {
    */
   async addImages(listId: string, formData: FormData): Promise<any> {
     try {
-      const response = await axiosInstance.post(
+      const response = await axiosInstance.put(
         `${this.basePath}/${listId}/add-images`,
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
         }
       );
@@ -87,7 +89,14 @@ class UnlabeledListAPI {
    * @param itemId - The item ID
    * @param data - Object with projectId and labels
    */
-  async validateItem(listId: string, itemId: string, data: { projectId: string; labels: Array<{ name: string; position: number[] }> }): Promise<{ projectItem: any; message: string }> {
+  async validateItem(
+    listId: string,
+    itemId: string,
+    data: {
+      projectId: string;
+      labels: Array<{ name: string; position: number[] }>;
+    }
+  ): Promise<{ projectItem: any; message: string }> {
     try {
       const response = await axiosInstance.post(
         `${this.basePath}/${listId}/items/${itemId}/validate`,

@@ -22,6 +22,19 @@ export const createListActions = {
     store.setSelectedImages(newImages);
   },
 
+  loadExistingList: async (listId: string) => {
+    try {
+      const response = await unlabeledListAPI.getById(listId);
+      if (response) {
+        useStore.getState().setListName(response.name || 'Liste sans nom');
+      }
+    } catch (error) {
+      console.error('Error loading list:', error);
+    }
+  },
+
+  addImagesToList: (listId: string, projectId: string) => addImagesToList(listId, projectId),
+
   createList: (projectId: string) => createList(projectId),
 
   selectImages: async (projectId: string) => {
@@ -118,3 +131,49 @@ const createList = createSafeAction(
   }
 );
 
+const addImagesToList = createSafeAction(
+  async (listId: string, projectId: string) => {
+    const store = useStore.getState();
+    const { selectedImages, setIsCreating } = store;
+
+    if (selectedImages.length === 0) {
+      throw new Error('Aucune image sélectionnée');
+    }
+
+    setIsCreating(true);
+
+    try {
+      const formData = new FormData();
+      
+      // Append all images
+      selectedImages.forEach((imageUri, index) => {
+        formData.append('images', {
+          uri: imageUri,
+          name: `image_${index}.jpg`,
+          type: 'image/jpeg',
+        } as any);
+      });
+
+      // Add images to existing list
+      await unlabeledListAPI.addImages(listId, formData);
+
+      // Reset store
+      useStore.getState().reset();
+
+      // Navigate back to label-list
+      router.replace(`/(project)/${projectId}/label-list?listId=${listId}`);
+      
+    } catch (error) {
+      console.error('Error adding images to list:', error);
+      throw error;
+    } finally {
+      setIsCreating(false);
+    }
+  },
+  {
+    showAlert: true,
+    alertTitle: 'Erreur',
+    alertMessage: 'Impossible d\'ajouter les images à la liste',
+    componentName: 'AddToList',
+  }
+);

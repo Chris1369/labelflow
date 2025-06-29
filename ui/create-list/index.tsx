@@ -20,13 +20,22 @@ import { router } from 'expo-router';
 
 interface CreateListScreenProps {
   projectId: string;
+  mode?: 'create' | 'add';
+  listId?: string;
 }
 
-export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId }) => {
+export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, mode = 'create', listId }) => {
   const { listName, isCreating, error, selectedImages } = useStore();
+  
+  React.useEffect(() => {
+    if (mode === 'add' && listId) {
+      // Load existing list details
+      createListActions.loadExistingList(listId);
+    }
+  }, [mode, listId]);
 
   const handleAddImages = () => {
-    if (!listName.trim()) {
+    if (mode === 'create' && !listName.trim()) {
       createListActions.setError('Veuillez entrer un nom pour la liste');
       return;
     }
@@ -39,7 +48,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId })
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
-        <Text style={styles.title}>Créer une liste</Text>
+        <Text style={styles.title}>{mode === 'add' ? 'Ajouter des images' : 'Créer une liste'}</Text>
         <View style={styles.placeholder} />
       </View>
 
@@ -52,21 +61,32 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId })
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={styles.inputContainer}>
-            <Text style={styles.label}>Nom de la liste</Text>
-            <Input
-              placeholder="Ex: Photos du salon"
-              value={listName}
-              onChangeText={createListActions.setListName}
-              editable={!isCreating}
-            />
-            <Text style={styles.hint}>
-              Ce nom vous aidera à identifier votre liste d'images
-            </Text>
-            {error && (
-              <Text style={styles.error}>{error}</Text>
-            )}
-          </View>
+          {mode === 'create' && (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Nom de la liste</Text>
+              <Input
+                placeholder="Ex: Photos du salon"
+                value={listName}
+                onChangeText={createListActions.setListName}
+                editable={!isCreating}
+              />
+              <Text style={styles.hint}>
+                Ce nom vous aidera à identifier votre liste d'images
+              </Text>
+              {error && (
+                <Text style={styles.error}>{error}</Text>
+              )}
+            </View>
+          )}
+          
+          {mode === 'add' && (
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Liste : {listName}</Text>
+              <Text style={styles.hint}>
+                Sélectionnez des images à ajouter à cette liste
+              </Text>
+            </View>
+          )}
 
           {selectedImages.length > 0 && (
             <View style={styles.imagesSection}>
@@ -118,8 +138,17 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId })
         {selectedImages.length > 0 && (
           <View style={styles.bottomContainer}>
             <Button
-              title={isCreating ? "Création..." : "Créer la liste"}
-              onPress={() => createListActions.createList(projectId)}
+              title={isCreating ? 
+                (mode === 'add' ? "Ajout..." : "Création...") : 
+                (mode === 'add' ? "Ajouter les images" : "Créer la liste")
+              }
+              onPress={() => {
+                if (mode === 'add' && listId) {
+                  createListActions.addImagesToList(listId, projectId);
+                } else {
+                  createListActions.createList(projectId);
+                }
+              }}
               disabled={isCreating || selectedImages.length === 0}
               style={styles.createButton}
             />

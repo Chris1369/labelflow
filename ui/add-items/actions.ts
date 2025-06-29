@@ -372,7 +372,8 @@ export const addItemsActions = {
           console.error("No fileUrl found in item:", firstItem);
         }
       } else {
-        console.error("No items found in list");
+        console.log("List is empty, showing add images interface");
+        // List is empty, the UI will show the add images button
       }
     } catch (error) {
       console.error("Error loading unlabeled list:", error);
@@ -477,6 +478,75 @@ export const addItemsActions = {
       console.error("Error validating item:", error);
       setIsSaving(false);
       Alert.alert("Erreur", error.response?.data?.message || "Impossible de valider l'item");
+    }
+  },
+
+  openImagePicker: async (listId: string) => {
+    try {
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission refusée",
+          "L'accès à la galerie est nécessaire pour ajouter des images.",
+          [{ text: "OK" }]
+        );
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsMultipleSelection: true,
+        quality: 1,
+      });
+
+      if (!result.canceled && result.assets.length > 0) {
+        const store = useAddItemsStore.getState();
+        store.setIsSaving(true);
+        
+        try {
+          // Create FormData with multiple images
+          const formData = new FormData();
+          
+          for (let i = 0; i < result.assets.length; i++) {
+            const asset = result.assets[i];
+            const resizedUri = await resizeImageTo640x640(asset.uri);
+            
+            formData.append('images', {
+              uri: resizedUri,
+              name: `image_${i}.jpg`,
+              type: 'image/jpeg',
+            } as any);
+          }
+
+          // Add images to the unlabeled list
+          const response = await unlabeledListAPI.addImages(listId, formData);
+          
+          if (response.success) {
+            Alert.alert(
+              "Images ajoutées",
+              `${result.assets.length} image(s) ont été ajoutées à la liste.`,
+              [
+                {
+                  text: "OK",
+                  onPress: () => {
+                    // Reload the list to show the new images
+                    addItemsActions.loadUnlabeledList(listId);
+                  }
+                }
+              ]
+            );
+          }
+        } catch (error) {
+          console.error("Error adding images to list:", error);
+          Alert.alert("Erreur", "Impossible d'ajouter les images");
+        } finally {
+          store.setIsSaving(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error opening image picker:", error);
+      Alert.alert("Erreur", "Impossible d'ouvrir la galerie");
     }
   },
 

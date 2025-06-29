@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
-import { View, StyleSheet, ActivityIndicator, Text } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import { useLocalSearchParams, router } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { LabelBottomSheet, LabelBottomSheetRef } from "@/components/organisms";
 import { theme } from "@/types/theme";
 import { useAddItemsStore } from "./useStore";
@@ -245,11 +246,31 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
   }
 
   // Show loading state for UnlabeledList mode
-  if (isForUnlabeled && unlabeledListItems.length === 0) {
+  if (isForUnlabeled && unlabeledListItems.length === 0 && !capturedImageUri) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={styles.loadingText}>Chargement de la liste...</Text>
+      <View style={styles.emptyListContainer}>
+        <Ionicons name="images-outline" size={80} color={theme.colors.textSecondary} />
+        <Text style={styles.emptyListTitle}>Liste vide</Text>
+        <Text style={styles.emptyListText}>
+          Cette liste ne contient aucune image à labelliser
+        </Text>
+        <TouchableOpacity
+          style={styles.addImagesButton}
+          onPress={() => {
+            router.push({
+              pathname: '/(project)/[id]/create-list',
+              params: { 
+                id: projectId,
+                mode: 'add',
+                listId: unlabeledListId 
+              }
+            });
+          }}
+          activeOpacity={0.8}
+        >
+          <Ionicons name="add-circle-outline" size={24} color={theme.colors.secondary} />
+          <Text style={styles.addImagesButtonText}>Ajouter des images</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -317,5 +338,37 @@ const styles = StyleSheet.create({
     ...theme.fonts.caption,
     color: theme.colors.secondary,
     fontWeight: '600',
+  },
+  emptyListContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: theme.spacing.xl,
+  },
+  emptyListTitle: {
+    ...theme.fonts.title,
+    color: theme.colors.text,
+    marginTop: theme.spacing.lg,
+    marginBottom: theme.spacing.sm,
+  },
+  emptyListText: {
+    ...theme.fonts.body,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    marginBottom: theme.spacing.xl,
+  },
+  addImagesButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: theme.spacing.xl,
+    paddingVertical: theme.spacing.md,
+    borderRadius: theme.borderRadius.lg,
+    gap: theme.spacing.sm,
+  },
+  addImagesButtonText: {
+    ...theme.fonts.button,
+    color: theme.colors.secondary,
   },
 });
