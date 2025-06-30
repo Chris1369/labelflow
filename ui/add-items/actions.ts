@@ -9,6 +9,7 @@ import { resizeImageTo640x640 } from "@/helpers/imageResizer";
 import { predictionAPI } from "@/api/prediction.api";
 import { trainingAnnotationAPI } from "@/api/trainingAnnotation.api";
 import { unlabeledListAPI } from "@/api/unlabeledList.api";
+import { useProjectStore } from "@/ui/project/useStore";
 
 export const addItemsActions = {
   requestCameraPermission: async () => {
@@ -222,6 +223,10 @@ export const addItemsActions = {
 
       // Send annotations for training (fire and forget - don't wait for response)
       try {
+        // Get project name from the project store
+        const currentProject = useProjectStore.getState().currentProject;
+        const projectName = currentProject?.name || 'Unknown Project';
+        
         // Get image dimensions (we know it's 640x640 from resizing)
         const imageWidth = 640;
         const imageHeight = 640;
@@ -242,7 +247,8 @@ export const addItemsActions = {
           capturedImageUri,
           imageWidth,
           imageHeight,
-          annotations
+          annotations,
+          projectName
         ).then(() => {
           console.log('Training annotations sent successfully');
         }).catch(error => {
@@ -444,6 +450,10 @@ export const addItemsActions = {
       if (response && response.projectItem) {
         // Send training annotations (fire and forget - don't wait for response)
         try {
+          // Get project name from the project store
+          const currentProject = useProjectStore.getState().currentProject;
+          const projectName = currentProject?.name || 'Unknown Project';
+          
           // Get current image URL
           const currentImageUrl = currentItem.fileUrl;
           
@@ -470,7 +480,8 @@ export const addItemsActions = {
               currentImageUrl,
               imageWidth,
               imageHeight,
-              annotations
+              annotations,
+              projectName
             ).then(() => {
               console.log('Training annotations sent successfully for validated item');
             }).catch(error => {

@@ -13,12 +13,14 @@ class TrainingAnnotationAPI {
    * @param imageWidth - Width of the image in pixels
    * @param imageHeight - Height of the image in pixels
    * @param annotations - Array of annotations with normalized coordinates
+   * @param projectName - Name of the project (required)
    */
   async sendAnnotations(
     imageUri: string,
     imageWidth: number,
     imageHeight: number,
-    annotations: AnnotationRequest
+    annotations: AnnotationRequest,
+    projectName: string
   ): Promise<void> {
     try {
       const formData = new FormData();
@@ -38,6 +40,7 @@ class TrainingAnnotationAPI {
       formData.append('annotations', JSON.stringify(annotations));
 
       console.log('Sending training annotations:', {
+        projectName,
         imageWidth,
         imageHeight,
         annotationsCount: annotations.annotations.length,
@@ -45,7 +48,7 @@ class TrainingAnnotationAPI {
       });
 
       const response = await axios.post(
-        `${this.baseURL}/training/annotation`,
+        `${this.baseURL}/training/annotation?projectName=${encodeURIComponent(projectName)}`,
         formData,
         {
           headers: {
