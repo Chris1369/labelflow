@@ -142,7 +142,7 @@ export const addItemsActions = {
   },
 
   saveAllItems: async (projectId: string) => {
-    const { boundingBoxes, capturedImageUri, setIsSaving, generateObjectItemTrainingId } =
+    const { boundingBoxes, capturedImageUri,currentProject, setIsSaving, generateObjectItemTrainingId } =
       useAddItemsStore.getState();
     const completedBoxes = boundingBoxes.filter((box) => box.isComplete);
     const objectItemTrainingId = generateObjectItemTrainingId();
@@ -226,7 +226,6 @@ export const addItemsActions = {
       // Send annotations for training (fire and forget - don't wait for response)
       try {
         // Get project name from the project store
-        const currentProject = useProjectStore.getState().currentProject;
         const projectName = currentProject?.name || 'Unknown Project';
         
         // Get image dimensions (we know it's 640x640 from resizing)
@@ -415,7 +414,7 @@ export const addItemsActions = {
 
   validateUnlabeledItem: async (projectId: string, listId: string) => {
     const store = useAddItemsStore.getState();
-    const { boundingBoxes, currentUnlabeledIndex, unlabeledListItems, setIsSaving , generateObjectItemTrainingId} = store;
+    const { boundingBoxes, currentUnlabeledIndex, unlabeledListItems, setIsSaving , generateObjectItemTrainingId, currentProject} = store;
     
     if (!boundingBoxes.length || !listId) return;
 
@@ -458,7 +457,6 @@ export const addItemsActions = {
         // Send training annotations (fire and forget - don't wait for response)
         try {
           // Get project name from the project store
-          const currentProject = useProjectStore.getState().currentProject;
           const projectName = currentProject?.name || 'Unknown Project';
           
           // Get current image URL

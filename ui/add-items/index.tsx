@@ -16,6 +16,7 @@ import {
 } from "./components";
 import { RecentLabelsManager } from "@/helpers/recentLabels";
 import { resetLabelColors } from "@/helpers/labelColors";
+import { useProjectDetails } from "@/hooks/queries";
 
 interface AddItemsScreenProps {
   projectId?: string;
@@ -30,6 +31,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
 }) => {
   const params = useLocalSearchParams();
   const projectId = propProjectId || params.id as string;
+
   const cameraRef = useRef<any>(null);
   const bottomSheetRef = useRef<LabelBottomSheetRef>(null);
   const [isCameraReady, setIsCameraReady] = React.useState(false);
@@ -47,7 +49,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
     currentUnlabeledIndex,
   } = useAddItemsStore();
 
-  const { currentProject } = useProjectStore();
+  const { data: currentProject } = useProjectDetails(projectId);
 
   useEffect(() => {
     let mounted = true;
@@ -58,6 +60,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
 
         // Set the mode in the store
         useAddItemsStore.getState().setIsForUnlabeled(isForUnlabeled);
+        useAddItemsStore.getState().setCurrentProject(currentProject || null);
         if (isForUnlabeled && unlabeledListId) {
           // Load UnlabeledList items
           await addItemsActions.loadUnlabeledList(unlabeledListId);
@@ -99,7 +102,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
         console.error("Error during cleanup:", error);
       }
     };
-  }, [isForUnlabeled, unlabeledListId]);
+  }, [isForUnlabeled, unlabeledListId, currentProject]);
 
   const handleCapture = () => {
     if (cameraRef.current && !isCapturing) {

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import uuid from 'react-native-uuid';
 import { BoundingBox, CameraPermissionStatus } from "../../types/camera";
+import { Project } from "@/types/project";
 
 export type FlashMode = 'off' | 'on' | 'auto';
 
@@ -19,6 +20,8 @@ interface AddItemsState {
   currentUnlabeledIndex: number;
   isForUnlabeled: boolean;
   unlabeledListId: string | null;
+
+  currentProject: Project | null;
 }
 
 interface AddItemsActions {
@@ -44,6 +47,7 @@ interface AddItemsActions {
   setCurrentUnlabeledImage: (uri: string) => void;
   setCurrentUnlabeledIndex: (index: number) => void;
   generateObjectItemTrainingId: () => string;
+  setCurrentProject: (project: Project | null) => void;
 }
 
 const createInitialBox = (withUnknownLabel: boolean = false): BoundingBox => ({
@@ -73,6 +77,9 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     currentUnlabeledIndex: 0,
     isForUnlabeled: false,
     unlabeledListId: null,
+    currentProject: null,
+    setCurrentProject: (project) => set({ currentProject: project }),
+    
     setPermission: (hasPermission) => set({ hasPermission }),
 
     setPermissionStatus: (permissionStatus) => set({ permissionStatus }),
