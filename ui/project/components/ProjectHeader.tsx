@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Switch } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Switch,
+  TextStyle,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/types/theme";
 import { Project } from "@/types/project";
@@ -20,11 +27,8 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
       <View style={styles.titleContainer}>
         <Text style={styles.title}>{project?.name || "Projet"}</Text>
         {project?.labelCounter && project.labelCounter.length > 0 && (
-          <TouchableOpacity
-            style={styles.eyeButton}
-            onPress={onEyePress}
-          >
-            <Ionicons name="eye" size={24} color={theme.colors.primary} />
+          <TouchableOpacity style={styles.eyeButton} onPress={onEyePress}>
+            <Ionicons name='eye' size={24} color={theme.colors.primary} />
           </TouchableOpacity>
         )}
       </View>
@@ -54,9 +58,7 @@ export const ProjectHeader: React.FC<ProjectHeaderProps> = ({
         />
       </View>
 
-      <Text style={styles.itemCount}>
-        {project?.items?.length || 0} items
-      </Text>
+      <Text style={styles.itemCount}>{project?.items?.length || 0} items</Text>
     </View>
   );
 };
@@ -76,7 +78,7 @@ const styles = StyleSheet.create({
   title: {
     ...theme.fonts.title,
     color: theme.colors.text,
-  },
+  } as TextStyle,
   eyeButton: {
     marginLeft: theme.spacing.sm,
     padding: theme.spacing.xs,

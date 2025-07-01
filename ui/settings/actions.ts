@@ -106,8 +106,9 @@ export const settingsActions = {
   ),
 
   startModelTraining: createSafeAction(
-    async (setIsTraining: (value: boolean) => void) => {
-      setIsTraining(true);
+    async () => {
+      const store = useSettingsStore.getState();
+      store.setIsTraining(true);
       
       try {
         const response = await trainingAPI.startTraining({
@@ -122,12 +123,12 @@ export const settingsActions = {
           [
             {
               text: "OK",
-              onPress: () => setIsTraining(false)
+              onPress: () => store.setIsTraining(false)
             }
           ]
         );
       } catch (error: any) {
-        setIsTraining(false);
+        store.setIsTraining(false);
         
         const errorMessage = error?.response?.data?.detail || 
                            error?.response?.data?.message || 

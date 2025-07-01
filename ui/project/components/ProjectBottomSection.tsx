@@ -8,10 +8,10 @@ export const ProjectBottomSection: React.FC = () => {
     <View style={styles.bottomSection}>
       <TouchableOpacity
         style={styles.exitButton}
-        onPress={() => router.back()}
+        onPress={() => router.replace("/(main)/home")}
         activeOpacity={0.7}
       >
-        <Text style={styles.exitButtonText}>Quitter le projet</Text>
+        <Text style={styles.exitButtonText}>Retour à l'accueil</Text>
       </TouchableOpacity>
     </View>
   );

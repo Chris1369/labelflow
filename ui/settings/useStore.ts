@@ -7,6 +7,7 @@ interface SettingsState {
   includePublicLabels: boolean;
   includePublicProjects: boolean;
   canBeAddedToTeam: boolean;
+  isTraining: boolean;
 }
 
 interface SettingsActions {
@@ -14,6 +15,7 @@ interface SettingsActions {
   setIncludePublicLabels: (value: boolean) => void;
   setIncludePublicProjects: (value: boolean) => void;
   setCanBeAddedToTeam: (value: boolean) => void;
+  setIsTraining: (value: boolean) => void;
   resetSettings: () => void;
 }
 
@@ -22,6 +24,7 @@ const defaultSettings: SettingsState = {
   includePublicLabels: false,
   includePublicProjects: false,
   canBeAddedToTeam: false,
+  isTraining: false,
 };
 
 export const useSettingsStore = create<SettingsState & SettingsActions>()(
@@ -37,6 +40,7 @@ export const useSettingsStore = create<SettingsState & SettingsActions>()(
       setIncludePublicProjects: (value) =>
         set({ includePublicProjects: value }),
       setCanBeAddedToTeam: (value) => set({ canBeAddedToTeam: value }),
+      setIsTraining: (value) => set({ isTraining: value }),
 
       resetSettings: () => set(defaultSettings),
     }),
