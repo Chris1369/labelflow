@@ -20,7 +20,8 @@ class TrainingAnnotationAPI {
     imageWidth: number,
     imageHeight: number,
     annotations: AnnotationRequest,
-    projectName: string
+    projectName: string,
+    objectItemTrainingId: string
   ): Promise<void> {
     try {
       const formData = new FormData();
@@ -38,6 +39,7 @@ class TrainingAnnotationAPI {
       
       // Add annotations as JSON string
       formData.append('annotations', JSON.stringify(annotations));
+      formData.append('object_item_training_id', objectItemTrainingId);
 
       console.log('Sending training annotations:', {
         projectName,

@@ -249,7 +249,8 @@ export const addItemsActions = {
           imageWidth,
           imageHeight,
           annotations,
-          projectName
+          projectName,
+          objectItemTrainingId as string
         ).then(() => {
           console.log('Training annotations sent successfully');
         }).catch(error => {
@@ -483,7 +484,8 @@ export const addItemsActions = {
               imageWidth,
               imageHeight,
               annotations,
-              projectName
+              projectName,
+              objectItemTrainingId as string
             ).then(() => {
               console.log('Training annotations sent successfully for validated item');
             }).catch(error => {
