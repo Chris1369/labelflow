@@ -17,32 +17,36 @@ export const useProjects = (filters?: { search?: string; isPublic?: boolean }) =
   return useQuery<Project[], Error>({
     queryKey: projectKeys.list(filters),
     queryFn: async () => {
-      const projects = await projectAPI.getAll(filters);
-      return projects;
+      const result = await projectAPI.getAll(filters);
+      // Handle both array and paginated response
+      if (Array.isArray(result)) {
+        return result;
+      }
+      return result.data || [];
     },
   });
 };
 
 // Hook to get user projects
-export const useUserProjects = () => {
+export const useUserProjects = (includePublic: boolean = false) => {
   return useQuery<Project[], Error>({
-    queryKey: projectKeys.list({ userProjects: true }),
+    queryKey: projectKeys.list({ userProjects: true, includePublic }),
     queryFn: async () => {
-      const projects = await projectAPI.getByUser();
+      const projects = await projectAPI.getMyProjects(includePublic);
       return projects;
     },
   });
 };
 
-// Hook to get team projects
-export const useProjectsByTeam = (teamId: string, enabled = true) => {
+// Hook to get projects by owner ID
+export const useProjectsByOwner = (ownerId: string, enabled = true) => {
   return useQuery<Project[], Error>({
-    queryKey: projectKeys.list({ teamId }),
+    queryKey: projectKeys.list({ ownerId }),
     queryFn: async () => {
-      const projects = await projectAPI.getByTeam(teamId);
+      const projects = await projectAPI.getProjectsByOwnerId(ownerId);
       return projects;
     },
-    enabled: enabled && !!teamId,
+    enabled: enabled && !!ownerId,
   });
 };
 

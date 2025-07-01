@@ -18,18 +18,33 @@ export const useLabels = () => {
   return useQuery<Label[], Error>({
     queryKey: labelKeys.lists(),
     queryFn: async () => {
-      const labels = await labelAPI.getAll();
-      return labels;
+      const result = await labelAPI.getAll();
+      // Handle both array and paginated response
+      if (Array.isArray(result)) {
+        return result;
+      }
+      return result.data || [];
     },
   });
 };
 
 // Hook to get user labels
-export const useMyLabels = () => {
+export const useMyLabels = (includePublic: boolean = true) => {
   return useQuery<Label[], Error>({
-    queryKey: labelKeys.list({ my: true }),
+    queryKey: labelKeys.list({ my: true, includePublic }),
     queryFn: async () => {
-      const labels = await labelAPI.getMyLabels();
+      const labels = await labelAPI.getMyLabels(includePublic);
+      return labels;
+    },
+  });
+};
+
+// Hook to get public labels
+export const usePublicLabels = () => {
+  return useQuery<Label[], Error>({
+    queryKey: labelKeys.list({ public: true }),
+    queryFn: async () => {
+      const labels = await labelAPI.getPublicLabels();
       return labels;
     },
   });
@@ -44,18 +59,6 @@ export const useSearchLabels = (query: string, enabled = true) => {
       return labels;
     },
     enabled: enabled && query.length >= 2,
-  });
-};
-
-// Hook to get labels by category
-export const useLabelsByCategory = (categoryId: string, enabled = true) => {
-  return useQuery<Label[], Error>({
-    queryKey: labelKeys.byCategory(categoryId),
-    queryFn: async () => {
-      const labels = await labelAPI.getByCategory(categoryId);
-      return labels;
-    },
-    enabled: enabled && !!categoryId,
   });
 };
 
