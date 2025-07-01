@@ -16,6 +16,7 @@ import {
   ImageGrid,
   EmptyImageCard,
   BottomActionButton,
+  AutoCropToggle,
 } from './components';
 
 interface CreateListScreenProps {
@@ -25,7 +26,7 @@ interface CreateListScreenProps {
 }
 
 export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, mode = 'create', listId }) => {
-  const { listName, isCreating, error, selectedImages } = useStore();
+  const { listName, isCreating, error, selectedImages, autoCrop, setAutoCrop } = useStore();
   
   React.useEffect(() => {
     if (mode === 'add' && listId) {
@@ -73,6 +74,11 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
           )}
           
           {mode === 'add' && <AddModeInfo listName={listName} />}
+
+          <AutoCropToggle
+            value={autoCrop}
+            onChange={setAutoCrop}
+          />
 
           {selectedImages.length > 0 ? (
             <ImageGrid

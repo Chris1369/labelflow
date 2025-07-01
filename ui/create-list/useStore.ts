@@ -5,6 +5,7 @@ interface CreateListState {
   selectedImages: string[];
   isCreating: boolean;
   error: string | null;
+  autoCrop: boolean;
 }
 
 interface CreateListActions {
@@ -12,6 +13,7 @@ interface CreateListActions {
   setSelectedImages: (images: string[]) => void;
   setIsCreating: (isCreating: boolean) => void;
   setError: (error: string | null) => void;
+  setAutoCrop: (autoCrop: boolean) => void;
   reset: () => void;
 }
 
@@ -21,17 +23,20 @@ export const useStore = create<CreateListState & CreateListActions>((set, get) =
   selectedImages: [],
   isCreating: false,
   error: null,
+  autoCrop: false,
 
   // actions
   setListName: (name) => set({ listName: name, error: null }),
   setSelectedImages: (images) => set({ selectedImages: images }),
   setIsCreating: (isCreating) => set({ isCreating }),
   setError: (error) => set({ error }),
+  setAutoCrop: (autoCrop) => set({ autoCrop }),
   
   reset: () => set({
     listName: '',
     selectedImages: [],
     isCreating: false,
     error: null,
+    autoCrop: false,
   }),
 }));

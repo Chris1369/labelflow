@@ -50,29 +50,68 @@ export const createListActions = {
         return;
       }
 
+      const store = useStore.getState();
+      const { autoCrop } = store;
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: true,
-        aspect: [1, 1], // Force square aspect ratio
+        allowsEditing: !autoCrop, // Allow manual editing only when autoCrop is disabled
+        aspect: !autoCrop ? [1, 1] : undefined, // Force square aspect ratio for manual crop
         quality: 1,
+        allowsMultipleSelection: autoCrop, // Enable multi-select when autoCrop is enabled
       });
 
-      if (!result.canceled && result.assets[0]) {
-        const asset = result.assets[0];
-        
-        // Crop and resize to 640x640
-        const manipResult = await ImageManipulator.manipulateAsync(
-          asset.uri,
-          [
-            { resize: { width: 640, height: 640 } }
-          ],
-          { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
-        );
-
-        // Store the image locally
-        const store = useStore.getState();
+      if (!result.canceled && result.assets.length > 0) {
         const currentImages = store.selectedImages;
-        store.setSelectedImages([...currentImages, manipResult.uri]);
+        const newImages: string[] = [];
+
+        // Process each selected image
+        for (const asset of result.assets) {
+          let finalUri = asset.uri;
+          
+          // Process the image based on autoCrop setting
+          if (autoCrop) {
+            // Automatically crop and resize to 640x640
+            const { width, height } = asset;
+            
+            // Calculate crop to center square
+            const cropSize = Math.min(width, height);
+            const cropX = (width - cropSize) / 2;
+            const cropY = (height - cropSize) / 2;
+            
+            const manipResult = await ImageManipulator.manipulateAsync(
+              asset.uri,
+              [
+                {
+                  crop: {
+                    originX: cropX,
+                    originY: cropY,
+                    width: cropSize,
+                    height: cropSize
+                  }
+                },
+                { resize: { width: 640, height: 640 } }
+              ],
+              { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+            );
+            finalUri = manipResult.uri;
+          } else {
+            // Manual crop was already done by the user, just resize to 640x640
+            const manipResult = await ImageManipulator.manipulateAsync(
+              asset.uri,
+              [
+                { resize: { width: 640, height: 640 } }
+              ],
+              { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+            );
+            finalUri = manipResult.uri;
+          }
+          
+          newImages.push(finalUri);
+        }
+
+        // Store all processed images
+        store.setSelectedImages([...currentImages, ...newImages]);
       }
     } catch (error) {
       console.error('Error selecting image:', error);
