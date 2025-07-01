@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from "react";
-import { View, StyleSheet, ActivityIndicator, Text, TouchableOpacity } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  Text,
+  TouchableOpacity,
+  TextStyle,
+} from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { LabelBottomSheet, LabelBottomSheetRef } from "@/components/organisms";
@@ -27,10 +34,10 @@ interface AddItemsScreenProps {
 export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
   projectId: propProjectId,
   isForUnlabeled = false,
-  unlabeledListId
+  unlabeledListId,
 }) => {
   const params = useLocalSearchParams();
-  const projectId = propProjectId || params.id as string;
+  const projectId = propProjectId || (params.id as string);
 
   const cameraRef = useRef<any>(null);
   const bottomSheetRef = useRef<LabelBottomSheetRef>(null);
@@ -67,7 +74,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
         } else {
           // Normal camera mode
           // Add delay to prevent immediate camera access
-          await new Promise(resolve => setTimeout(resolve, 300));
+          await new Promise((resolve) => setTimeout(resolve, 300));
 
           if (mounted) {
             const hasPermission = await addItemsActions.checkCameraPermission();
@@ -77,7 +84,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
 
             // Mark camera as ready after another small delay
             if (mounted) {
-              await new Promise(resolve => setTimeout(resolve, 200));
+              await new Promise((resolve) => setTimeout(resolve, 200));
               setIsCameraReady(true);
             }
           }
@@ -131,14 +138,13 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
     });
   };
 
-
   const handleValidate = () => {
     if (currentBoxId) {
       // Validate current box - open label selector
       bottomSheetRef.current?.open();
     } else if (hasUnknownBoxes) {
       // If there are unknown boxes, select the first one
-      const firstUnknownBox = boundingBoxes.find(box => box.label === "???");
+      const firstUnknownBox = boundingBoxes.find((box) => box.label === "???");
       if (firstUnknownBox) {
         useAddItemsStore.getState().setCurrentBox(firstUnknownBox.id);
         bottomSheetRef.current?.open();
@@ -179,10 +185,13 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
     useAddItemsStore.getState().setCurrentBox(id);
   };
 
-  const hasCompletedBoxes = boundingBoxes.some(box => box.isComplete);
-  const hasUncompletedBoxes = boundingBoxes.some(box => !box.isComplete);
-  const hasUnknownBoxes = boundingBoxes.some(box => box.label === "???" || box.label === "Objet non identifié");
-  const hasNextImage = isForUnlabeled && currentUnlabeledIndex < unlabeledListItems.length - 1;
+  const hasCompletedBoxes = boundingBoxes.some((box) => box.isComplete);
+  const hasUncompletedBoxes = boundingBoxes.some((box) => !box.isComplete);
+  const hasUnknownBoxes = boundingBoxes.some(
+    (box) => box.label === "???" || box.label === "Objet non identifié"
+  );
+  const hasNextImage =
+    isForUnlabeled && currentUnlabeledIndex < unlabeledListItems.length - 1;
 
   const handleNextImage = () => {
     if (hasNextImage) {
@@ -194,7 +203,6 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
   if (!isForUnlabeled && (hasPermission === null || hasPermission === false)) {
     return <PermissionView hasPermission={hasPermission} />;
   }
-
 
   // Show captured image with bounding boxes
   if (capturedImageUri) {
@@ -221,7 +229,9 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
           onRetake={addItemsActions.retakePicture}
           onAddBox={handleAddBox}
           onValidate={handleValidate}
-          onPredict={() => addItemsActions.predictBoundingBoxes(capturedImageUri)}
+          onPredict={() =>
+            addItemsActions.predictBoundingBoxes(capturedImageUri)
+          }
           isForUnlabeled={isForUnlabeled}
           hasNextImage={hasNextImage}
           onNextImage={handleNextImage}
@@ -237,14 +247,22 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
         )}
 
         <RecentLabelsBar
-          visible={currentBoxId !== null && !boundingBoxes.find(b => b.id === currentBoxId)?.isComplete}
+          visible={
+            currentBoxId !== null &&
+            !boundingBoxes.find((b) => b.id === currentBoxId)?.isComplete
+          }
           onSelectLabel={handleSelectLabel}
         />
 
         <LabelBottomSheet
           ref={bottomSheetRef}
           onSelectLabel={handleSelectLabel}
-          hasExistingLabel={currentBoxId ? boundingBoxes.find(b => b.id === currentBoxId)?.isComplete ?? false : false}
+          hasExistingLabel={
+            currentBoxId
+              ? boundingBoxes.find((b) => b.id === currentBoxId)?.isComplete ??
+                false
+              : false
+          }
           labelCounters={currentProject?.labelCounter || []}
         />
       </View>
@@ -255,26 +273,34 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
   if (isForUnlabeled && unlabeledListItems.length === 0 && !capturedImageUri) {
     return (
       <View style={styles.emptyListContainer}>
-        <Ionicons name="images-outline" size={80} color={theme.colors.textSecondary} />
-        <Text style={styles.emptyListTitle}>Liste vide</Text>
-        <Text style={styles.emptyListText}>
+        <Ionicons
+          name='images-outline'
+          size={80}
+          color={theme.colors.textSecondary}
+        />
+        <Text style={styles.emptyListTitle as TextStyle}>Liste vide</Text>
+        <Text style={styles.emptyListText as TextStyle}>
           Cette liste ne contient aucune image à labelliser
         </Text>
         <TouchableOpacity
           style={styles.addImagesButton}
           onPress={() => {
             router.push({
-              pathname: '/(project)/[id]/create-list',
+              pathname: "/(project)/[id]/create-list",
               params: {
                 id: projectId,
-                mode: 'add',
-                listId: unlabeledListId
-              }
+                mode: "add",
+                listId: unlabeledListId,
+              },
             });
           }}
           activeOpacity={0.8}
         >
-          <Ionicons name="add-circle-outline" size={24} color={theme.colors.secondary} />
+          <Ionicons
+            name='add-circle-outline'
+            size={24}
+            color={theme.colors.secondary}
+          />
           <Text style={styles.addImagesButtonText}>Ajouter des images</Text>
         </TouchableOpacity>
       </View>
@@ -285,8 +311,10 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
   if (!isForUnlabeled && !isCameraReady) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={styles.loadingText}>Préparation de la caméra...</Text>
+        <ActivityIndicator size='large' color={theme.colors.primary} />
+        <Text style={styles.loadingText as TextStyle}>
+          Préparation de la caméra...
+        </Text>
       </View>
     );
   }
@@ -308,8 +336,10 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
   // UnlabeledList mode but no image shown yet
   return (
     <View style={styles.loadingContainer}>
-      <ActivityIndicator size="large" color={theme.colors.primary} />
-      <Text style={styles.loadingText}>Chargement de l'image...</Text>
+      <ActivityIndicator size='large' color={theme.colors.primary} />
+      <Text style={styles.loadingText as TextStyle}>
+        Chargement de l'image...
+      </Text>
     </View>
   );
 };
@@ -331,11 +361,11 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.md,
   },
   progressContainer: {
-    position: 'absolute',
+    position: "absolute",
     top: 110,
-    left: '50%',
+    left: "50%",
     transform: [{ translateX: -50 }],
-    backgroundColor: 'rgba(0,0,0,0.8)',
+    backgroundColor: "rgba(0,0,0,0.8)",
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.sm,
     borderRadius: theme.borderRadius.lg,
@@ -343,7 +373,7 @@ const styles = StyleSheet.create({
   progressText: {
     ...theme.fonts.caption,
     color: theme.colors.secondary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   emptyListContainer: {
     flex: 1,
@@ -376,5 +406,5 @@ const styles = StyleSheet.create({
   addImagesButtonText: {
     ...theme.fonts.button,
     color: theme.colors.secondary,
-  },
+  } as TextStyle,
 });
