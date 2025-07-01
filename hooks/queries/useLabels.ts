@@ -29,7 +29,7 @@ export const useLabels = () => {
 };
 
 // Hook to get user labels
-export const useMyLabels = (includePublic: boolean = true) => {
+export const useMyLabels = (includePublic: boolean = true, enabled: boolean = true) => {
   return useQuery<Label[], Error>({
     queryKey: labelKeys.list({ my: true, includePublic }),
     queryFn: async () => {
@@ -40,6 +40,7 @@ export const useMyLabels = (includePublic: boolean = true) => {
       );
       return sortedLabels;
     },
+    enabled: enabled,
   });
 };
 

@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { Label } from '@/types/label';
-import { labelAPI } from '@/api/label.api';
 
 interface AddLabelsModalState {
   allLabels: Label[];
@@ -13,7 +12,7 @@ interface AddLabelsModalState {
 }
 
 interface AddLabelsModalActions {
-  loadAllLabels: () => Promise<void>;
+  initLabels: (labels: Label[]) => void;
   setSearchQuery: (query: string) => void;
   toggleLabelSelection: (labelId: string) => void;
   setInitialSelectedLabels: (labelIds: string[]) => void;
@@ -33,24 +32,9 @@ export const useAddLabelsModalStore = create<AddLabelsModalState & AddLabelsModa
   error: null,
 
   // Actions
-  loadAllLabels: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const labels = await labelAPI.getMyLabels(true); // Include public labels
-      const sortedLabels = labels.sort((a, b) => 
-        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-      );
-      set({ 
-        allLabels: sortedLabels,
-        filteredLabels: sortedLabels,
-        isLoading: false 
-      });
-    } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to load labels',
-        isLoading: false 
-      });
-    }
+
+  initLabels: (labels: Label[]) => {
+    set({ allLabels: labels, filteredLabels: labels });
   },
 
   setSearchQuery: (searchQuery) => {

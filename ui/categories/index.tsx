@@ -15,25 +15,32 @@ import { Label } from '@/types/label';
 import { useCategoriesStore } from './useStore';
 import { CategoryItem } from './components/CategoryItem';
 import { CreateCategoryBottomSheet, CreateCategoryBottomSheetRef } from './components/CreateCategoryBottomSheet';
+import { useSettingsStore } from '../settings/useStore';
+import { useMyCategories } from '@/hooks/queries';
 
 export const CategoriesScreen: React.FC = () => {
   const bottomSheetRef = useRef<CreateCategoryBottomSheetRef>(null);
+  const includePublic = useSettingsStore.getState().includePublicCategories;
+
   const {
     filteredCategories,
     expandedCategories,
     searchQuery,
-    isLoading,
     isSearching,
     error,
-    loadCategories,
     setSearchQuery,
     toggleCategory,
     deleteCategory,
+    initCategories,
   } = useCategoriesStore();
 
+  const { data: categories, isLoading, refetch } = useMyCategories(includePublic);
+
   useEffect(() => {
-    loadCategories();
-  }, []);
+    if (categories) {
+      initCategories({ categories, refreshCategories: refetch });
+    }
+  }, [categories]);
 
   const handleCreateCategory = () => {
     bottomSheetRef.current?.open();
@@ -80,9 +87,9 @@ export const CategoriesScreen: React.FC = () => {
       ) : error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.retryButton}
-            onPress={loadCategories}
+            onPress={() => refetch()}
           >
             <Text style={styles.retryText}>Réessayer</Text>
           </TouchableOpacity>
@@ -97,12 +104,12 @@ export const CategoriesScreen: React.FC = () => {
               labels={
                 item.labels
                   ?.filter((label): label is Label => typeof label === 'object')
-                  || []
+                || []
               }
               isExpanded={expandedCategories[item.id] || false}
               onToggle={() => toggleCategory(item.id)}
               onDelete={() => deleteCategory(item.id)}
-              onLabelsUpdated={() => loadCategories()}
+              onLabelsUpdated={() => refetch()}
             />
           )}
           contentContainerStyle={styles.listContent}

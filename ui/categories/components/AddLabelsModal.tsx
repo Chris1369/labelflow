@@ -17,6 +17,7 @@ import { categoryAPI } from '@/api/category.api';
 import { useAddLabelsModalStore } from './addLabelsModal.store';
 import { AddLabelsModalProps } from './addLabelsModal.types';
 import { Label } from '@/types/label';
+import { useMyLabels } from '@/hooks/queries';
 
 export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
   isVisible,
@@ -28,10 +29,9 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
     filteredLabels,
     selectedLabelIds,
     searchQuery,
-    isLoading,
     isSubmitting,
     error,
-    loadAllLabels,
+    initLabels,
     setSearchQuery,
     toggleLabelSelection,
     setInitialSelectedLabels,
@@ -40,12 +40,16 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
     getLabelsToRemove,
   } = useAddLabelsModalStore();
 
+  const { data: labels, isLoading } = useMyLabels(true, isVisible);
+
   useEffect(() => {
     if (isVisible) {
       // Load all labels and set initial selection
-      loadAllLabels();
+      if (labels) {
+        initLabels(labels);
+      }
       // Extract label IDs from the category labels (can be strings or Label objects)
-      const labelIds = (category.labels || []).map(label => 
+      const labelIds = (category.labels || []).map(label =>
         typeof label === 'string' ? label : label.id
       );
       setInitialSelectedLabels(labelIds);
@@ -53,34 +57,34 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
       // Reset when modal closes
       resetSelection();
     }
-  }, [isVisible, category.labels]);
+  }, [isVisible, category.labels, labels]);
 
   const handleSubmit = async () => {
     // Extract label IDs from the category labels
-    const existingLabelIds = (category.labels || []).map(label => 
+    const existingLabelIds = (category.labels || []).map(label =>
       typeof label === 'string' ? label : label.id
     );
     const newlySelectedLabels = getNewlySelectedLabels(existingLabelIds);
     const labelsToRemove = getLabelsToRemove(existingLabelIds);
-    
+
     if (newlySelectedLabels.length === 0 && labelsToRemove.length === 0) {
       Alert.alert('Info', 'Aucune modification détectée');
       return;
     }
 
     useAddLabelsModalStore.setState({ isSubmitting: true });
-    
+
     try {
       // Add newly selected labels
       for (const labelId of newlySelectedLabels) {
         await categoryAPI.addLabel(category.id, labelId);
       }
-      
+
       // Remove unselected labels
       for (const labelId of labelsToRemove) {
         await categoryAPI.removeLabel(category.id, labelId);
       }
-      
+
       const message = [];
       if (newlySelectedLabels.length > 0) {
         message.push(`${newlySelectedLabels.length} label(s) ajouté(s)`);
@@ -88,7 +92,7 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
       if (labelsToRemove.length > 0) {
         message.push(`${labelsToRemove.length} label(s) supprimé(s)`);
       }
-      
+
       Alert.alert('Succès', message.join(' et '));
       onLabelsUpdated();
       onClose();
@@ -102,10 +106,10 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
   const renderLabelItem = ({ item }: { item: Label }) => {
     const isSelected = selectedLabelIds.has(item.id);
     // Check if the label is already in the category
-    const isExisting = category.labels?.some(label => 
+    const isExisting = category.labels?.some(label =>
       typeof label === 'string' ? label === item.id : label.id === item.id
     );
-    
+
     return (
       <TouchableOpacity
         style={[
@@ -148,9 +152,9 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
       animationType="slide"
       onRequestClose={onClose}
     >
-      <TouchableOpacity 
-        style={styles.overlay} 
-        activeOpacity={1} 
+      <TouchableOpacity
+        style={styles.overlay}
+        activeOpacity={1}
         onPress={onClose}
       >
         <KeyboardAvoidingView
@@ -160,9 +164,9 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
           <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
             <View style={styles.container}>
               <View style={styles.handle} />
-              
+
               <Text style={styles.title}>Gérer les labels de "{category.name}"</Text>
-              
+
               <View style={styles.legendContainer}>
                 <View style={styles.legendItem}>
                   <View style={[styles.legendBox, { backgroundColor: theme.colors.info + '10', borderColor: theme.colors.info }]} />
@@ -173,7 +177,7 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
                   <Text style={styles.legendText}>Sélectionné</Text>
                 </View>
               </View>
-              
+
               <Input
                 placeholder="Rechercher des labels..."
                 value={searchQuery}
@@ -212,7 +216,7 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
                 >
                   <Text style={styles.cancelText}>Annuler</Text>
                 </TouchableOpacity>
-                
+
                 <Button
                   title={isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
                   onPress={handleSubmit}

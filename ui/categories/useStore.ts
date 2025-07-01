@@ -1,9 +1,7 @@
 import { create } from 'zustand';
 import { Category } from '@/types/category';
-import { Label } from '@/types/label';
 import { categoryAPI } from '@/api/category.api';
 import { ExpandedCategories } from './types';
-import { useSettingsStore } from '@/ui/settings/useStore';
 import { debounce } from 'lodash';
 
 interface CategoriesState {
@@ -17,12 +15,13 @@ interface CategoriesState {
 }
 
 interface CategoriesActions {
-  loadCategories: () => Promise<void>;
+  // loadCategories: () => Promise<void>;
   setSearchQuery: (query: string) => void;
   searchCategories: (query: string) => Promise<void>;
   toggleCategory: (categoryId: string) => void;
   deleteCategory: (categoryId: string) => Promise<void>;
-  refreshCategories: () => Promise<void>;
+  refreshCategories?: () => void;
+  initCategories: ({categories, refreshCategories}: {categories: Category[], refreshCategories?: () => void}) => void;
 }
 
 export const useCategoriesStore = create<CategoriesState & CategoriesActions>((set, get) => {
@@ -36,21 +35,8 @@ export const useCategoriesStore = create<CategoriesState & CategoriesActions>((s
 
     set({ isSearching: true });
     try {
-      const includePublic = useSettingsStore.getState().includePublicCategories;
-      const searchResults = await categoryAPI.getAll({
-        search: query,
-        limit: 50,
-        getIsPublic: includePublic
-      });
-      
-      // Handle both array and paginated response
-      let categories: Category[] = [];
-      if (Array.isArray(searchResults)) {
-        categories = searchResults;
-      } else if (searchResults && 'categories' in searchResults) {
-        categories = searchResults.categories || [];
-      }
-      
+      const categories = await categoryAPI.searchCategories(query);
+
       set({ 
         filteredCategories: categories,
         isSearching: false 
@@ -78,22 +64,8 @@ export const useCategoriesStore = create<CategoriesState & CategoriesActions>((s
   isSearching: false,
   error: null,
 
-  loadCategories: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const includePublic = useSettingsStore.getState().includePublicCategories;
-      const categories = await categoryAPI.getMyCategories(includePublic);
-      set({ 
-        categories,
-        filteredCategories: categories,
-        isLoading: false 
-      });
-    } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to load categories',
-        isLoading: false 
-      });
-    }
+  initCategories: ({ categories, refreshCategories }: { categories: Category[], refreshCategories?: () => void }) => {
+    set({ categories, filteredCategories: categories, refreshCategories });
   },
 
 
@@ -118,14 +90,10 @@ export const useCategoriesStore = create<CategoriesState & CategoriesActions>((s
   deleteCategory: async (categoryId) => {
     try {
       await categoryAPI.delete(categoryId);
-      await get().loadCategories();
+      get().refreshCategories?.();
     } catch (error: any) {
       throw error;
     }
-  },
-
-  refreshCategories: async () => {
-    await get().loadCategories();
   },
 };
 });

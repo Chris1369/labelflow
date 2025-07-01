@@ -61,6 +61,7 @@ class CategoryAPI extends BaseAPI<Category, CreateCategoryRequest, UpdateCategor
     }
   }
 
+
   async getPublicCategories(): Promise<Category[]> {
     try {
       const response = await axiosInstance.get(`${this.basePath}/public`);
@@ -113,12 +114,27 @@ class CategoryAPI extends BaseAPI<Category, CreateCategoryRequest, UpdateCategor
 
   async searchCategories(query: string): Promise<Category[]> {
     try {
-      const response = await axiosInstance.get(`${this.basePath}/search`, {
-        params: { q: query }
+      const response = await axiosInstance.get(this.basePath, {
+        params: {
+          search: query,
+          limit: 50, // Limit results for performance
+        },
       });
-      
-      const result = handleApiResponse<Category[]>(response);
-      return result;
+
+      const result = handleApiResponse<
+        | {
+            categories?: Category[];
+            total?: number;
+            totalPage?: number;
+            page?: number;
+            limit?: number;
+          }
+        | Category[]
+      >(response);
+      if (Array.isArray(result)) {
+        return result;
+      }
+      return result.categories || [];
     } catch (error) {
       throw handleApiError(error);
     }

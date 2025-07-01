@@ -47,15 +47,15 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
         name: name.trim(),
         isPublic,
       });
-      
+
       // Refresh categories list
-      await useCategoriesStore.getState().refreshCategories();
-      
+      useCategoriesStore.getState().refreshCategories?.();
+
       // Reset form and close
       setName('');
       setIsPublic(false);
       setIsVisible(false);
-      
+
       Alert.alert('Succès', 'Catégorie créée avec succès');
     } catch (error: any) {
       Alert.alert('Erreur', error.message || 'Impossible de créer la catégorie');
@@ -71,9 +71,9 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
       animationType="slide"
       onRequestClose={() => setIsVisible(false)}
     >
-      <TouchableOpacity 
-        style={styles.overlay} 
-        activeOpacity={1} 
+      <TouchableOpacity
+        style={styles.overlay}
+        activeOpacity={1}
         onPress={() => setIsVisible(false)}
       >
         <KeyboardAvoidingView
@@ -83,9 +83,9 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
           <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
             <View style={styles.container}>
               <View style={styles.handle} />
-              
+
               <Text style={styles.title}>Nouvelle catégorie</Text>
-              
+
               <Input
                 placeholder="Nom de la catégorie"
                 value={name}
@@ -103,9 +103,9 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
                 <Switch
                   value={isPublic}
                   onValueChange={setIsPublic}
-                  trackColor={{ 
-                    false: theme.colors.border, 
-                    true: theme.colors.primary + '80' 
+                  trackColor={{
+                    false: theme.colors.border,
+                    true: theme.colors.primary + '80'
                   }}
                   thumbColor={isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
                 />
@@ -118,7 +118,7 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
                 >
                   <Text style={styles.cancelText}>Annuler</Text>
                 </TouchableOpacity>
-                
+
                 <Button
                   title={isCreating ? 'Création...' : 'Créer'}
                   onPress={handleCreate}
