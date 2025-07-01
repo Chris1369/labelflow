@@ -283,6 +283,8 @@ export const addItemsActions = {
                 await new Promise((resolve) => setTimeout(resolve, 100));
                 // Réinitialiser pour permettre de capturer une nouvelle image
                 useAddItemsStore.getState().resetCapture();
+                // generer un nouvel objectItemTrainingId
+                useAddItemsStore.getState().generateObjectItemTrainingId();
               } catch (error) {
                 console.error("Error in Continue action:", error);
               }
