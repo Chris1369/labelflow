@@ -1,11 +1,13 @@
 import { useCreateProjectStore } from './useStore';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
+import { useSelectProjectStore } from '../select-project/useStore';
 
 export const createProjectActions = {
   createProject: async () => {
     // Utiliser la méthode createProject du store qui gère déjà tout
     await useCreateProjectStore.getState().createProject();
+    useSelectProjectStore.getState().refreshProjects?.();
   },
   
   cancelCreation: () => {

@@ -18,7 +18,8 @@ interface SelectProjectActions {
   setSearchQuery: (query: string) => void;
   searchProjects: (query: string) => Promise<void>;
   selectProject: (project: Project) => void;
-  initProjects: (projects: Project[]) => void;
+  initProjects: ({projects, refreshProjects}: {projects: Project[], refreshProjects?: () => void}) => void;
+  refreshProjects?: () => void;
 }
 
 export const useSelectProjectStore = create<SelectProjectState & SelectProjectActions>((set, get) => {
@@ -75,8 +76,8 @@ export const useSelectProjectStore = create<SelectProjectState & SelectProjectAc
     set({ selectedProject: project });
   },
 
-  initProjects: (projects) => {
-    set({ projects, filteredProjects: projects });
+  initProjects: ({projects, refreshProjects}: {projects: Project[], refreshProjects?: () => void}) => {
+    set({ projects, filteredProjects: projects, refreshProjects });
   },
 };
 });

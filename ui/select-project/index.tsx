@@ -23,11 +23,11 @@ export const SelectProjectScreen: React.FC = () => {
     useSelectProjectStore();
   const includePublic = useSettingsStore.getState().includePublicProjects;
 
-  const { data: projects, isLoading } = useMyProjects(includePublic);
+  const { data: projects, isLoading, refetch } = useMyProjects(includePublic);
 
   useEffect(() => {
     if (projects) {
-      initProjects(projects);
+      initProjects({ projects, refreshProjects: refetch });
     }
   }, [projects]);
 
