@@ -18,7 +18,7 @@ interface SelectProjectActions {
   setSearchQuery: (query: string) => void;
   searchProjects: (query: string) => Promise<void>;
   selectProject: (project: Project) => void;
-  loadProjects: () => Promise<void>;
+  initProjects: (projects: Project[]) => void;
 }
 
 export const useSelectProjectStore = create<SelectProjectState & SelectProjectActions>((set, get) => {
@@ -33,22 +33,9 @@ export const useSelectProjectStore = create<SelectProjectState & SelectProjectAc
     set({ isSearching: true });
     try {
       const includePublic = useSettingsStore.getState().includePublicProjects;
-      const searchResults = await projectAPI.getAll({
-        search: query,
-        limit: 50,
-        getIsPublic: includePublic
-      });
-      
-      // Handle both array and paginated response
-      let projects: Project[] = [];
-      if (Array.isArray(searchResults)) {
-        projects = searchResults;
-      } else if (searchResults && 'projects' in searchResults) {
-        projects = searchResults.projects || [];
-      }
-      
+      const searchResults = await projectAPI.searchProjects({query, includePublic});
       set({ 
-        filteredProjects: projects,
+        filteredProjects: searchResults,
         isSearching: false 
       });
     } catch (error) {
@@ -88,30 +75,8 @@ export const useSelectProjectStore = create<SelectProjectState & SelectProjectAc
     set({ selectedProject: project });
   },
 
-  loadProjects: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      // Récupérer le paramètre des settings
-      const includePublic = useSettingsStore.getState().includePublicProjects;
-      
-      // Utiliser getMyProjects avec le paramètre includePublic
-      const projects = await projectAPI.getMyProjects(includePublic);
-      console.log('My projects:', projects);
-      
-      set({ 
-        projects: projects, 
-        filteredProjects: projects,
-        isLoading: false 
-      });
-    } catch (error: any) {
-      console.error('Error loading projects:', error);
-      set({ 
-        error: error.message || 'Failed to load projects',
-        isLoading: false,
-        projects: [],
-        filteredProjects: []
-      });
-    }
+  initProjects: (projects) => {
+    set({ projects, filteredProjects: projects });
   },
 };
 });

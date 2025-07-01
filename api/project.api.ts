@@ -116,6 +116,35 @@ class ProjectAPI extends BaseAPI<
       throw error;
     }
   }
+
+  async searchProjects({query, includePublic}: {query: string, includePublic: boolean}): Promise<Project[]> {
+    try {
+      const response = await axiosInstance.get(this.basePath, {
+        params: {
+          search: query,
+          getIsPublic: includePublic,
+          limit: 50, // Limit results for performance
+        },
+      });
+
+      const result = handleApiResponse<
+        | {
+            projects?: Project[];
+            total?: number;
+            totalPage?: number;
+            page?: number;
+            limit?: number;
+          }
+        | Project[]
+      >(response);
+      if (Array.isArray(result)) {
+        return result;
+      }
+      return result.projects || [];
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
 }
 
 export const projectAPI = new ProjectAPI();

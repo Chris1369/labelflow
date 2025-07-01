@@ -15,14 +15,21 @@ import { theme } from "@/types/theme";
 import { useSelectProjectStore } from "./useStore";
 import { selectProjectActions } from "./actions";
 import { Project } from "@/types/project";
+import { useMyProjects } from "@/hooks/queries/useProjects";
+import { useSettingsStore } from "../settings/useStore";
 
 export const SelectProjectScreen: React.FC = () => {
-  const { filteredProjects, searchQuery, isLoading, isSearching, error } =
+  const { filteredProjects, searchQuery, isSearching, error, initProjects } =
     useSelectProjectStore();
+  const includePublic = useSettingsStore.getState().includePublicProjects;
+
+  const { data: projects, isLoading } = useMyProjects(includePublic);
 
   useEffect(() => {
-    selectProjectActions.loadProjects();
-  }, []);
+    if (projects) {
+      initProjects(projects);
+    }
+  }, [projects]);
 
   const renderProjectItem = ({ item }: { item: Project }) => (
     <TouchableOpacity
