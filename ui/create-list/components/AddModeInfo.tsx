@@ -1,0 +1,33 @@
+import React from 'react';
+import { View, Text, StyleSheet } from 'react-native';
+import { theme } from '@/types/theme';
+
+interface AddModeInfoProps {
+  listName: string;
+}
+
+export const AddModeInfo: React.FC<AddModeInfoProps> = ({ listName }) => {
+  return (
+    <View style={styles.inputContainer}>
+      <Text style={styles.label}>Liste : {listName}</Text>
+      <Text style={styles.hint}>
+        Sélectionnez des images à ajouter à cette liste
+      </Text>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  inputContainer: {
+    marginBottom: theme.spacing.xl,
+  },
+  label: {
+    ...theme.fonts.body,
+    marginBottom: theme.spacing.sm,
+  },
+  hint: {
+    ...theme.fonts.caption,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.sm,
+  },
+});
