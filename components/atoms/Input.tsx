@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   TextInput,
   View,
@@ -7,16 +7,17 @@ import {
   TouchableOpacity,
   TextInputProps,
   ViewStyle,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../types/theme';
+  TextStyle,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "../../types/theme";
 
 export interface InputProps extends TextInputProps {
   label?: string;
   error?: string;
   containerStyle?: ViewStyle;
   inputStyle?: ViewStyle;
-  type?: 'text' | 'email' | 'password';
+  type?: "text" | "email" | "password";
   icon?: keyof typeof Ionicons.glyphMap;
 }
 
@@ -25,7 +26,7 @@ export const Input: React.FC<InputProps> = ({
   error,
   containerStyle,
   inputStyle,
-  type = 'text',
+  type = "text",
   icon,
   ...textInputProps
 }) => {
@@ -33,15 +34,15 @@ export const Input: React.FC<InputProps> = ({
   const [isFocused, setIsFocused] = useState(false);
 
   const getKeyboardType = () => {
-    if (type === 'email') return 'email-address';
-    return textInputProps.keyboardType || 'default';
+    if (type === "email") return "email-address";
+    return textInputProps.keyboardType || "default";
   };
 
-  const isPasswordType = type === 'password';
+  const isPasswordType = type === "password";
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <Text style={styles.label as TextStyle}>{label}</Text>}
       <View
         style={[
           styles.inputContainer,
@@ -59,11 +60,13 @@ export const Input: React.FC<InputProps> = ({
         )}
         <TextInput
           {...textInputProps}
-          style={[styles.input, inputStyle]}
+          style={[styles.input as TextStyle, inputStyle]}
           keyboardType={getKeyboardType()}
           secureTextEntry={isPasswordType && !showPassword}
-          autoCapitalize={type === 'email' ? 'none' : textInputProps.autoCapitalize}
-          autoCorrect={type === 'email' ? false : textInputProps.autoCorrect}
+          autoCapitalize={
+            type === "email" ? "none" : textInputProps.autoCapitalize
+          }
+          autoCorrect={type === "email" ? false : textInputProps.autoCorrect}
           onFocus={(e) => {
             setIsFocused(true);
             textInputProps.onFocus?.(e);
@@ -80,14 +83,14 @@ export const Input: React.FC<InputProps> = ({
             style={styles.eyeIcon}
           >
             <Ionicons
-              name={showPassword ? 'eye-off' : 'eye'}
+              name={showPassword ? "eye-off" : "eye"}
               size={20}
               color={theme.colors.textSecondary}
             />
           </TouchableOpacity>
         )}
       </View>
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={styles.error as TextStyle}>{error}</Text>}
     </View>
   );
 };
@@ -102,8 +105,8 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: theme.borderRadius.md,
