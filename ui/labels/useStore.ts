@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { Label } from '@/types/label';
 import { labelAPI } from '@/api/label.api';
-import { useSettingsStore } from '@/ui/settings/useStore';
 import { debounce } from 'lodash';
 
 interface LabelsState {
@@ -14,11 +13,11 @@ interface LabelsState {
 }
 
 interface LabelsActions {
-  loadLabels: () => Promise<void>;
   setSearchQuery: (query: string) => void;
   searchLabels: (query: string) => Promise<void>;
-  deleteLabel: (labelId: string) => Promise<void>;
-  refreshLabels: () => Promise<void>;
+  deleteLabel: (labelId: string, refetch?: () => void) => Promise<void>;
+  initLabels: ({labels, refreshLabels}: {labels: Label[], refreshLabels?: () => void}) => void;
+  refreshLabels?: () => void;
 }
 
 export const useLabelsStore = create<LabelsState & LabelsActions>((set, get) => {
@@ -59,28 +58,6 @@ export const useLabelsStore = create<LabelsState & LabelsActions>((set, get) => 
   isSearching: false,
   error: null,
 
-  loadLabels: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const includePublic = useSettingsStore.getState().includePublicLabels;
-      const labels = await labelAPI.getMyLabels(includePublic);
-      // Sort labels alphabetically
-      const sortedLabels = labels.sort((a, b) => 
-        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
-      );
-      set({ 
-        labels: sortedLabels,
-        filteredLabels: sortedLabels,
-        isLoading: false 
-      });
-    } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to load labels',
-        isLoading: false 
-      });
-    }
-  },
-
   setSearchQuery: (searchQuery) => {
     set({ searchQuery });
     debouncedSearch(searchQuery);
@@ -91,16 +68,18 @@ export const useLabelsStore = create<LabelsState & LabelsActions>((set, get) => 
   },
 
   deleteLabel: async (labelId) => {
+    const { refreshLabels } = get();
     try {
       await labelAPI.delete(labelId);
-      await get().loadLabels();
+      if (refreshLabels) {
+        refreshLabels();
+      }
     } catch (error: any) {
       throw error;
     }
   },
-
-  refreshLabels: async () => {
-    await get().loadLabels();
-  },
+  initLabels: ({ labels, refreshLabels }: {labels: Label[], refreshLabels?: () => void}) => {
+    set({ labels, filteredLabels: labels, refreshLabels });
+  }
 };
 });

@@ -14,23 +14,32 @@ import { theme } from '@/types/theme';
 import { useLabelsStore } from './useStore';
 import { LabelItem } from './components/LabelItem';
 import { CreateLabelBottomSheet, CreateLabelBottomSheetRef } from './components/CreateLabelBottomSheet';
+import { useMyLabels } from '@/hooks/queries';
+import { useSettingsStore } from '../settings/useStore';
 
 export const LabelsScreen: React.FC = () => {
   const bottomSheetRef = useRef<CreateLabelBottomSheetRef>(null);
+  const includePublic = useSettingsStore.getState().includePublicLabels;
+
   const {
     filteredLabels,
     searchQuery,
     isLoading,
     isSearching,
     error,
-    loadLabels,
     setSearchQuery,
     deleteLabel,
+    initLabels
   } = useLabelsStore();
 
+  // fetch labels
+  const { data: labels, refetch } = useMyLabels(includePublic);
+
   useEffect(() => {
-    loadLabels();
-  }, []);
+    if (labels) {
+      initLabels({ labels, refreshLabels: refetch });
+    }
+  }, [labels]);
 
   const handleCreateLabel = () => {
     bottomSheetRef.current?.open();
@@ -77,9 +86,9 @@ export const LabelsScreen: React.FC = () => {
       ) : error ? (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.retryButton}
-            onPress={loadLabels}
+            onPress={() => refetch()}
           >
             <Text style={styles.retryText}>Réessayer</Text>
           </TouchableOpacity>
@@ -92,7 +101,7 @@ export const LabelsScreen: React.FC = () => {
             <LabelItem
               label={item}
               onDelete={() => deleteLabel(item.id)}
-              onUpdate={loadLabels}
+              onUpdate={() => refetch()}
             />
           )}
           contentContainerStyle={styles.listContent}

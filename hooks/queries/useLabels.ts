@@ -34,7 +34,11 @@ export const useMyLabels = (includePublic: boolean = true) => {
     queryKey: labelKeys.list({ my: true, includePublic }),
     queryFn: async () => {
       const labels = await labelAPI.getMyLabels(includePublic);
-      return labels;
+      // Sort labels alphabetically
+      const sortedLabels = labels.sort((a, b) => 
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      );
+      return sortedLabels;
     },
   });
 };
