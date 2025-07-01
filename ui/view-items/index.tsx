@@ -58,7 +58,7 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
         {
           text: "Supprimer",
           style: "destructive",
-          onPress: () => deleteItem(item.id),
+          onPress: () => deleteItem(item.id, item.objectItemTrainingId),
         },
       ]
     );

@@ -96,6 +96,16 @@ class TrainingAnnotationAPI {
     }
   }
 
+  async removeitem({objectItemTrainingId, projectName}: {objectItemTrainingId: string, projectName: string}): Promise<void> {
+    try {
+      const response = await axios.delete(`${this.baseURL}/training/removeAnnotation/${objectItemTrainingId}?projectName=${encodeURIComponent(projectName)}`);
+      console.log('Training annotation removed successfully:', response.data);
+    } catch (error) {
+      console.error('Error removing training annotation:', error);
+      throw handleApiError(error);
+    }
+  }
+
   /**
    * Helper method to convert bounding box format from app to API format
    * App format: centerX, centerY, width, height (all 0-1)

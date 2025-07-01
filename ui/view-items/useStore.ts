@@ -4,6 +4,7 @@ import { projectItemAPI } from '@/api/projectItem.api';
 import { projectAPI } from '@/api/project.api';
 import { getCurrentUser } from '@/helpers/getCurrentUser';
 import { User } from '@/types/auth';
+import { trainingAnnotationAPI } from '@/api/trainingAnnotation.api';
 
 interface ViewItemsState {
   items: ProjectItem[];
@@ -22,7 +23,7 @@ interface ViewItemsActions {
   setProjectId: (projectId: string) => void;
   loadItems: (reset?: boolean) => Promise<void>;
   loadMoreItems: () => Promise<void>;
-  deleteItem: (itemId: string) => Promise<void>;
+  deleteItem: (itemId: string, objectItemTrainingId?: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -106,7 +107,7 @@ export const useViewItemsStore = create<ViewItemsState & ViewItemsActions>((set,
     await get().loadItems();
   },
 
-  deleteItem: async (itemId: string) => {
+  deleteItem: async (itemId: string, objectItemTrainingId?: string) => {
     const { projectId, items, project } = get();
     if (!projectId || !project) return;
 
@@ -118,6 +119,10 @@ export const useViewItemsStore = create<ViewItemsState & ViewItemsActions>((set,
 
       // Mettre à jour le projet pour retirer l'item de la liste
       await projectAPI.removeItemFromProject(projectId, itemId);
+      // remove item from trainingAnnotation
+      if (objectItemTrainingId) {
+        await trainingAnnotationAPI.removeitem({objectItemTrainingId, projectName: project.name});
+      }
 
       // Mettre à jour l'état local
       const updatedItems = items.filter(item => item.id !== itemId);

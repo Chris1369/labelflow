@@ -45,6 +45,7 @@ export interface ProjectItem {
     name: string;
     position: string[]; // [centerX, centerY, width, height]
   }[];
+  objectItemTrainingId?: string;
   createdAt: string;
   updatedAt: string;
   __v?: number;
