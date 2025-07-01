@@ -142,7 +142,7 @@ export const addItemsActions = {
   },
 
   saveAllItems: async (projectId: string) => {
-    const { boundingBoxes, capturedImageUri, setIsSaving } =
+    const { boundingBoxes, capturedImageUri, setIsSaving, objectItemTrainingId } =
       useAddItemsStore.getState();
     const completedBoxes = boundingBoxes.filter((box) => box.isComplete);
 
@@ -176,6 +176,7 @@ export const addItemsActions = {
         type: "image/jpeg",
       } as any);
       formData.append("projectId", projectId);
+      formData.append("objectItemTrainingId", objectItemTrainingId as string);
       const labels = completedBoxes.map((box) => {
         // Debug log for each box
         console.log(`Processing box ${box.id}:`, {
