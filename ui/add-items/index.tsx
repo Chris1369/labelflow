@@ -6,6 +6,7 @@ import { LabelBottomSheet, LabelBottomSheetRef } from "@/components/organisms";
 import { theme } from "@/types/theme";
 import { useAddItemsStore } from "./useStore";
 import { addItemsActions } from "./actions";
+import { useProjectStore } from "@/ui/project/useStore";
 import {
   PermissionView,
   CameraViewComponent,
@@ -45,6 +46,8 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
     unlabeledListItems,
     currentUnlabeledIndex,
   } = useAddItemsStore();
+
+  const { currentProject } = useProjectStore();
 
   useEffect(() => {
     let mounted = true;
@@ -240,6 +243,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
           ref={bottomSheetRef}
           onSelectLabel={handleSelectLabel}
           hasExistingLabel={currentBoxId ? boundingBoxes.find(b => b.id === currentBoxId)?.isComplete ?? false : false}
+          labelCounters={currentProject?.labelCounter || []}
         />
       </View>
     );

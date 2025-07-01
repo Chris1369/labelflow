@@ -1,3 +1,9 @@
+export interface LabelCounter {
+  label: string;
+  count: number;
+  _id: string;
+}
+
 export interface Project {
   id: string;
   _id?: string; // MongoDB ID
@@ -6,6 +12,7 @@ export interface Project {
   items: string[]; // Array of ProjectItem IDs
   ownerId: string;
   isPublic: boolean;
+  labelCounter?: LabelCounter[]; // Array of label counters
   createdAt: string;
   updatedAt: string;
   __v?: number; // MongoDB version key

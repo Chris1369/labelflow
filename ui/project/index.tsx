@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import { theme } from "@/types/theme";
 import { projectActions } from "./actions";
 import { useProjectStore } from "./useStore";
 import { router } from "expo-router";
+import { LabelCounterBottomSheet, LabelCounterBottomSheetRef } from "@/components/organisms/LabelCounterBottomSheet";
 
 interface ProjectMenuItem {
   id: string;
@@ -37,6 +38,8 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
     error,
     updateProjectVisibility,
   } = useProjectStore();
+
+  const labelCounterBottomSheetRef = useRef<LabelCounterBottomSheetRef>(null);
 
   useEffect(() => {
     useProjectStore.getState().loadProject(projectId);
@@ -76,9 +79,9 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
     },
     {
       id: "reset",
-      title: "Réinitialiser",
+      title: "Entraîner le modèle",
       icon: "refresh",
-      onPress: projectActions.handleReset,
+      onPress: projectActions.startTraining,
       color: theme.colors.warning,
       variant: "warning",
     },
@@ -130,7 +133,17 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <View style={styles.header}>
-          <Text style={styles.title}>{currentProject?.name || "Projet"}</Text>
+          <View style={styles.titleContainer}>
+            <Text style={styles.title}>{currentProject?.name || "Projet"}</Text>
+            {currentProject?.labelCounter && currentProject.labelCounter.length > 0 && (
+              <TouchableOpacity
+                style={styles.eyeButton}
+                onPress={() => labelCounterBottomSheetRef.current?.open()}
+              >
+                <Ionicons name="eye" size={24} color={theme.colors.primary} />
+              </TouchableOpacity>
+            )}
+          </View>
           {currentProject?.description && (
             <Text style={styles.subtitle}>{currentProject.description}</Text>
           )}
@@ -207,6 +220,11 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
+
+      <LabelCounterBottomSheet
+        ref={labelCounterBottomSheetRef}
+        labelCounters={currentProject?.labelCounter || []}
+      />
     </SafeAreaView>
   );
 };
@@ -225,11 +243,23 @@ const styles = StyleSheet.create({
     marginTop: theme.spacing.xl,
     marginBottom: theme.spacing.xxl,
   },
-  title: {
-    fontSize: theme.fontSize.xxl,
-    fontWeight: "bold",
-    color: theme.colors.text,
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: theme.spacing.xs,
+  },
+  title: {
+    ...theme.fonts.title,
+    color: theme.colors.text,
+  },
+  eyeButton: {
+    marginLeft: theme.spacing.sm,
+    padding: theme.spacing.xs,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.md,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   subtitle: {
     fontSize: theme.fontSize.md,

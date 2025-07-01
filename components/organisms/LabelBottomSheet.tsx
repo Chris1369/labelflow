@@ -22,6 +22,7 @@ import { labelAPI } from '@/api/label.api';
 import { categoryAPI } from '@/api/category.api';
 import { Category } from '@/types/category';
 import { Label } from '@/types/label';
+import { LabelCounter } from '@/types/project';
 import { RecentLabelsManager } from '@/helpers/recentLabels';
 import { trainingClassAPI } from '@/api/trainingClass.api';
 
@@ -30,6 +31,7 @@ const { height: screenHeight } = Dimensions.get('window');
 interface LabelBottomSheetProps {
   onSelectLabel: (label: string) => void;
   hasExistingLabel?: boolean;
+  labelCounters?: LabelCounter[];
 }
 
 export interface LabelBottomSheetRef {
@@ -38,7 +40,7 @@ export interface LabelBottomSheetRef {
 }
 
 export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheetProps>(
-  ({ onSelectLabel, hasExistingLabel = false }, ref) => {
+  ({ onSelectLabel, hasExistingLabel = false, labelCounters = [] }, ref) => {
     const [isVisible, setIsVisible] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -358,22 +360,37 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
       }
     };
 
-    const renderLabel = ({ item }: { item: ObjectLabel & { isDynamic?: boolean; isRecent?: boolean } }) => (
-      <TouchableOpacity
-        style={[styles.labelItem, item.isRecent && styles.recentLabelItem]}
-        onPress={() => handleSelectLabel(item)}
-      >
-        <View style={styles.labelContent}>
-          <Text style={styles.labelText}>{item.name}</Text>
-          {item.isDynamic && (
-            <View style={styles.dynamicLabelIndicator} />
-          )}
-        </View>
-        <Text style={[styles.labelCategory, item.isRecent && styles.recentLabelCategory]}>
-          {item.category}
-        </Text>
-      </TouchableOpacity>
-    );
+    const renderLabel = ({ item }: { item: ObjectLabel & { isDynamic?: boolean; isRecent?: boolean } }) => {
+      // Find the counter for this label
+      const labelCounter = labelCounters.find(counter => 
+        counter.label.toLowerCase() === item.name.toLowerCase()
+      );
+      
+      return (
+        <TouchableOpacity
+          style={[styles.labelItem, item.isRecent && styles.recentLabelItem]}
+          onPress={() => handleSelectLabel(item)}
+        >
+          <View style={styles.labelContent}>
+            {item.isDynamic && (
+              <View style={styles.dynamicLabelIndicator} />
+            )}
+            <Text style={styles.labelText}>{item.name}</Text>
+          </View>
+          
+          <View style={styles.labelRightContent}>
+            {labelCounter && (
+              <View style={styles.counterBadge}>
+                <Text style={styles.counterText}>{labelCounter.count}</Text>
+              </View>
+            )}
+            <Text style={[styles.labelCategory, item.isRecent && styles.recentLabelCategory]}>
+              {item.category}
+            </Text>
+          </View>
+        </TouchableOpacity>
+      );
+    };
 
     const renderCategory = ({ item }: { item: { id: string; name: string; isDynamic: boolean } }) => (
       <TouchableOpacity
@@ -423,20 +440,18 @@ export const LabelBottomSheet = forwardRef<LabelBottomSheetRef, LabelBottomSheet
                 minHeight: Math.min(screenHeight * 0.5, screenHeight * 0.9 - keyboardHeight)
               }
             ]}>
-              {hasExistingLabel && (
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setIsVisible(false)}
-                >
-                  <Ionicons name="close" size={24} color={theme.colors.text} />
-                </TouchableOpacity>
-              )}
-              
               <View style={styles.handle} />
               
               <View style={styles.header}>
                 <Text style={styles.title}>Sélectionner un label</Text>
               </View>
+              
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setIsVisible(false)}
+              >
+                <Ionicons name="close" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
               
               <View style={styles.searchContainer}>
                 <Input
@@ -543,16 +558,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: theme.spacing.lg,
     paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.sm,
   },
   title: {
-    ...theme.fonts.title,
+    ...theme.fonts.subtitle,
     textAlign: 'center',
   },
   closeButton: {
     position: 'absolute',
-    right: theme.spacing.md,
-    top: theme.spacing.md,
+    right: theme.spacing.lg,
+    top: theme.spacing.lg,
     padding: theme.spacing.xs,
+    zIndex: 1,
   },
   searchContainer: {
     paddingHorizontal: theme.spacing.lg,
@@ -654,6 +671,28 @@ const styles = StyleSheet.create({
   },
   labelText: {
     ...theme.fonts.body,
+    marginLeft: theme.spacing.xs,
+  },
+  labelRightContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: theme.spacing.md,
+  },
+  counterBadge: {
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: theme.borderRadius.full,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    marginLeft: theme.spacing.sm,
+    minWidth: 24,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  counterText: {
+    ...theme.fonts.caption,
+    color: theme.colors.textSecondary,
+    fontWeight: '500',
   },
   labelCategory: {
     ...theme.fonts.caption,
@@ -668,7 +707,6 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: theme.colors.primary,
-    marginLeft: theme.spacing.sm,
   },
   emptyText: {
     ...theme.fonts.body,

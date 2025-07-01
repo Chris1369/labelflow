@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { useProjectStore } from './useStore';
 import { Alert } from 'react-native';
+import { trainingAnnotationAPI } from '@/api/trainingAnnotation.api';
 
 export const projectActions = {
   handleAddItems: async (projectId: string) => {
@@ -35,6 +36,54 @@ export const projectActions = {
 
   handleReset: () => {
     useProjectStore.getState().showModal('reset');
+  },
+
+  startTraining: async () => {
+    const { currentProject } = useProjectStore.getState();
+    
+    if (!currentProject) {
+      Alert.alert('Erreur', 'Aucun projet sélectionné');
+      return;
+    }
+
+    try {
+      Alert.alert(
+        'Démarrer l\'entraînement',
+        `Voulez-vous démarrer l'entraînement du modèle pour le projet "${currentProject.name}" ?`,
+        [
+          {
+            text: 'Annuler',
+            style: 'cancel',
+          },
+          {
+            text: 'Démarrer',
+            onPress: async () => {
+              try {
+                await trainingAnnotationAPI.startTraining(
+                  currentProject.name,
+                  100, // epochs
+                  8    // batch_size
+                );
+                
+                Alert.alert(
+                  'Entraînement démarré',
+                  'L\'entraînement du modèle a été lancé avec succès.'
+                );
+              } catch (error) {
+                console.error('Error starting training:', error);
+                Alert.alert(
+                  'Erreur',
+                  'Impossible de démarrer l\'entraînement. Vérifiez que le serveur est en ligne.'
+                );
+              }
+            },
+          },
+        ]
+      );
+    } catch (error) {
+      console.error('Error in startTraining:', error);
+      Alert.alert('Erreur', 'Une erreur est survenue');
+    }
   },
 
   handleDelete: () => {

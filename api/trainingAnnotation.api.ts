@@ -66,6 +66,35 @@ class TrainingAnnotationAPI {
   }
 
   /**
+   * Start model training for a project
+   * @param projectName - Name of the project
+   * @param epochs - Number of training epochs (default: 100)
+   * @param batchSize - Batch size for training (default: 8)
+   */
+  async startTraining(
+    projectName: string,
+    epochs: number = 100,
+    batchSize: number = 8
+  ): Promise<void> {
+    try {
+      const response = await axios.post(
+        `${this.baseURL}/training/start?projectName=${encodeURIComponent(projectName)}&epochs=${epochs}&batch_size=${batchSize}`,
+        {},
+        {
+          headers: {
+            'X-API-Key': this.apiKey,
+          },
+        }
+      );
+      
+      console.log('Training started successfully:', response.data);
+    } catch (error) {
+      console.error('Error starting training:', error);
+      throw handleApiError(error);
+    }
+  }
+
+  /**
    * Helper method to convert bounding box format from app to API format
    * App format: centerX, centerY, width, height (all 0-1)
    * API format: x, y, width, height (all 0-1, where x,y is center)
