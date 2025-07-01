@@ -1,7 +1,7 @@
 export const environment = process.env.APP_VARIANT || "development";
 const IS_DEV = environment === "development";
 const IS_STAGING = environment === "staging";
-const IP = "192.168.1.127";
+const IP = "192.168.1.133";
 
 interface EnvironmentValues {
   name: string;
