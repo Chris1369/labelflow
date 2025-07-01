@@ -1,6 +1,7 @@
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
 import { useTeamProjectsStore } from './useStore';
+import { useSelectTeamStore } from '../select-team/useStore';
 
 export const teamProjectsActions = {
   loadTeamProjects: async (teamId: string) => {
@@ -20,6 +21,7 @@ export const teamProjectsActions = {
   saveChanges: async (teamId: string) => {
     try {
       await useTeamProjectsStore.getState().saveChanges(teamId);
+      useSelectTeamStore.getState().refreshTeams?.();
       
       Alert.alert(
         'Succès',

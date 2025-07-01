@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 import { useTeamMembersStore, TeamMember } from './useStore';
 import { teamAPI } from '@/api/team.api';
 import { createSafeAction } from '@/helpers/safeAction';
+import { useSelectTeamStore } from '../select-team/useStore';
 
 const mockMembers: TeamMember[] = [
   {
@@ -79,6 +80,7 @@ export const teamMembersActions = {
         
         // Réinitialiser le formulaire
         useTeamMembersStore.getState().resetForm();
+        useSelectTeamStore.getState().refreshTeams?.();
         
         Alert.alert(
           'Succès',
