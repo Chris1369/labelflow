@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -13,10 +13,12 @@ import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/types/theme";
 import { projectActions } from "./actions";
 import { useProjectStore } from "./useStore";
-import { router } from "expo-router";
-import { LabelCounterBottomSheet, LabelCounterBottomSheetRef } from "@/components/organisms/LabelCounterBottomSheet";
+import { router, useFocusEffect } from "expo-router";
+import {
+  LabelCounterBottomSheet,
+  LabelCounterBottomSheetRef,
+} from "@/components/organisms/LabelCounterBottomSheet";
 import { buildMenuItems } from "./data";
-
 
 interface ProjectScreenProps {
   projectId: string;
@@ -35,14 +37,16 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
   const labelCounterBottomSheetRef = useRef<LabelCounterBottomSheetRef>(null);
 
   useEffect(() => {
-    useProjectStore.getState().loadProject(projectId);
-  }, [projectId]);
-
-  useEffect(() => {
     if (isModalVisible && modalType) {
       projectActions.showWarningModal();
     }
   }, [isModalVisible, modalType]);
+
+  useFocusEffect(
+    useCallback(() => {
+      useProjectStore.getState().loadProject(projectId);
+    }, [projectId])
+  );
 
   const menuItems = buildMenuItems(projectId);
 
@@ -86,14 +90,15 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
         <View style={styles.header}>
           <View style={styles.titleContainer}>
             <Text style={styles.title}>{currentProject?.name || "Projet"}</Text>
-            {currentProject?.labelCounter && currentProject.labelCounter.length > 0 && (
-              <TouchableOpacity
-                style={styles.eyeButton}
-                onPress={() => labelCounterBottomSheetRef.current?.open()}
-              >
-                <Ionicons name="eye" size={24} color={theme.colors.primary} />
-              </TouchableOpacity>
-            )}
+            {currentProject?.labelCounter &&
+              currentProject.labelCounter.length > 0 && (
+                <TouchableOpacity
+                  style={styles.eyeButton}
+                  onPress={() => labelCounterBottomSheetRef.current?.open()}
+                >
+                  <Ionicons name='eye' size={24} color={theme.colors.primary} />
+                </TouchableOpacity>
+              )}
           </View>
           {currentProject?.description && (
             <Text style={styles.subtitle}>{currentProject.description}</Text>
