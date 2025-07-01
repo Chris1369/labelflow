@@ -411,7 +411,7 @@ export const addItemsActions = {
 
   validateUnlabeledItem: async (projectId: string, listId: string) => {
     const store = useAddItemsStore.getState();
-    const { boundingBoxes, currentUnlabeledIndex, unlabeledListItems, setIsSaving } = store;
+    const { boundingBoxes, currentUnlabeledIndex, unlabeledListItems, setIsSaving , objectItemTrainingId} = store;
     
     if (!boundingBoxes.length || !listId) return;
     
@@ -442,6 +442,7 @@ export const addItemsActions = {
       const response = await unlabeledListAPI.validateItem(listId, currentItem._id, {
         projectId,
         labels,
+        objectItemTrainingId: objectItemTrainingId as string
       });
       
       console.log("Validate response:", response);

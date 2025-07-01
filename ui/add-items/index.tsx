@@ -23,10 +23,10 @@ interface AddItemsScreenProps {
   unlabeledListId?: string;
 }
 
-export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({ 
-  projectId: propProjectId, 
+export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
+  projectId: propProjectId,
   isForUnlabeled = false,
-  unlabeledListId 
+  unlabeledListId
 }) => {
   const params = useLocalSearchParams();
   const projectId = propProjectId || params.id as string;
@@ -55,10 +55,11 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
     const initialize = async () => {
       try {
         if (!mounted) return;
-        
+
         // Set the mode in the store
         useAddItemsStore.getState().setIsForUnlabeled(isForUnlabeled);
-        
+        useAddItemsStore.getState().generateObjectItemTrainingId();
+
         if (isForUnlabeled && unlabeledListId) {
           // Load UnlabeledList items
           await addItemsActions.loadUnlabeledList(unlabeledListId);
@@ -66,13 +67,13 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
           // Normal camera mode
           // Add delay to prevent immediate camera access
           await new Promise(resolve => setTimeout(resolve, 300));
-          
+
           if (mounted) {
             const hasPermission = await addItemsActions.checkCameraPermission();
             if (!hasPermission && mounted) {
               await addItemsActions.requestCameraPermission();
             }
-            
+
             // Mark camera as ready after another small delay
             if (mounted) {
               await new Promise(resolve => setTimeout(resolve, 200));
@@ -263,10 +264,10 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
           onPress={() => {
             router.push({
               pathname: '/(project)/[id]/create-list',
-              params: { 
+              params: {
                 id: projectId,
                 mode: 'add',
-                listId: unlabeledListId 
+                listId: unlabeledListId
               }
             });
           }}
@@ -288,7 +289,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
       </View>
     );
   }
-  
+
   // Show camera only in normal mode
   if (!isForUnlabeled) {
     return (

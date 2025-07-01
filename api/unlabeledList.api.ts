@@ -95,6 +95,7 @@ class UnlabeledListAPI {
     data: {
       projectId: string;
       labels: Array<{ name: string; position: number[] }>;
+      objectItemTrainingId: string;
     }
   ): Promise<{ projectItem: any; message: string }> {
     try {
