@@ -19,7 +19,6 @@ interface AddItemsState {
   currentUnlabeledIndex: number;
   isForUnlabeled: boolean;
   unlabeledListId: string | null;
-  objectItemTrainingId: string | null;
 }
 
 interface AddItemsActions {
@@ -44,7 +43,7 @@ interface AddItemsActions {
   nextUnlabeledItem: () => void;
   setCurrentUnlabeledImage: (uri: string) => void;
   setCurrentUnlabeledIndex: (index: number) => void;
-  generateObjectItemTrainingId: () => void;
+  generateObjectItemTrainingId: () => string;
 }
 
 const createInitialBox = (withUnknownLabel: boolean = false): BoundingBox => ({
@@ -74,7 +73,6 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     currentUnlabeledIndex: 0,
     isForUnlabeled: false,
     unlabeledListId: null,
-    objectItemTrainingId: null, 
     setPermission: (hasPermission) => set({ hasPermission }),
 
     setPermissionStatus: (permissionStatus) => set({ permissionStatus }),
@@ -197,8 +195,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     setCurrentUnlabeledIndex: (index) => set({ currentUnlabeledIndex: index }),
 
     generateObjectItemTrainingId: () => {
-      const id = uuid.v4();
-      set({ objectItemTrainingId: id });
+      return uuid.v4();
     },
   })
 );

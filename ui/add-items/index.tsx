@@ -58,8 +58,6 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
 
         // Set the mode in the store
         useAddItemsStore.getState().setIsForUnlabeled(isForUnlabeled);
-        useAddItemsStore.getState().generateObjectItemTrainingId();
-
         if (isForUnlabeled && unlabeledListId) {
           // Load UnlabeledList items
           await addItemsActions.loadUnlabeledList(unlabeledListId);

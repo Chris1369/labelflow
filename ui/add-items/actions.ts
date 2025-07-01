@@ -142,9 +142,10 @@ export const addItemsActions = {
   },
 
   saveAllItems: async (projectId: string) => {
-    const { boundingBoxes, capturedImageUri, setIsSaving, objectItemTrainingId } =
+    const { boundingBoxes, capturedImageUri, setIsSaving, generateObjectItemTrainingId } =
       useAddItemsStore.getState();
     const completedBoxes = boundingBoxes.filter((box) => box.isComplete);
+    const objectItemTrainingId = generateObjectItemTrainingId();
 
     if (completedBoxes.length === 0) {
       Alert.alert(
@@ -284,7 +285,6 @@ export const addItemsActions = {
                 // Réinitialiser pour permettre de capturer une nouvelle image
                 useAddItemsStore.getState().resetCapture();
                 // generer un nouvel objectItemTrainingId
-                useAddItemsStore.getState().generateObjectItemTrainingId();
               } catch (error) {
                 console.error("Error in Continue action:", error);
               }
@@ -415,9 +415,11 @@ export const addItemsActions = {
 
   validateUnlabeledItem: async (projectId: string, listId: string) => {
     const store = useAddItemsStore.getState();
-    const { boundingBoxes, currentUnlabeledIndex, unlabeledListItems, setIsSaving , objectItemTrainingId} = store;
+    const { boundingBoxes, currentUnlabeledIndex, unlabeledListItems, setIsSaving , generateObjectItemTrainingId} = store;
     
     if (!boundingBoxes.length || !listId) return;
+
+    const objectItemTrainingId = generateObjectItemTrainingId();
     
     try {
       setIsSaving(true);
