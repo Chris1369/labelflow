@@ -19,7 +19,8 @@ interface SelectTeamActions {
   searchTeams: (query: string) => Promise<void>;
   selectTeam: (team: Team) => void;
   resetSelection: () => void;
-  loadTeams: () => Promise<void>;
+  initTeams: ({teams, refreshTeams}: {teams: Team[], refreshTeams?: () => void}) => void;
+  refreshTeams?: () => void;
 }
 
 export const useSelectTeamStore = create<SelectTeamState & SelectTeamActions>(
@@ -34,21 +35,9 @@ export const useSelectTeamStore = create<SelectTeamState & SelectTeamActions>(
 
       set({ isSearching: true });
       try {
-        const searchResults = await teamAPI.getAll({
-          search: query,
-          limit: 50
-        });
-        
-        // Handle both array and paginated response
-        let teams: Team[] = [];
-        if (Array.isArray(searchResults)) {
-          teams = searchResults;
-        } else if (searchResults && 'teams' in searchResults) {
-          teams = searchResults.teams || [];
-        }
-        
+        const searchResults = await teamAPI.searchMyTeam({query});
         set({ 
-          filteredTeams: teams,
+          filteredTeams: searchResults,
           isSearching: false 
         });
       } catch (error) {
@@ -92,26 +81,8 @@ export const useSelectTeamStore = create<SelectTeamState & SelectTeamActions>(
 
     resetSelection: () => set({ selectedTeam: null, searchQuery: "" }),
 
-    loadTeams: async () => {
-      set({ isLoading: true, error: null });
-      try {
-        // Utiliser getMyTeams pour récupérer les teams où l'utilisateur est membre ou owner
-        const teams = await teamAPI.getMyTeams();
-
-        set({
-          teams: teams,
-          filteredTeams: teams,
-          isLoading: false,
-        });
-      } catch (error: any) {
-        console.error("Error loading teams:", error);
-        set({
-          error: error.message || "Failed to load teams",
-          isLoading: false,
-          teams: [],
-          filteredTeams: [],
-        });
-      }
+    initTeams: ({teams, refreshTeams}: {teams: Team[], refreshTeams?: () => void}) => {
+      set({ teams, filteredTeams: teams, refreshTeams });
     },
   };
   }

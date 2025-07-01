@@ -14,17 +14,22 @@ import { theme } from "@/types/theme";
 import { useSelectTeamStore } from "./useStore";
 import { selectTeamActions } from "./actions";
 import { Team } from "@/types/team";
+import { useMyTeams } from "@/hooks/queries";
 
 export const SelectTeamScreen: React.FC = () => {
-  const { filteredTeams, searchQuery, isLoading, isSearching, error } =
+  const { filteredTeams, searchQuery, isSearching, error, initTeams } =
     useSelectTeamStore();
 
+  const { data: teams, isLoading, refetch } = useMyTeams();
+
   useEffect(() => {
-    useSelectTeamStore.getState().loadTeams();
+    if (teams) {
+      initTeams({ teams, refreshTeams: refetch });
+    }
     return () => {
       useSelectTeamStore.getState().resetSelection();
     };
-  }, []);
+  }, [teams]);
 
   const renderTeam = ({ item }: { item: Team }) => (
     <TouchableOpacity
@@ -122,7 +127,7 @@ export const SelectTeamScreen: React.FC = () => {
           <Text style={styles.errorText}>{error}</Text>
           <TouchableOpacity
             style={styles.retryButton}
-            onPress={() => useSelectTeamStore.getState().loadTeams()}
+            onPress={() => refetch()}
           >
             <Text style={styles.retryText}>Réessayer</Text>
           </TouchableOpacity>

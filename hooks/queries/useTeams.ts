@@ -71,3 +71,18 @@ export const useTeamProjects = (teamId: string, enabled = true) => {
     enabled: enabled && !!teamId,
   });
 };
+
+
+export const useMyTeams = () => {
+  return useQuery<Team[], Error>({
+    queryKey: teamKeys.list({ my: true }),
+    queryFn: async () => {
+      const teams = await teamAPI.getMyTeams();
+      // Sort labels alphabetically
+      const sortedTeams = teams.sort((a, b) => 
+        a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      );
+      return sortedTeams;
+    },
+  });
+};

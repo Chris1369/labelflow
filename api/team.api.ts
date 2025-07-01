@@ -68,6 +68,45 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
     }
   }
 
+
+  async searchMyTeam({query}: {query: string}): Promise<Team[]> {
+    try {
+      // Récupérer l'ID de l'utilisateur actuel
+      const userId = await getCurrentUserId();
+
+      // Utiliser l'endpoint /teams/owner/:ownerId
+      const response = await axiosInstance.get(
+        `${this.basePath}/owner/${userId}`,
+        {
+          params:{
+            search: query
+          }
+        }
+      );
+
+      // La réponse peut avoir une structure paginée similaire aux projects
+      const result = handleApiResponse<
+        | {
+            teams?: Team[];
+            total?: number;
+            totalPage?: number;
+            page?: number;
+            limit?: number;
+          }
+        | Team[]
+      >(response);
+
+      // Gérer les deux types de réponse possibles
+      if (Array.isArray(result)) {
+        return result;
+      }
+      return result.teams || [];
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+  
+
   async getTeamsByOwnerId(ownerId: string): Promise<Team[]> {
     try {
       const response = await axiosInstance.get(

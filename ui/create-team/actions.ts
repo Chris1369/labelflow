@@ -1,11 +1,13 @@
 import { useCreateTeamStore } from './useStore';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
+import { useSelectTeamStore } from '../select-team/useStore';
 
 export const createTeamActions = {
   createTeam: async () => {
     // Utiliser la méthode createTeam du store qui gère déjà tout
     await useCreateTeamStore.getState().createTeam();
+    useSelectTeamStore.getState().refreshTeams?.();
   },
   
   addCurrentEmail: () => {
