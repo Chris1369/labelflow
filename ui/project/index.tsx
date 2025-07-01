@@ -20,6 +20,7 @@ import {
   LabelCounterBottomSheetRef,
 } from "@/components/organisms/LabelCounterBottomSheet";
 import { buildMenuItems } from "./data";
+import { useProjectDetails } from "@/hooks/queries/useProjects";
 
 interface ProjectScreenProps {
   projectId: string;
@@ -27,13 +28,18 @@ interface ProjectScreenProps {
 
 export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
   const {
-    currentProject,
     isModalVisible,
     modalType,
-    isLoading,
+
     error,
     updateProjectVisibility,
   } = useProjectStore();
+
+  const {
+    data: currentProject,
+    refetch,
+    isLoading,
+  } = useProjectDetails(projectId);
 
   const labelCounterBottomSheetRef = useRef<LabelCounterBottomSheetRef>(null);
 
@@ -45,7 +51,7 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
 
   useFocusEffect(
     useCallback(() => {
-      useProjectStore.getState().loadProject(projectId);
+      refetch();
     }, [projectId])
   );
 
