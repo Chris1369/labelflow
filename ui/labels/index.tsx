@@ -24,7 +24,6 @@ export const LabelsScreen: React.FC = () => {
   const {
     filteredLabels,
     searchQuery,
-    isLoading,
     isSearching,
     error,
     setSearchQuery,
@@ -33,7 +32,7 @@ export const LabelsScreen: React.FC = () => {
   } = useLabelsStore();
 
   // fetch labels
-  const { data: labels, refetch } = useMyLabels(includePublic);
+  const { data: labels, isLoading, refetch } = useMyLabels(includePublic);
 
   useEffect(() => {
     if (labels) {
