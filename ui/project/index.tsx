@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Switch,
+  TextStyle,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -208,7 +209,7 @@ const styles = StyleSheet.create({
   title: {
     ...theme.fonts.title,
     color: theme.colors.text,
-  },
+  } as TextStyle,
   eyeButton: {
     marginLeft: theme.spacing.sm,
     padding: theme.spacing.xs,
