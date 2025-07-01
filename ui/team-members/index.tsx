@@ -11,8 +11,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { Input, Button } from "../../components/atoms";
 import { theme } from "../../types/theme";
-import { useTeamMembersStore, TeamMember } from "./useStore";
+import { useTeamMembersStore } from "./useStore";
 import { teamMembersActions } from "./actions";
+import { TeamMember } from "@/types/team";
 
 interface TeamMembersScreenProps {
   teamId: string;

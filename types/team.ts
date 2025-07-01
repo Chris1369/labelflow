@@ -32,11 +32,14 @@ export interface AddMemberRequest {
 
 export interface TeamMember {
   id: string;
+  name?: string;
+  username?: string;
   email: string;
-  name: string;
-  role?: string;
+  role: "owner" | "admin" | "member";
   joinedAt?: string;
 }
+
+
 
 export interface TeamInvitation {
   id: string;

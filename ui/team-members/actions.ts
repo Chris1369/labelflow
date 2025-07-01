@@ -1,8 +1,9 @@
 import { Alert } from 'react-native';
-import { useTeamMembersStore, TeamMember } from './useStore';
+import { useTeamMembersStore } from './useStore';
 import { teamAPI } from '@/api/team.api';
 import { createSafeAction } from '@/helpers/safeAction';
 import { useSelectTeamStore } from '../select-team/useStore';
+import { TeamMember } from '@/types/team';
 
 const mockMembers: TeamMember[] = [
   {

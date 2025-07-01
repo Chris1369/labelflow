@@ -1,13 +1,5 @@
+import { TeamMember } from "@/types/team";
 import { create } from "zustand";
-
-export interface TeamMember {
-  id: string;
-  name?: string;
-  username?: string;
-  email: string;
-  role: "owner" | "admin" | "member";
-  joinedAt?: string;
-}
 
 interface TeamMembersState {
   teamId: string;
