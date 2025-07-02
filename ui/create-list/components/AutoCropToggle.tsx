@@ -1,19 +1,23 @@
-import React from 'react';
-import { View, Text, Switch, StyleSheet } from 'react-native';
-import { theme } from '@/types/theme';
+import React from "react";
+import { View, Text, Switch, StyleSheet } from "react-native";
+import { theme } from "@/types/theme";
 
 interface AutoCropToggleProps {
   value: boolean;
   onChange: (value: boolean) => void;
 }
 
-export const AutoCropToggle: React.FC<AutoCropToggleProps> = ({ value, onChange }) => {
+export const AutoCropToggle: React.FC<AutoCropToggleProps> = ({
+  value,
+  onChange,
+}) => {
   return (
     <View style={styles.switchContainer}>
       <View style={styles.switchLabel}>
-        <Text style={styles.switchLabelText}>Crop auto 640x640</Text>
+        <Text style={styles.switchLabelText}>Multi selection</Text>
         <Text style={styles.switchDescription}>
-          Redimensionne automatiquement les images
+          Sélectionne plusieurs images en même temps, le crop sera appliqué à
+          toutes les images sélectionnées
         </Text>
       </View>
       <Switch
@@ -24,9 +28,7 @@ export const AutoCropToggle: React.FC<AutoCropToggleProps> = ({ value, onChange 
           true: theme.colors.primary + "80",
         }}
         thumbColor={
-          value
-            ? theme.colors.primary
-            : theme.colors.backgroundSecondary
+          value ? theme.colors.primary : theme.colors.backgroundSecondary
         }
       />
     </View>

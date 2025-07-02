@@ -61,12 +61,13 @@ const styles = StyleSheet.create({
   imageGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    marginHorizontal: -theme.spacing.xs, // Compense les marges des cartes
   },
   imageCard: {
     width: 106, // Dimensions fixes
     height: 106, // Dimensions fixes
     marginBottom: theme.spacing.md,
+    marginHorizontal: theme.spacing.xs,
     borderRadius: theme.borderRadius.md,
     overflow: 'hidden',
     position: 'relative',
@@ -90,6 +91,7 @@ const styles = StyleSheet.create({
     width: 106, // Dimensions fixes
     height: 106, // Dimensions fixes
     marginBottom: theme.spacing.md,
+    marginHorizontal: theme.spacing.xs,
     borderRadius: theme.borderRadius.md,
     borderWidth: 2,
     borderColor: theme.colors.border,
