@@ -13,7 +13,7 @@ export const TeamHeader: React.FC<TeamHeaderProps> = ({ team }) => {
     <View style={styles.header}>
       <Text style={styles.title}>{team?.name || "Équipe"}</Text>
       {team?.description && (
-        <Text style={styles.subtitle}>{team.description}</Text>
+        <Text style={styles.subtitle}>{team?.description}</Text>
       )}
       <View style={styles.statsContainer}>
         <View style={styles.stat}>

@@ -10,7 +10,6 @@ interface TeamState {
 
 interface TeamActions {
   setCurrentTeam: (team: Team | null) => void;
-  loadTeam: (teamId: string) => Promise<void>;
 }
 
 export const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
@@ -19,17 +18,5 @@ export const useTeamStore = create<TeamState & TeamActions>((set, get) => ({
   error: null,
 
   setCurrentTeam: (team) => set({ currentTeam: team }),
-  
-  loadTeam: async (teamId: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const team = await teamAPI.getOne(teamId);
-      set({ currentTeam: team, isLoading: false });
-    } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to load team',
-        isLoading: false 
-      });
-    }
-  },
+
 }));

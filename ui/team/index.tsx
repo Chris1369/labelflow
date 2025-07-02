@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/types/theme";
-import { teamActions } from "./actions";
 import { useTeamStore } from "./useStore";
 import {
   TeamHeader,
@@ -12,36 +11,23 @@ import {
   TeamBottomSection,
   type MenuItemData,
 } from "./components";
+import { useTeamDetails } from "@/hooks/queries";
+import { buildMenuItems } from "./data";
 
 interface TeamScreenProps {
   teamId: string;
 }
 
 export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
-  const { currentTeam, isLoading, error } = useTeamStore();
+  const { setCurrentTeam, currentTeam } = useTeamStore();
+  const { data, isLoading, error: teamError, refetch } = useTeamDetails(teamId);
+  const error = teamError?.message;
 
   useEffect(() => {
-    useTeamStore.getState().loadTeam(teamId);
-  }, [teamId]);
+    setCurrentTeam(data || null);
+  }, [data]);
 
-  const menuItems: MenuItemData[] = [
-    {
-      id: "members",
-      title: "Gestion des membres",
-      description: "Ajouter ou retirer des membres de l'équipe",
-      icon: "people",
-      onPress: () => teamActions.handleMembers(teamId),
-      color: theme.colors.primary,
-    },
-    {
-      id: "projects",
-      title: "Gestion des projets",
-      description: "Sélectionner ou retirer des projets",
-      icon: "folder",
-      onPress: () => teamActions.handleProjects(teamId),
-      color: theme.colors.info,
-    },
-  ];
+  const menuItems: MenuItemData[] = buildMenuItems(teamId);
 
   if (isLoading) {
     return (
@@ -54,9 +40,9 @@ export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
   if (error) {
     return (
       <SafeAreaView style={styles.container}>
-        <TeamErrorView 
-          error={error} 
-          onRetry={() => useTeamStore.getState().loadTeam(teamId)} 
+        <TeamErrorView
+          error={error}
+          onRetry={() => refetch()}
         />
       </SafeAreaView>
     );
