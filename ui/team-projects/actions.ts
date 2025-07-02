@@ -7,7 +7,6 @@ export const teamProjectsActions = {
   loadTeamProjects: async (teamId: string) => {
     const store = useTeamProjectsStore.getState();
     await store.loadTeamProjects(teamId);
-    await store.loadAllProjects();
   },
 
   searchProjects: (query: string) => {

@@ -1,25 +1,17 @@
 import { create } from "zustand";
-import { Project } from "@/types/project";
 import { teamAPI } from "@/api/team.api";
-import { projectAPI } from "@/api/project.api";
-import { useSettingsStore } from "@/ui/settings/useStore";
 import { debounce } from 'lodash';
 
 interface TeamProjectsState {
-  teamProjects: Project[]; // Projets actuellement liés à la team
-  allProjects: Project[]; // Tous les projets disponibles
   selectedProjects: Set<string>;
-  filteredProjects: Project[];
   searchQuery: string;
-  isLoading: boolean;
+  filterQuery: string;
   isUpdating: boolean;
-  isSearching: boolean;
   error: string | null;
 }
 
 interface TeamProjectsActions {
   loadTeamProjects: (teamId: string) => Promise<void>;
-  loadAllProjects: () => Promise<void>;
   setSelectedProjects: (projectIds: string[]) => void;
   setSearchQuery: (query: string) => void;
   setIsUpdating: (isUpdating: boolean) => void;
@@ -34,60 +26,22 @@ export const useTeamProjectsStore = create<
   // Create debounced search function
   const debouncedSearch = debounce(async (query: string) => {
     if (!query || query.trim().length < 2) {
-      const { allProjects } = get();
-      set({ filteredProjects: allProjects, isSearching: false });
+      set({ filterQuery: '' });
       return;
     }
 
-    set({ isSearching: true });
-    try {
-      const includePublic = useSettingsStore.getState().includePublicProjects;
-      const searchResults = await projectAPI.getAll({
-        search: query,
-        limit: 50,
-        getIsPublic: includePublic
-      });
-      
-      // Handle both array and paginated response
-      let projects: Project[] = [];
-      if (Array.isArray(searchResults)) {
-        projects = searchResults;
-      } else if (searchResults && 'projects' in searchResults) {
-        projects = searchResults.projects || [];
-      }
-      
-      set({ 
-        filteredProjects: projects,
-        isSearching: false 
-      });
-    } catch (error) {
-      console.error('Search error:', error);
-      // Fallback to local search
-      const { allProjects } = get();
-      const filtered = allProjects.filter(project => 
-        project.name.toLowerCase().includes(query.toLowerCase()) ||
-        project.description?.toLowerCase().includes(query.toLowerCase())
-      );
-      set({ 
-        filteredProjects: filtered,
-        isSearching: false 
-      });
-    }
+    set({ filterQuery: query });
   }, 300);
 
   return {
-  teamProjects: [],
-  allProjects: [],
   selectedProjects: new Set(),
-  filteredProjects: [],
   searchQuery: "",
-  isLoading: false,
+  filterQuery: "",
   isUpdating: false,
-  isSearching: false,
   error: null,
 
   loadTeamProjects: async (teamId: string) => {
-    set({ isLoading: true, error: null });
+    set({ error: null });
     try {
       // Charger d'abord les détails de la team pour obtenir les IDs des projets
       const team = await teamAPI.getOne(teamId);
@@ -99,37 +53,12 @@ export const useTeamProjectsStore = create<
       // On stocke juste les IDs sélectionnés
 
       set({
-        teamProjects: [], // On va les charger avec loadAllProjects
         selectedProjects: new Set(teamProjectIds),
-        isLoading: false,
       });
     } catch (error: any) {
       console.error("Error loading team projects:", error);
       set({
         error: error.message || "Failed to load team projects",
-        isLoading: false,
-      });
-    }
-  },
-
-  loadAllProjects: async () => {
-    try {
-      // Récupérer le paramètre des settings
-      const includePublic = useSettingsStore.getState().includePublicProjects;
-      
-      // Charger tous les projets de l'utilisateur avec le paramètre includePublic
-      const projects = await projectAPI.getMyProjects({includePublic});
-
-      // S'assurer que projects est un tableau
-      const projectArray = Array.isArray(projects) ? projects : [];
-      set({
-        allProjects: projectArray,
-        filteredProjects: projectArray,
-      });
-    } catch (error: any) {
-      console.error("Error loading all projects:", error);
-      set({
-        error: error.message || "Failed to load projects",
       });
     }
   },
