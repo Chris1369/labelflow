@@ -8,16 +8,16 @@ Chaque hook retourne un objet avec toutes ces propriétés :
 
 ```typescript
 const {
-  data,           // Les données récupérées
-  error,          // L'erreur si la requête a échoué
-  isLoading,      // true lors du premier chargement
-  isFetching,     // true pendant tout rechargement (incluant refetch)
-  isSuccess,      // true si la requête a réussi
-  isError,        // true si la requête a échoué
-  refetch,        // Fonction pour recharger manuellement
-  isRefetching,   // true pendant un refetch
-  status,         // 'loading' | 'error' | 'success'
-  fetchStatus,    // 'fetching' | 'paused' | 'idle'
+  data, // Les données récupérées
+  error, // L'erreur si la requête a échoué
+  isLoading, // true lors du premier chargement
+  isFetching, // true pendant tout rechargement (incluant refetch)
+  isSuccess, // true si la requête a réussi
+  isError, // true si la requête a échoué
+  refetch, // Fonction pour recharger manuellement
+  isRefetching, // true pendant un refetch
+  status, // 'loading' | 'error' | 'success'
+  fetchStatus, // 'fetching' | 'paused' | 'idle'
 } = useHook();
 ```
 
@@ -35,23 +35,22 @@ const CategoriesComponent = () => {
     isFetching,
     error,
     refetch,
-    isRefetching
+    isRefetching,
   } = useCategories();
-  
+
   // Récupérer les catégories de l'utilisateur
-  const { 
-    data: myCategories,
-    refetch: refetchMyCategories
-  } = useMyCategories(true);
-  
+  const { data: myCategories, refetch: refetchMyCategories } =
+    useMyCategories(true);
+
   if (isLoading) return <ActivityIndicator />;
-  if (error) return (
-    <View>
-      <Text>Erreur: {error.message}</Text>
-      <Button title="Réessayer" onPress={() => refetch()} />
-    </View>
-  );
-  
+  if (error)
+    return (
+      <View>
+        <Text>Erreur: {error.message}</Text>
+        <Button title='Réessayer' onPress={() => refetch()} />
+      </View>
+    );
+
   return (
     <>
       {isRefetching && <Text>Mise à jour...</Text>}
@@ -69,12 +68,14 @@ const CategoriesComponent = () => {
 ## Hooks disponibles
 
 ### Categories
+
 - `useCategories()` - Toutes les catégories
 - `useMyCategories(includePublic)` - Catégories de l'utilisateur
 - `usePublicCategories()` - Catégories publiques uniquement
 - `useCategoryDetails(id)` - Détails d'une catégorie
 
 ### Labels
+
 - `useLabels()` - Tous les labels
 - `useMyLabels(includePublic)` - Labels de l'utilisateur
 - `usePublicLabels()` - Labels publics uniquement
@@ -82,12 +83,14 @@ const CategoriesComponent = () => {
 - `useLabelDetails(id)` - Détails d'un label
 
 ### Projects
+
 - `useProjects(filters)` - Tous les projets avec filtres
-- `useUserProjects(includePublic)` - Projets de l'utilisateur
+- `useMyProjects({includePublic, withTeamsProjects, searchQuery})` - Projets de l'utilisateur
 - `useProjectsByOwner(ownerId)` - Projets par propriétaire
 - `useProjectDetails(id)` - Détails d'un projet
 
 ### Teams
+
 - `useTeams()` - Équipes de l'utilisateur
 - `useTeamsByOwner(ownerId)` - Équipes par propriétaire
 - `useTeamDetails(id)` - Détails d'une équipe
@@ -106,7 +109,7 @@ const ProjectScreen = ({ projectId }: { projectId: string }) => {
     isError,
     error,
     refetch,
-    isFetching
+    isFetching,
   } = useProjectDetails(projectId);
 
   // Utilisation dans des handlers
@@ -135,19 +138,19 @@ Les hooks acceptent aussi des options React Query :
 
 ```typescript
 const { data, refetch } = useProjectDetails(projectId, {
-  enabled: !!projectId,              // Activer/désactiver la requête
-  staleTime: 5 * 60 * 1000,          // Données considérées fraîches pendant 5 minutes
-  cacheTime: 10 * 60 * 1000,         // Garder en cache pendant 10 minutes
-  refetchOnWindowFocus: true,        // Recharger au focus
-  refetchOnReconnect: true,          // Recharger à la reconnexion
-  retry: 3,                          // Nombre de tentatives en cas d'échec
-  retryDelay: attemptIndex => Math.min(1000 * 2 ** attemptIndex, 30000),
+  enabled: !!projectId, // Activer/désactiver la requête
+  staleTime: 5 * 60 * 1000, // Données considérées fraîches pendant 5 minutes
+  cacheTime: 10 * 60 * 1000, // Garder en cache pendant 10 minutes
+  refetchOnWindowFocus: true, // Recharger au focus
+  refetchOnReconnect: true, // Recharger à la reconnexion
+  retry: 3, // Nombre de tentatives en cas d'échec
+  retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   onSuccess: (data) => {
     console.log('Données chargées:', data);
   },
   onError: (error) => {
     console.error('Erreur:', error);
-  }
+  },
 });
 ```
 

@@ -1,6 +1,7 @@
 import { router } from "expo-router";
 import { useHomeStore } from "./useStore";
 import { Alert } from "react-native";
+import { queryClient } from "@/providers/QueryProvider";
 
 export const homeActions = {
   handleSelectProject: () => {
@@ -38,6 +39,7 @@ export const homeActions = {
         text: "Déconnexion",
         onPress: () => {
           // TODO: Clear user session
+          queryClient.clear();
           router.replace("/(auth)/signin");
         },
         style: "destructive",

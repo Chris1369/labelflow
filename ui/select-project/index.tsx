@@ -22,7 +22,7 @@ export const SelectProjectScreen: React.FC = () => {
   const createProjectBottomSheetRef = useRef<CreateProjectBottomSheetRef>(null);
   const includePublic = useSettingsStore.getState().includePublicProjects;
 
-  const { projects, isLoading, error: projectsError, refetch } = useMyProjects({ includePublic, searchQuery: filterQuery });
+  const { projects, isLoading, error: projectsError, refetch } = useMyProjects({ includePublic, withTeamsProjects: true, searchQuery: filterQuery });
   const error = projectsError?.message;
 
   const handleCreateProject = () => {

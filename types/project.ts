@@ -83,3 +83,9 @@ export interface ProjectItemsResponse {
   page: number;
   limit: number;
 }
+
+export interface ProjectQueryParams {
+  includePublic: boolean;
+  withTeamsProjects?: boolean;
+  searchQuery?: string;
+}

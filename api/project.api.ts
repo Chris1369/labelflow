@@ -6,6 +6,7 @@ import {
   Project,
   CreateProjectRequest,
   UpdateProjectRequest,
+  ProjectQueryParams,
 } from "@/types/project";
 
 class ProjectAPI extends BaseAPI<
@@ -37,7 +38,7 @@ class ProjectAPI extends BaseAPI<
   }
 
   // Méthodes spécifiques aux projets
-  async getMyProjects({includePublic, searchQuery}: {includePublic: boolean, searchQuery?: string}): Promise<{projects: Project[], total: number}> {
+  async getMyProjects({includePublic,withTeamsProjects, searchQuery}:ProjectQueryParams): Promise<{projects: Project[], total: number}> {
     try {
       // Récupérer l'ID de l'utilisateur actuel
       const userId = await getCurrentUserId();
@@ -46,6 +47,7 @@ class ProjectAPI extends BaseAPI<
       const response = await axiosInstance.get(`${this.basePath}/owner/${userId}`, {
         params: {
           getIsPublic: includePublic,
+          withTeamsProjects: withTeamsProjects,
           ...(searchQuery && { search: searchQuery, limit: 50 }), 
         }
       });

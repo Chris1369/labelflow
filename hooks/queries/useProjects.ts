@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { projectAPI } from '@/api/project.api';
-import { Project } from '@/types/project';
+import { Project, ProjectQueryParams } from '@/types/project';
 
 // Query keys
 export const projectKeys = {
@@ -23,17 +23,6 @@ export const useProjects = (filters?: { search?: string; isPublic?: boolean }) =
         return result;
       }
       return result.data || [];
-    },
-  });
-};
-
-// Hook to get user projects
-export const useUserProjects = (includePublic: boolean = false) => {
-  return useQuery<Project[], Error>({
-    queryKey: projectKeys.list({ userProjects: true, includePublic }),
-    queryFn: async () => {
-      const projects = await projectAPI.getMyProjects({includePublic});
-      return projects.projects;
     },
   });
 };
@@ -63,10 +52,10 @@ export const useProjectDetails = (projectId: string, enabled = true) => {
 };
 
 // Hook to get user's own projects
-export const useMyProjects = ({includePublic, searchQuery}: {includePublic: boolean, searchQuery?: string}) => {
+export const useMyProjects = ({includePublic, withTeamsProjects, searchQuery}: ProjectQueryParams) => {
  const {data, error, isLoading, refetch} = useQuery<{projects: Project[], total: number}, Error>({
-    queryKey: projectKeys.list({ my: true, includePublic, searchQuery }),
-    queryFn: async () =>await projectAPI.getMyProjects({includePublic, searchQuery})
+    queryKey: projectKeys.list({ my: true, includePublic, withTeamsProjects, searchQuery }),
+    queryFn: async () =>await projectAPI.getMyProjects({includePublic, withTeamsProjects, searchQuery})
   });
 
   return {
