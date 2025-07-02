@@ -101,16 +101,8 @@ class CategoryAPI extends BaseAPI<Category, CreateCategoryRequest, UpdateCategor
     }
   }
 
-  async removeLabel(categoryId: string, labelId: string): Promise<Category> {
-    try {
-      const response = await axiosInstance.delete(
-        `${this.basePath}/${categoryId}/labels/${labelId}`
-      );
-      return handleApiResponse<Category>(response);
-    } catch (error) {
-      throw handleApiError(error);
-    }
-  }
+  // Note: To remove labels, use the update method with the new labels array
+  // The backend doesn't support DELETE on individual labels
 
   async searchCategories(query: string): Promise<Category[]> {
     try {

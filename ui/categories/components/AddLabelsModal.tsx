@@ -4,14 +4,13 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Modal,
   FlatList,
   ActivityIndicator,
   Alert,
-  KeyboardAvoidingView,
-  Platform,
+  ScrollView,
 } from 'react-native';
 import { Input, Button } from '@/components/atoms';
+import { BottomSheet } from '@/components/molecules/BottomSheet';
 import { theme } from '@/types/theme';
 import { categoryAPI } from '@/api/category.api';
 import { useAddLabelsModalStore } from './addLabelsModal.store';
@@ -59,6 +58,7 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
     }
   }, [isVisible, category.labels, labels]);
 
+
   const handleSubmit = async () => {
     // Extract label IDs from the category labels
     const existingLabelIds = (category.labels || []).map(label =>
@@ -75,15 +75,13 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
     useAddLabelsModalStore.setState({ isSubmitting: true });
 
     try {
-      // Add newly selected labels
-      for (const labelId of newlySelectedLabels) {
-        await categoryAPI.addLabel(category.id, labelId);
-      }
-
-      // Remove unselected labels
-      for (const labelId of labelsToRemove) {
-        await categoryAPI.removeLabel(category.id, labelId);
-      }
+      // Get the final list of label IDs
+      const finalLabelIds = Array.from(selectedLabelIds);
+      
+      // Update the category with the new label list
+      await categoryAPI.update(category.id, {
+        labels: finalLabelIds
+      });
 
       const message = [];
       if (newlySelectedLabels.length > 0) {
@@ -109,13 +107,19 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
     const isExisting = category.labels?.some(label =>
       typeof label === 'string' ? label === item.id : label.id === item.id
     );
+    
+    // Determine the state of the label
+    const willBeRemoved = isExisting && !isSelected;
+    const willBeAdded = !isExisting && isSelected;
+    const willRemainInCategory = isExisting && isSelected;
 
     return (
       <TouchableOpacity
         style={[
           styles.labelItem,
-          isSelected && styles.labelItemSelected,
-          isExisting && styles.labelItemExisting,
+          willBeAdded && styles.labelItemWillBeAdded,
+          willBeRemoved && styles.labelItemWillBeRemoved,
+          willRemainInCategory && styles.labelItemExisting,
         ]}
         onPress={() => toggleLabelSelection(item.id)}
         disabled={false}
@@ -123,22 +127,32 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
         <View style={styles.labelInfo}>
           <Text style={[
             styles.labelName,
-            isSelected && styles.labelNameSelected,
-            isExisting && styles.labelNameExisting,
+            willBeAdded && styles.labelNameWillBeAdded,
+            willBeRemoved && styles.labelNameWillBeRemoved,
+            willRemainInCategory && styles.labelNameExisting,
           ]}>
             {item.name}
           </Text>
           {item.isPublic && (
             <Text style={styles.publicBadge}>Public</Text>
           )}
+          {willBeAdded && (
+            <Text style={styles.statusBadge}>À ajouter</Text>
+          )}
+          {willBeRemoved && (
+            <Text style={styles.statusBadgeRemove}>À retirer</Text>
+          )}
         </View>
         <View style={[
           styles.checkbox,
           isSelected && styles.checkboxSelected,
-          isExisting && styles.checkboxExisting,
+          willBeRemoved && styles.checkboxWillBeRemoved,
         ]}>
-          {(isSelected || isExisting) && (
+          {isSelected && (
             <Text style={styles.checkmark}>✓</Text>
+          )}
+          {willBeRemoved && (
+            <Text style={styles.checkmarkRemove}>−</Text>
           )}
         </View>
       </TouchableOpacity>
@@ -146,145 +160,161 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
   };
 
   return (
-    <Modal
+    <BottomSheet
       visible={isVisible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
+      onClose={onClose}
     >
-      <TouchableOpacity
-        style={styles.overlay}
-        activeOpacity={1}
-        onPress={onClose}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
-        >
-          <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-            <View style={styles.container}>
-              <View style={styles.handle} />
+      <View style={styles.container}>
+        <View style={styles.fixedHeader}>
+          <View style={styles.header}>
+            <Text style={styles.title}>Gérer les labels de "{category.name}"</Text>
+            
+            <Text style={styles.subtitle}>
+              Sélectionnez ou désélectionnez les labels
+            </Text>
+          </View>
 
-              <Text style={styles.title}>Gérer les labels de "{category.name}"</Text>
+          <View style={styles.searchContainer}>
+            <Input
+              placeholder="Rechercher des labels..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              containerStyle={styles.searchInput}
+            />
+          </View>
 
-              <View style={styles.legendContainer}>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendBox, { backgroundColor: theme.colors.info + '10', borderColor: theme.colors.info }]} />
-                  <Text style={styles.legendText}>Déjà dans la catégorie</Text>
-                </View>
-                <View style={styles.legendItem}>
-                  <View style={[styles.legendBox, { backgroundColor: theme.colors.primary + '10', borderColor: theme.colors.primary }]} />
-                  <Text style={styles.legendText}>Sélectionné</Text>
-                </View>
+          <View style={styles.legendContainer}>
+            <View style={styles.legendRow}>
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: theme.colors.success }]} />
+                <Text style={styles.legendText}>À ajouter</Text>
               </View>
-
-              <Input
-                placeholder="Rechercher des labels..."
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-                containerStyle={styles.searchInput}
-              />
-
-              {error && (
-                <Text style={styles.errorText}>{error}</Text>
-              )}
-
-              <View style={styles.listContainer}>
-                {isLoading ? (
-                  <ActivityIndicator size="large" color={theme.colors.primary} />
-                ) : (
-                  <FlatList
-                    data={filteredLabels}
-                    keyExtractor={(item) => item.id}
-                    renderItem={renderLabelItem}
-                    contentContainerStyle={styles.listContent}
-                    showsVerticalScrollIndicator={false}
-                    ListEmptyComponent={
-                      <Text style={styles.emptyText}>
-                        {searchQuery ? 'Aucun label trouvé' : 'Aucun label disponible'}
-                      </Text>
-                    }
-                  />
-                )}
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: theme.colors.info }]} />
+                <Text style={styles.legendText}>Reste</Text>
               </View>
-
-              <View style={styles.actions}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={onClose}
-                  disabled={isSubmitting}
-                >
-                  <Text style={styles.cancelText}>Annuler</Text>
-                </TouchableOpacity>
-
-                <Button
-                  title={isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
-                  onPress={handleSubmit}
-                  disabled={isSubmitting || isLoading}
-                  style={styles.submitButton}
-                />
+              <View style={styles.legendItem}>
+                <View style={[styles.legendDot, { backgroundColor: theme.colors.error }]} />
+                <Text style={styles.legendText}>À retirer</Text>
               </View>
             </View>
+          </View>
+
+          {error && (
+            <Text style={styles.errorText}>{error}</Text>
+          )}
+        </View>
+
+        <View style={styles.listContainer}>
+          {isLoading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color={theme.colors.primary} />
+              <Text style={styles.loadingText}>Chargement des labels...</Text>
+            </View>
+          ) : (
+            <FlatList
+              data={filteredLabels}
+              keyExtractor={(item) => item.id}
+              renderItem={renderLabelItem}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              keyboardDismissMode="interactive"
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>
+                  {searchQuery ? 'Aucun label trouvé' : 'Aucun label disponible'}
+                </Text>
+              }
+            />
+          )}
+        </View>
+
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={onClose}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.cancelText}>Annuler</Text>
           </TouchableOpacity>
-        </KeyboardAvoidingView>
-      </TouchableOpacity>
-    </Modal>
+
+          <Button
+            title={isSubmitting ? 'Enregistrement...' : 'Enregistrer'}
+            onPress={handleSubmit}
+            disabled={isSubmitting || isLoading}
+            style={styles.submitButton}
+          />
+        </View>
+      </View>
+    </BottomSheet>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  keyboardView: {
-    flex: 1,
-    justifyContent: 'flex-end',
-  },
   container: {
-    backgroundColor: theme.colors.background,
-    borderTopLeftRadius: theme.borderRadius.xl,
-    borderTopRightRadius: theme.borderRadius.xl,
-    padding: theme.spacing.lg,
-    paddingBottom: Platform.OS === 'ios' ? 40 : theme.spacing.lg,
-    height: '90%',
+    flex: 1,
   },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: theme.colors.border,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: theme.spacing.lg,
+  fixedHeader: {
+    flexShrink: 0,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: theme.spacing.md,
+    ...theme.fonts.body,
+    color: theme.colors.textSecondary,
   },
   title: {
-    fontSize: theme.fontSize.xl,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: theme.spacing.lg,
+    ...theme.fonts.subtitle,
+    textAlign: 'center',
+    marginBottom: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+    paddingTop: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.lg,
+  },
+  subtitle: {
+    ...theme.fonts.caption,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.xs,
+    textAlign: 'center',
+    paddingHorizontal: theme.spacing.lg,
+  },
+  searchContainer: {
+    marginBottom: theme.spacing.sm,
+    paddingHorizontal: theme.spacing.lg,
   },
   searchInput: {
-    marginBottom: theme.spacing.md,
+    marginBottom: 0,
   },
   legendContainer: {
+    paddingHorizontal: theme.spacing.md,
+    paddingVertical: theme.spacing.sm,
+    backgroundColor: theme.colors.backgroundSecondary,
+    marginBottom: theme.spacing.sm,
+  },
+  legendRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginBottom: theme.spacing.lg,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: theme.spacing.sm,
+    gap: theme.spacing.xs,
   },
-  legendBox: {
-    width: 20,
-    height: 20,
-    borderRadius: theme.borderRadius.sm,
-    borderWidth: 1,
+  legendDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   legendText: {
-    fontSize: theme.fontSize.sm,
+    ...theme.fonts.caption,
     color: theme.colors.textSecondary,
   },
   errorText: {
@@ -294,10 +324,11 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     flex: 1,
-    marginBottom: theme.spacing.lg,
+    marginBottom: theme.spacing.md,
   },
   listContent: {
     paddingVertical: theme.spacing.xs,
+    paddingHorizontal: theme.spacing.lg,
   },
   labelItem: {
     flexDirection: 'row',
@@ -311,9 +342,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
-  labelItemSelected: {
-    backgroundColor: theme.colors.primary + '10',
-    borderColor: theme.colors.primary,
+  labelItemWillBeAdded: {
+    backgroundColor: theme.colors.success + '10',
+    borderColor: theme.colors.success,
+  },
+  labelItemWillBeRemoved: {
+    backgroundColor: theme.colors.error + '10',
+    borderColor: theme.colors.error,
   },
   labelItemExisting: {
     backgroundColor: theme.colors.info + '10',
@@ -329,12 +364,18 @@ const styles = StyleSheet.create({
     fontSize: theme.fontSize.md,
     color: theme.colors.text,
   },
-  labelNameSelected: {
-    color: theme.colors.primary,
+  labelNameWillBeAdded: {
+    color: theme.colors.success,
     fontWeight: '600',
   },
+  labelNameWillBeRemoved: {
+    color: theme.colors.error,
+    fontWeight: '600',
+    textDecorationLine: 'line-through',
+  },
   labelNameExisting: {
-    color: theme.colors.textSecondary,
+    color: theme.colors.info,
+    fontWeight: '600',
   },
   publicBadge: {
     fontSize: theme.fontSize.xs,
@@ -343,6 +384,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.sm,
     paddingVertical: 2,
     borderRadius: theme.borderRadius.sm,
+  },
+  statusBadge: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.success,
+    backgroundColor: theme.colors.success + '20',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: 2,
+    borderRadius: theme.borderRadius.sm,
+    fontWeight: '600',
+  },
+  statusBadgeRemove: {
+    fontSize: theme.fontSize.xs,
+    color: theme.colors.error,
+    backgroundColor: theme.colors.error + '20',
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: 2,
+    borderRadius: theme.borderRadius.sm,
+    fontWeight: '600',
   },
   checkbox: {
     width: 24,
@@ -354,16 +413,21 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   checkboxSelected: {
-    backgroundColor: theme.colors.primary,
-    borderColor: theme.colors.primary,
+    backgroundColor: theme.colors.success,
+    borderColor: theme.colors.success,
   },
-  checkboxExisting: {
-    backgroundColor: theme.colors.info,
-    borderColor: theme.colors.info,
+  checkboxWillBeRemoved: {
+    backgroundColor: theme.colors.error,
+    borderColor: theme.colors.error,
   },
   checkmark: {
     color: theme.colors.background,
     fontSize: theme.fontSize.md,
+    fontWeight: 'bold',
+  },
+  checkmarkRemove: {
+    color: theme.colors.background,
+    fontSize: theme.fontSize.lg,
     fontWeight: 'bold',
   },
   emptyText: {
@@ -375,6 +439,11 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: 'row',
     gap: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+    backgroundColor: theme.colors.background,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
   },
   cancelButton: {
     flex: 1,

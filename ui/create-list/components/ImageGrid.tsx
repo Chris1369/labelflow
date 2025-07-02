@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/types/theme';
 
 interface ImageGridProps {
   selectedImages: string[];
   isCreating: boolean;
+  isSelectingImages: boolean;
   onRemoveImage: (index: number) => void;
   onAddImages: () => void;
 }
@@ -13,6 +14,7 @@ interface ImageGridProps {
 export const ImageGrid: React.FC<ImageGridProps> = ({
   selectedImages,
   isCreating,
+  isSelectingImages,
   onRemoveImage,
   onAddImages,
 }) => {
@@ -39,10 +41,16 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
         <TouchableOpacity 
           style={styles.addImageCard}
           onPress={onAddImages}
-          disabled={isCreating}
+          disabled={isCreating || isSelectingImages}
         >
-          <Ionicons name="add" size={32} color={theme.colors.primary} />
-          <Text style={styles.addImageText}>Ajouter</Text>
+          {isSelectingImages ? (
+            <ActivityIndicator size="small" color={theme.colors.primary} />
+          ) : (
+            <>
+              <Ionicons name="add" size={32} color={theme.colors.primary} />
+              <Text style={styles.addImageText}>Ajouter</Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
     </View>

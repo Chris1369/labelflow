@@ -51,7 +51,7 @@ export const createListActions = {
       }
 
       const store = useStore.getState();
-      const { autoCrop } = store;
+      const { autoCrop, setIsSelectingImages } = store;
 
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -62,6 +62,9 @@ export const createListActions = {
       });
 
       if (!result.canceled && result.assets.length > 0) {
+        // Show loader while processing images
+        setIsSelectingImages(true);
+        
         const currentImages = store.selectedImages;
         const newImages: string[] = [];
 
@@ -112,10 +115,14 @@ export const createListActions = {
 
         // Store all processed images
         store.setSelectedImages([...currentImages, ...newImages]);
+        
+        // Hide loader
+        setIsSelectingImages(false);
       }
     } catch (error) {
       console.error('Error selecting image:', error);
       Alert.alert('Erreur', 'Impossible de sélectionner l\'image');
+      useStore.getState().setIsSelectingImages(false);
     }
   },
 };

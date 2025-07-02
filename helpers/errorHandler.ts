@@ -64,7 +64,7 @@ class ErrorHandler {
 
   private async loadErrorLogs() {
     try {
-      const logs = await AsyncStorage.getItem("@bboxly:errorHandler");
+      const logs = await AsyncStorage.getItem("@labelflow:errorHandler");
       if (logs) {
         this.errorLogs = JSON.parse(logs);
       }
@@ -80,7 +80,7 @@ class ErrorHandler {
         this.errorLogs = this.errorLogs.slice(-50);
       }
       await AsyncStorage.setItem(
-        "@bboxly:errorHandler",
+        "@labelflow:errorHandler",
         JSON.stringify(this.errorLogs)
       );
     } catch (e) {
@@ -168,7 +168,7 @@ class ErrorHandler {
 
   clearErrorLogs() {
     this.errorLogs = [];
-    AsyncStorage.removeItem("@bboxly:errorHandler").catch(() => {});
+    AsyncStorage.removeItem("@labelflow:errorHandler").catch(() => {});
   }
 
   // Helper to wrap async functions with error handling

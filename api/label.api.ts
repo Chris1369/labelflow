@@ -44,22 +44,31 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
       );
 
       // La réponse peut avoir une structure paginée
-      const result = handleApiResponse<
-        | {
-            labels?: Label[];
-            total?: number;
-            totalPage?: number;
-            page?: number;
-            limit?: number;
-          }
-        | Label[]
-      >(response);
+      const result = handleApiResponse<any>(response);
+      
+      console.log('getMyLabels response structure:', result);
 
       // Gérer les deux types de réponse possibles
       if (Array.isArray(result)) {
         return result;
       }
-      return result.labels || [];
+      
+      // Check for different possible response structures
+      if (result.labels && Array.isArray(result.labels)) {
+        return result.labels;
+      }
+      
+      if (result.projects && Array.isArray(result.projects)) {
+        console.warn('API returned projects instead of labels for labels endpoint');
+        return result.projects;
+      }
+      
+      if (result.data && Array.isArray(result.data)) {
+        return result.data;
+      }
+      
+      console.error('Unexpected response structure for labels:', result);
+      return [];
     } catch (error) {
       throw handleApiError(error);
     }
@@ -67,11 +76,18 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
 
   async getPublicLabels(): Promise<Label[]> {
     try {
-      const response = await axiosInstance.get(`${this.basePath}/public`);
+      // Use the general /labels endpoint with getIsPublic parameter
+      const response = await axiosInstance.get(this.basePath, {
+        params: {
+          getIsPublic: true,
+          limit: 100, // Get more public labels
+        },
+      });
 
       const result = handleApiResponse<
         | {
             labels?: Label[];
+            projects?: Label[]; // Backend might return 'projects' key
             total?: number;
             totalPage?: number;
           }
@@ -81,7 +97,8 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
       if (Array.isArray(result)) {
         return result;
       }
-      return result.labels || [];
+      // Check both 'labels' and 'projects' keys as backend might return either
+      return result.labels || result.projects || [];
     } catch (error) {
       throw handleApiError(error);
     }
@@ -99,6 +116,7 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
       const result = handleApiResponse<
         | {
             labels?: Label[];
+            projects?: Label[]; // Backend might return 'projects' key
             total?: number;
             totalPage?: number;
             page?: number;
@@ -109,7 +127,8 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
       if (Array.isArray(result)) {
         return result;
       }
-      return result.labels || [];
+      // Check both 'labels' and 'projects' keys as backend might return either
+      return result.labels || result.projects || [];
     } catch (error) {
       throw handleApiError(error);
     }

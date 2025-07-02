@@ -17,51 +17,51 @@ interface EnvironmentValues {
 export function getEnvironmentValues(): EnvironmentValues {
   if (IS_DEV) {
     return {
-      name: "BBoxly Dev",
+      name: "Labelflow Dev",
       icon: "./assets/icon.png", // Using existing icon for now
       adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
-      package: "com.bboxly.dev",
+      package: "com.labelflow.dev",
       BASE_URL: `http://${IP}:3000/`,
       VERSION: "v1.0",
-      PROJECT_NAME: "bboxly-api",
+      PROJECT_NAME: "labelflow-api",
       PREDICTION_API_URL: `http://${IP}:8000`,
     };
   }
   if (IS_STAGING) {
     return {
-      name: "BBoxly Staging",
+      name: "Labelflow Staging",
       icon: "./assets/icon.png", // Using existing icon for now
       adaptiveIcon: "./assets/adaptive-icon.png", // Using existing adaptive icon
-      package: "com.bboxly.staging",
-      BASE_URL: "https://staging-api.bboxly.com/",
+      package: "com.labelflow.staging",
+      BASE_URL: "https://staging-api.labelflow.com/",
       VERSION: "v1.0",
-      PROJECT_NAME: "bboxly-api",
-      PREDICTION_API_URL: "https://staging-prediction.bboxly.com",
+      PROJECT_NAME: "labelflow-api",
+      PREDICTION_API_URL: "https://staging-prediction.labelflow.com",
     };
   }
   // Production
   return {
-    name: "BBoxly",
+    name: "Labelflow",
     icon: "./assets/icon.png",
     adaptiveIcon: "./assets/adaptive-icon.png",
-    package: "com.bboxly.app",
-    BASE_URL: "https://api.bboxly.com/",
+    package: "com.labelflow.app",
+    BASE_URL: "https://api.labelflow.com/",
     VERSION: "v1.0",
-    PROJECT_NAME: "bboxly-api",
-    PREDICTION_API_URL: "https://prediction.bboxly.com",
+    PROJECT_NAME: "labelflow-api",
+    PREDICTION_API_URL: "https://prediction.labelflow.com",
   };
 }
 
 export default {
   expo: {
     name: getEnvironmentValues().name,
-    slug: "bboxly",
+    slug: "labelflow",
     version: "1.0.0",
     orientation: "portrait",
     icon: getEnvironmentValues().icon,
     userInterfaceStyle: "light",
     newArchEnabled: true,
-    scheme: "bboxly",
+    scheme: "labelflow",
     splash: {
       image: "./assets/splash-icon.png",
       resizeMode: "contain",

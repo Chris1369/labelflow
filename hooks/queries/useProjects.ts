@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { projectAPI } from '@/api/project.api';
 import { Project } from '@/types/project';
-import { labelKeys } from './useLabels';
 
 // Query keys
 export const projectKeys = {
@@ -63,17 +62,17 @@ export const useProjectDetails = (projectId: string, enabled = true) => {
   });
 };
 
-// Hook to get user labels
+// Hook to get user's own projects
 export const useMyProjects = (includePublic: boolean = true) => {
   return useQuery<Project[], Error>({
-    queryKey: labelKeys.list({ my: true, includePublic }),
+    queryKey: projectKeys.list({ my: true, includePublic }),
     queryFn: async () => {
-      const labels = await projectAPI.getMyProjects(includePublic);
-      // Sort labels alphabetically
-      const sortedLabels = labels.sort((a, b) => 
+      const projects = await projectAPI.getMyProjects(includePublic);
+      // Sort projects alphabetically
+      const sortedProjects = projects.sort((a, b) => 
         a.name.toLowerCase().localeCompare(b.name.toLowerCase())
       );
-      return sortedLabels;
+      return sortedProjects;
     },
   });
 };

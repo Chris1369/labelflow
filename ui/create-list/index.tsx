@@ -26,7 +26,7 @@ interface CreateListScreenProps {
 }
 
 export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, mode = 'create', listId }) => {
-  const { listName, isCreating, error, selectedImages, autoCrop, setAutoCrop } = useStore();
+  const { listName, isCreating, error, selectedImages, autoCrop, setAutoCrop, isSelectingImages } = useStore();
   
   React.useEffect(() => {
     if (mode === 'add' && listId) {
@@ -84,12 +84,14 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
             <ImageGrid
               selectedImages={selectedImages}
               isCreating={isCreating}
+              isSelectingImages={isSelectingImages}
               onRemoveImage={createListActions.removeImage}
               onAddImages={handleAddImages}
             />
           ) : (
             <EmptyImageCard 
               isCreating={isCreating} 
+              isSelectingImages={isSelectingImages}
               onPress={handleAddImages} 
             />
           )}

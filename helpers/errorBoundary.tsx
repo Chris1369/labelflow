@@ -66,7 +66,7 @@ export class ErrorBoundary extends Component<Props, State> {
       };
 
       // Get existing logs
-      const existingLogs = await AsyncStorage.getItem("@bboxly:errorLogs");
+      const existingLogs = await AsyncStorage.getItem("@labelflow:errorLogs");
       const logs = existingLogs ? JSON.parse(existingLogs) : [];
 
       // Add new log (keep only last 10 errors)
@@ -75,7 +75,7 @@ export class ErrorBoundary extends Component<Props, State> {
         logs.pop();
       }
 
-      await AsyncStorage.setItem("@bboxly:errorLogs", JSON.stringify(logs));
+      await AsyncStorage.setItem("@labelflow:errorLogs", JSON.stringify(logs));
     } catch (e) {
       console.error("Failed to save error log:", e);
     }

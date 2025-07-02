@@ -1,7 +1,14 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, TextStyle } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/types/theme';
+import React from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  TextStyle,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "@/types/theme";
 
 interface HomeHeaderProps {
   onLogout: () => void;
@@ -23,7 +30,7 @@ export const HomeHeader: React.FC<HomeHeaderProps> = ({ onLogout }) => {
           style={styles.logo}
           resizeMode='contain'
         />
-        <Text style={styles.title}>BBoxly</Text>
+        <Text style={styles.title}>Labelflow</Text>
       </View>
       <Text style={styles.subtitle}>Menu principal</Text>
     </View>

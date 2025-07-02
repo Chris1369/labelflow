@@ -1,25 +1,37 @@
 import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { TouchableOpacity, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/types/theme';
 
 interface EmptyImageCardProps {
   isCreating: boolean;
+  isSelectingImages: boolean;
   onPress: () => void;
 }
 
-export const EmptyImageCard: React.FC<EmptyImageCardProps> = ({ isCreating, onPress }) => {
+export const EmptyImageCard: React.FC<EmptyImageCardProps> = ({ isCreating, isSelectingImages, onPress }) => {
   return (
     <TouchableOpacity 
       style={styles.firstImageCard}
       onPress={onPress}
-      disabled={isCreating}
+      disabled={isCreating || isSelectingImages}
     >
-      <Ionicons name="image-outline" size={48} color={theme.colors.primary} />
-      <Text style={styles.firstImageTitle}>Ajouter des images</Text>
-      <Text style={styles.firstImageHint}>
-        Appuyez pour sélectionner vos premières images
-      </Text>
+      {isSelectingImages ? (
+        <>
+          <ActivityIndicator size="large" color={theme.colors.primary} />
+          <Text style={[styles.firstImageTitle, { marginTop: theme.spacing.lg }]}>
+            Chargement des images...
+          </Text>
+        </>
+      ) : (
+        <>
+          <Ionicons name="image-outline" size={48} color={theme.colors.primary} />
+          <Text style={styles.firstImageTitle}>Ajouter des images</Text>
+          <Text style={styles.firstImageHint}>
+            Appuyez pour sélectionner vos premières images
+          </Text>
+        </>
+      )}
     </TouchableOpacity>
   );
 };

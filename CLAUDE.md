@@ -1,11 +1,11 @@
-# Instructions spécifiques au projet BBoxly
+# Instructions spécifiques au projet Labelflow
 
 ## Architecture du projet
 
 ### Structure complète des dossiers
 
 ```
-bboxly-app/
+labelflow-app/
 ├── api/                    # Couche API avec axios
 ├── app/                    # Routes expo-router
 ├── assets/                 # Ressources statiques (fonts, images, icons)
@@ -145,7 +145,7 @@ bboxly-app/
     - `errorBoundary.tsx` : Capture erreurs React globalement
     - `safeAction.ts` : Wrapper pour actions sécurisées
   - **Storage et données** :
-    - `StorageKeys.ts` : Clés AsyncStorage centralisées (@bboxly:\*)
+    - `StorageKeys.ts` : Clés AsyncStorage centralisées (@labelflow:\*)
     - `recentLabels.ts` : Gestion des labels récemment utilisés
     - `labelColors.ts` : Palette de couleurs pour labels
   - **Utilitaires** :
@@ -348,7 +348,7 @@ Chaque API suit généralement cette structure :
 
 Toutes les clés AsyncStorage sont centralisées dans `helpers/StorageKeys.ts` :
 
-- Préfixe : `@bboxly:`
+- Préfixe : `@labelflow:`
 - Auth : tokens, user data
 - App : settings, préférences
 - Cache : données mises en cache
@@ -779,9 +779,9 @@ export const loadData = createSafeAction(
 
 ### Accès à la documentation
 
-- **Swagger UI** : http://localhost:3000/v1.0/bboxly-api/api-docs
+- **Swagger UI** : http://localhost:3000/v1.0/labelflow-api/api-docs
 - **Base URL** :
-  - Development : `http://localhost:3000/v1.0/bboxly-api`
+  - Development : `http://localhost:3000/v1.0/labelflow-api`
   - Staging/Production : Configuré via `BASE_URL`
 
 ### Routes API complètes
@@ -991,27 +991,30 @@ Le front gère automatiquement les différents cas d'erreur :
 ```typescript
 // Structure obligatoire pour les query keys
 export const entityKeys = {
-  all: ['entity'] as const,
-  lists: () => [...entityKeys.all, 'list'] as const,
+  all: ["entity"] as const,
+  lists: () => [...entityKeys.all, "list"] as const,
   list: (filters?: any) => [...entityKeys.lists(), { filters }] as const,
-  details: () => [...entityKeys.all, 'detail'] as const,
+  details: () => [...entityKeys.all, "detail"] as const,
   detail: (id: string) => [...entityKeys.details(), id] as const,
   // Ajout de clés spécifiques selon les besoins
-  byCategory: (categoryId: string) => [...entityKeys.all, 'category', categoryId] as const,
-  search: (query: string) => [...entityKeys.all, 'search', query] as const,
-  members: (id: string) => [...entityKeys.detail(id), 'members'] as const,
+  byCategory: (categoryId: string) =>
+    [...entityKeys.all, "category", categoryId] as const,
+  search: (query: string) => [...entityKeys.all, "search", query] as const,
+  members: (id: string) => [...entityKeys.detail(id), "members"] as const,
 };
 ```
 
 ### Conventions des hooks
 
 1. **Nommage** :
+
    - `useEntities` : Pour récupérer toutes les entités
    - `useEntityDetails` : Pour récupérer une entité par ID
    - `useMyEntities` : Pour les entités de l'utilisateur connecté
    - `useEntitiesByX` : Pour filtrer par critère spécifique
 
 2. **Structure des hooks** :
+
 ```typescript
 export const useEntities = (filters?: any, enabled = true) => {
   return useQuery<Entity[], Error>({
@@ -1030,11 +1033,13 @@ export const useEntities = (filters?: any, enabled = true) => {
 ```
 
 3. **Paramètres standards** :
+
    - Toujours inclure le type générique `<ReturnType, Error>`
    - Paramètre `enabled` optionnel (défaut: true)
    - Vérification des paramètres requis dans `enabled`
 
 4. **Gestion des filtres** :
+
    - Utiliser le pattern `list({ filters })` pour les variations
    - Exemples : `{ my: true }`, `{ public: true }`, `{ ownerId }`
 
@@ -1090,7 +1095,7 @@ Les mutations ne sont pas incluses dans les hooks queries. Elles sont gérées d
 Utiliser `queryClient.invalidateQueries` avec les query keys appropriées après les mutations :
 
 ```typescript
-import { useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from "@tanstack/react-query";
 
 const queryClient = useQueryClient();
 
