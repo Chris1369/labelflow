@@ -3,6 +3,9 @@ import { Alert } from 'react-native';
 import { Project } from '@/types/project';
 import { projectAPI } from '@/api/project.api';
 import { router } from 'expo-router';
+import { projectKeys } from '@/hooks/queries';
+import { invalidateQuery } from '@/helpers/invalidateQuery';
+import { useSettingsStore } from '../settings/useStore';
 
 interface ProjectState {
   currentProject: Project | null;
@@ -14,7 +17,6 @@ interface ProjectState {
 
 interface ProjectActions {
   setCurrentProject: (project: Project | null) => void;
-  loadProject: (projectId: string) => Promise<void>;
   showModal: (type: 'reset' | 'delete') => void;
   hideModal: () => void;
   resetProject: () => Promise<void>;
@@ -30,20 +32,6 @@ export const useProjectStore = create<ProjectState & ProjectActions>((set, get) 
   error: null,
 
   setCurrentProject: (project) => set({ currentProject: project }),
-
-  loadProject: async (projectId: string) => {
-    set({ isLoading: true, error: null });
-    try {
-      const project = await projectAPI.getOne(projectId);
-      set({ currentProject: project, isLoading: false });
-    } catch (error: any) {
-      set({ 
-        error: error.message || 'Failed to load project',
-        isLoading: false,
-        currentProject: null 
-      });
-    }
-  },
 
   showModal: (type) => set({ isModalVisible: true, modalType: type }),
 
@@ -68,6 +56,8 @@ export const useProjectStore = create<ProjectState & ProjectActions>((set, get) 
     
     try {
       await projectAPI.delete(currentProject.id);
+      const includePublic = useSettingsStore.getState().includePublicProjects;
+      invalidateQuery( projectKeys.list({ my: true, includePublic }))
       set({ isModalVisible: false, modalType: null });
       router.replace('/(main)/select-project');
     } catch (error: any) {

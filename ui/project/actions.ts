@@ -95,8 +95,7 @@ export const projectActions = {
   },
 
   confirmDelete: () => {
-    useProjectStore.getState().deleteProject();
-    router.back();
+    useProjectStore.getState().deleteProject();;
   },
 
   cancelModal: () => {

@@ -24,7 +24,7 @@ interface ProjectScreenProps {
 }
 
 export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
-  const { isModalVisible, modalType, error, updateProjectVisibility } =
+  const { isModalVisible, modalType, error, updateProjectVisibility, setCurrentProject } =
     useProjectStore();
   const {
     data: currentProject,
@@ -32,6 +32,12 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
     isLoading,
   } = useProjectDetails(projectId);
   const labelCounterBottomSheetRef = useRef<LabelCounterBottomSheetRef>(null);
+
+  useEffect(() => {
+    if (currentProject) {
+      setCurrentProject(currentProject);
+    }
+  }, [currentProject]);
 
   useEffect(() => {
     if (isModalVisible && modalType) {
@@ -45,24 +51,21 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
     }, [projectId])
   );
 
+
   const menuItems = buildMenuItems(projectId);
 
   const handleLabelCounterOpen = () => {
     labelCounterBottomSheetRef.current?.open();
   };
 
-  const handleRetry = () => {
-    useProjectStore.getState().loadProject(projectId);
-  };
 
   if (isLoading) {
     return <ProjectLoadingView />;
   }
 
   if (error && !currentProject) {
-    return <ProjectErrorView error={error} onRetry={handleRetry} />;
+    return <ProjectErrorView error={error} onRetry={() => refetch()} />;
   }
-
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
