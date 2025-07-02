@@ -4,7 +4,7 @@ import { SimpleBottomSheet } from '@/components/molecules/SimpleBottomSheet';
 import { Input, Button } from '@/components/atoms';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/types/theme';
-import { useUserProjects, useTeamProjects } from '@/hooks/queries';
+import { useMyProjects, useTeamProjects } from '@/hooks/queries';
 import { Project } from '@/types/project';
 import { teamAPI } from '@/api/team.api';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
@@ -28,7 +28,7 @@ export const TeamProjectsBottomSheet = forwardRef<
   const [isUpdating, setIsUpdating] = useState(false);
   const { handleError, wrapAsync } = useErrorHandler('TeamProjectsBottomSheet');
   
-  const { data: userProjects = [], isLoading: loadingUserProjects } = useUserProjects();
+  const { projects: userProjects = [], isLoading: loadingUserProjects } = useMyProjects({});
   const { data: teamProjects = [], refetch: refetchTeamProjects, isLoading: loadingTeamProjects } = useTeamProjects(teamId);
 
   useEffect(() => {
@@ -163,12 +163,13 @@ export const TeamProjectsBottomSheet = forwardRef<
             <View style={styles.footer}>
               <View style={styles.separator} />
               <View style={styles.actions}>
-                <Button
-                  title="Annuler"
-                  onPress={() => setVisible(false)}
-                  variant="outline"
+                <TouchableOpacity
                   style={styles.cancelButton}
-                />
+                  onPress={() => setVisible(false)}
+                  disabled={isUpdating}
+                >
+                  <Text style={styles.cancelButtonText}>Annuler</Text>
+                </TouchableOpacity>
                 <Button
                   title="Enregistrer"
                   onPress={handleSave}
@@ -287,6 +288,13 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     flex: 1,
+    padding: theme.spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cancelButtonText: {
+    ...theme.fonts.button,
+    color: theme.colors.textSecondary,
   },
   saveButton: {
     flex: 1,

@@ -1,18 +1,17 @@
 import React, { useCallback } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/types/theme";
 import { useStore } from "./useStore";
 import { actions } from "./actions";
 import { router, useFocusEffect } from "expo-router";
 import {
-  ListHeader,
   LoadingListState,
   ErrorListState,
   UnlabeledListContent,
-  FloatingCreateButton,
   type UnlabeledListItem,
 } from "./components";
+import { HeaderPage, Input } from "@/components/atoms";
 import { useUnlabeledListsByProject } from "@/hooks/queries";
 
 interface SelectUnlabeledListScreenProps {
@@ -49,13 +48,24 @@ export const SelectUnlabeledListScreen: React.FC<
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ListHeader
-        searchQuery={searchQuery}
-        onSearchChange={actions.setSearchQuery}
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage
+        title="Listes à labelliser"
+        subtitle="Sélectionnez une liste d'images à labelliser"
+        rightAction={{
+          icon: 'add-circle-outline',
+          onPress: handleCreateList,
+        }}
       />
-
-      {isLoading ? (
+      <View style={styles.content}>
+        <Input
+          placeholder="Rechercher une liste..."
+          value={searchQuery}
+          onChangeText={actions.setSearchQuery}
+          icon="search"
+          containerStyle={styles.searchInput}
+        />
+        {isLoading ? (
         <LoadingListState />
       ) : error ? (
         <ErrorListState error={error.message} onRetry={() => refetch()} />
@@ -67,9 +77,9 @@ export const SelectUnlabeledListScreen: React.FC<
             onListSelect={handleListSelect}
             onCreateList={handleCreateList}
           />
-          <FloatingCreateButton onPress={handleCreateList} />
         </>
       )}
+      </View>
     </SafeAreaView>
   );
 };
@@ -78,5 +88,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  content: {
+    flex: 1,
+  },
+  searchInput: {
+    marginHorizontal: theme.spacing.lg,
+    marginTop: theme.spacing.md,
+    marginBottom: theme.spacing.lg,
   },
 });

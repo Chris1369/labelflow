@@ -1,4 +1,3 @@
-export { Header } from './Header';
 export { ListNameInput } from './ListNameInput';
 export { AddModeInfo } from './AddModeInfo';
 export { ImageGrid } from './ImageGrid';

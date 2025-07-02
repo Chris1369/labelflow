@@ -9,8 +9,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '@/types/theme';
 import { useStore } from './useStore';
 import { createListActions } from './actions';
+import { HeaderPage } from '@/components/atoms';
 import {
-  Header,
   ListNameInput,
   AddModeInfo,
   ImageGrid,
@@ -52,8 +52,11 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <Header mode={mode} />
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title={mode === 'add' ? 'Ajouter des images' : 'Créer une liste'}
+        subtitle={mode === 'add' ? 'Ajoutez des images à votre liste' : 'Créez une nouvelle liste d\'images'}
+      />
 
       <KeyboardAvoidingView 
         style={styles.keyboardView}

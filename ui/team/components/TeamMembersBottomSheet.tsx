@@ -1,5 +1,5 @@
 import React, { forwardRef, useImperativeHandle, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, FlatList, KeyboardAvoidingView, Platform, ScrollView, TouchableOpacity } from 'react-native';
 import { SimpleBottomSheet } from '@/components/molecules/SimpleBottomSheet';
 import { Input, Button } from '@/components/atoms';
 import { theme } from '@/types/theme';
@@ -152,6 +152,18 @@ export const TeamMembersBottomSheet = forwardRef<
             ItemSeparatorComponent={() => <View style={styles.separator} />}
           />
         </View>
+
+        <View style={styles.footer}>
+          <View style={styles.footerSeparator} />
+          <View style={styles.footerContent}>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setVisible(false)}
+            >
+              <Text style={styles.closeButtonText}>Fermer</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </KeyboardAvoidingView>
     </SimpleBottomSheet>
   );
@@ -220,5 +232,24 @@ const styles = StyleSheet.create({
   separator: {
     height: 1,
     backgroundColor: theme.colors.border,
+  },
+  footer: {
+    backgroundColor: theme.colors.background,
+  },
+  footerSeparator: {
+    height: 1,
+    backgroundColor: theme.colors.border,
+  },
+  footerContent: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+  },
+  closeButton: {
+    padding: theme.spacing.md,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    ...theme.fonts.button,
+    color: theme.colors.textSecondary,
   },
 });

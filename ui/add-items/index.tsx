@@ -14,6 +14,8 @@ import { theme } from "@/types/theme";
 import { useAddItemsStore } from "./useStore";
 import { addItemsActions } from "./actions";
 import { useProjectStore } from "@/ui/project/useStore";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage } from "@/components/atoms";
 import {
   PermissionView,
   CameraViewComponent,
@@ -207,7 +209,14 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
   // Show captured image with bounding boxes
   if (capturedImageUri) {
     return (
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        {isForUnlabeled && (
+          <HeaderPage
+            title="Labelliser l'image"
+            subtitle={`Image ${currentUnlabeledIndex + 1} sur ${unlabeledListItems.length}`}
+          />
+        )}
+        <View style={isForUnlabeled ? styles.contentWithHeader : styles.container}>
         <CapturedImageView
           capturedImageUri={capturedImageUri}
           boundingBoxes={boundingBoxes}
@@ -237,14 +246,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
           onNextImage={handleNextImage}
         />
 
-        {/* Progress indicator for UnlabeledList mode - Between bottom buttons */}
-        {isForUnlabeled && (
-          <View style={styles.progressContainer}>
-            <Text style={styles.progressText}>
-              {currentUnlabeledIndex + 1} / {unlabeledListItems.length}
-            </Text>
-          </View>
-        )}
+        {/* Progress indicator removed - now in header */}
 
         <RecentLabelsBar
           visible={
@@ -265,45 +267,52 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
           }
           labelCounters={currentProject?.labelCounter || []}
         />
-      </View>
+        </View>
+      </SafeAreaView>
     );
   }
 
   // Show loading state for UnlabeledList mode
   if (isForUnlabeled && unlabeledListItems.length === 0 && !capturedImageUri) {
     return (
-      <View style={styles.emptyListContainer}>
-        <Ionicons
-          name='images-outline'
-          size={80}
-          color={theme.colors.textSecondary}
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <HeaderPage
+          title="Liste vide"
+          subtitle="Aucune image à labelliser"
         />
-        <Text style={styles.emptyListTitle as TextStyle}>Liste vide</Text>
-        <Text style={styles.emptyListText as TextStyle}>
-          Cette liste ne contient aucune image à labelliser
-        </Text>
-        <TouchableOpacity
-          style={styles.addImagesButton}
-          onPress={() => {
-            router.push({
-              pathname: "/(project)/[id]/create-list",
-              params: {
-                id: projectId,
-                mode: "add",
-                listId: unlabeledListId,
-              },
-            });
-          }}
-          activeOpacity={0.8}
-        >
+        <View style={styles.emptyListContainer}>
           <Ionicons
-            name='add-circle-outline'
-            size={24}
-            color={theme.colors.secondary}
+            name='images-outline'
+            size={80}
+            color={theme.colors.textSecondary}
           />
-          <Text style={styles.addImagesButtonText}>Ajouter des images</Text>
-        </TouchableOpacity>
-      </View>
+          <Text style={styles.emptyListTitle as TextStyle}>Liste vide</Text>
+          <Text style={styles.emptyListText as TextStyle}>
+            Cette liste ne contient aucune image à labelliser
+          </Text>
+          <TouchableOpacity
+            style={styles.addImagesButton}
+            onPress={() => {
+              router.push({
+                pathname: "/(project)/[id]/create-list",
+                params: {
+                  id: projectId,
+                  mode: "add",
+                  listId: unlabeledListId,
+                },
+              });
+            }}
+            activeOpacity={0.8}
+          >
+            <Ionicons
+              name='add-circle-outline'
+              size={24}
+              color={theme.colors.secondary}
+            />
+            <Text style={styles.addImagesButtonText}>Ajouter des images</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -349,6 +358,10 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  contentWithHeader: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
   loadingContainer: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -360,24 +373,8 @@ const styles = StyleSheet.create({
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.md,
   },
-  progressContainer: {
-    position: "absolute",
-    top: 110,
-    left: "50%",
-    transform: [{ translateX: -50 }],
-    backgroundColor: "rgba(0,0,0,0.8)",
-    paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.borderRadius.lg,
-  },
-  progressText: {
-    ...theme.fonts.caption,
-    color: theme.colors.secondary,
-    fontWeight: "600",
-  },
   emptyListContainer: {
     flex: 1,
-    backgroundColor: theme.colors.background,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: theme.spacing.xl,
