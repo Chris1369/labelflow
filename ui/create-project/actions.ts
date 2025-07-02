@@ -1,13 +1,16 @@
 import { useCreateProjectStore } from './useStore';
 import { Alert } from 'react-native';
 import { router } from 'expo-router';
-import { useSelectProjectStore } from '../select-project/useStore';
+import { projectKeys } from '@/hooks/queries/useProjects';
+import { invalidateQuery } from '@/helpers/invalidateQuery';
+import { useSettingsStore } from '../settings/useStore';
 
 export const createProjectActions = {
   createProject: async () => {
+    const includePublic = useSettingsStore.getState().includePublicProjects;
     // Utiliser la méthode createProject du store qui gère déjà tout
     await useCreateProjectStore.getState().createProject();
-    useSelectProjectStore.getState().refreshProjects?.();
+    invalidateQuery(projectKeys.list({ my: true, includePublic }));
   },
   
   cancelCreation: () => {

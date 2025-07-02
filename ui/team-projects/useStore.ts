@@ -118,7 +118,7 @@ export const useTeamProjectsStore = create<
       const includePublic = useSettingsStore.getState().includePublicProjects;
       
       // Charger tous les projets de l'utilisateur avec le paramètre includePublic
-      const projects = await projectAPI.getMyProjects(includePublic);
+      const projects = await projectAPI.getMyProjects({includePublic});
 
       // S'assurer que projects est un tableau
       const projectArray = Array.isArray(projects) ? projects : [];

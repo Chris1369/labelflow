@@ -32,7 +32,7 @@ export const useUserProjects = (includePublic: boolean = false) => {
   return useQuery<Project[], Error>({
     queryKey: projectKeys.list({ userProjects: true, includePublic }),
     queryFn: async () => {
-      const projects = await projectAPI.getMyProjects(includePublic);
+      const projects = await projectAPI.getMyProjects({includePublic});
       return projects;
     },
   });
@@ -63,11 +63,11 @@ export const useProjectDetails = (projectId: string, enabled = true) => {
 };
 
 // Hook to get user's own projects
-export const useMyProjects = (includePublic: boolean = true) => {
+export const useMyProjects = ({includePublic,onlyOwnerProjects=false, searchQuery}: {includePublic: boolean, onlyOwnerProjects?: boolean, searchQuery?: string}) => {
   return useQuery<Project[], Error>({
-    queryKey: projectKeys.list({ my: true, includePublic }),
+    queryKey: projectKeys.list({ my: true, includePublic, onlyOwnerProjects, searchQuery }),
     queryFn: async () => {
-      const projects = await projectAPI.getMyProjects(includePublic);
+      const projects = await projectAPI.getMyProjects({includePublic, onlyOwnerProjects, searchQuery});
       // Sort projects alphabetically
       const sortedProjects = projects.sort((a, b) => 
         a.name.toLowerCase().localeCompare(b.name.toLowerCase())

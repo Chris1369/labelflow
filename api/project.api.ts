@@ -37,7 +37,7 @@ class ProjectAPI extends BaseAPI<
   }
 
   // Méthodes spécifiques aux projets
-  async getMyProjects(includePublic: boolean = false): Promise<Project[]> {
+  async getMyProjects({includePublic, onlyOwnerProjects, searchQuery}: {includePublic: boolean, onlyOwnerProjects?: boolean, searchQuery?: string}): Promise<Project[]> {
     try {
       // Récupérer l'ID de l'utilisateur actuel
       const userId = await getCurrentUserId();
@@ -45,7 +45,9 @@ class ProjectAPI extends BaseAPI<
       // Utiliser l'endpoint spécifique /projects/owner/:ownerId avec getIsPublic
       const response = await axiosInstance.get(`${this.basePath}/owner/${userId}`, {
         params: {
-          getIsPublic: includePublic
+          getIsPublic: includePublic,
+          onlyOwnerProjects: onlyOwnerProjects,
+          ...(searchQuery && { search: searchQuery, limit: 50 }), 
         }
       });
       

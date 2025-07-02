@@ -8,15 +8,10 @@ export const selectProjectActions = {
   },
 
   handleProjectSelect: (project: Project) => {
-    useSelectProjectStore.getState().selectProject(project);
     router.push({
       pathname: '/(project)/[id]',
       params: { id: project.id, name: project.name }
     });
-  },
-
-  loadProjects: () => {
-    useSelectProjectStore.getState().loadProjects();
   },
 
   createNewProject: () => {
