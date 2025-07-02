@@ -1,15 +1,18 @@
 import { theme } from "@/types/theme";
 import { MenuItemData } from "./components";
-import { teamActions } from "./actions";
 
-export const buildMenuItems = (teamId: string): MenuItemData[] => {
+export const buildMenuItems = (
+  teamId: string,
+  onMembersPress: () => void,
+  onProjectsPress: () => void
+): MenuItemData[] => {
   return [
     {
       id: "members",
       title: "Gestion des membres",
       description: "Ajouter ou retirer des membres de l'équipe",
       icon: "people",
-      onPress: () => teamActions.handleMembers(teamId),
+      onPress: onMembersPress,
       color: theme.colors.primary,
     },
     {
@@ -17,8 +20,8 @@ export const buildMenuItems = (teamId: string): MenuItemData[] => {
       title: "Gestion des projets",
       description: "Sélectionner ou retirer des projets",
       icon: "folder",
-      onPress: () => teamActions.handleProjects(teamId),
+      onPress: onProjectsPress,
       color: theme.colors.info,
     },
   ];
-  };
+};

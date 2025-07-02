@@ -1,16 +1,19 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { useTeamStore } from "./useStore";
 import {
-  TeamHeader,
   TeamMenuGrid,
   TeamLoadingView,
   TeamErrorView,
   TeamBottomSection,
+  TeamMembersBottomSheet,
+  TeamProjectsBottomSheet,
   type MenuItemData,
+  type TeamMembersBottomSheetRef,
+  type TeamProjectsBottomSheetRef,
 } from "./components";
 import { useTeamDetails } from "@/hooks/queries";
 import { buildMenuItems } from "./data";
@@ -23,12 +26,18 @@ export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
   const { setCurrentTeam, currentTeam } = useTeamStore();
   const { data, isLoading, error: teamError, refetch } = useTeamDetails(teamId);
   const error = teamError?.message;
+  const membersBottomSheetRef = useRef<TeamMembersBottomSheetRef>(null);
+  const projectsBottomSheetRef = useRef<TeamProjectsBottomSheetRef>(null);
 
   useEffect(() => {
     setCurrentTeam(data || null);
   }, [data]);
 
-  const menuItems: MenuItemData[] = buildMenuItems(teamId);
+  const menuItems: MenuItemData[] = buildMenuItems(
+    teamId,
+    () => membersBottomSheetRef.current?.open(),
+    () => projectsBottomSheetRef.current?.open()
+  );
 
   if (isLoading) {
     return (
@@ -65,12 +74,12 @@ export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
       />
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.headerContainer}>
-          <TeamHeader team={currentTeam} />
-        </View>
         <TeamMenuGrid menuItems={menuItems} />
         <TeamBottomSection />
       </ScrollView>
+      
+      <TeamMembersBottomSheet ref={membersBottomSheetRef} teamId={teamId} />
+      <TeamProjectsBottomSheet ref={projectsBottomSheetRef} teamId={teamId} />
     </SafeAreaView>
   );
 };
@@ -84,8 +93,5 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.md,
-  },
-  headerContainer: {
-    marginBottom: theme.spacing.md,
   },
 });

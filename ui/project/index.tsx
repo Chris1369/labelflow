@@ -13,7 +13,6 @@ import {
 import { buildMenuItems } from "./data";
 import { useProjectDetails } from "@/hooks/queries/useProjects";
 import {
-  ProjectHeader,
   ProjectMenuGrid,
   ProjectLoadingView,
   ProjectErrorView,
@@ -89,17 +88,13 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
       <HeaderPage 
         title={currentProject?.name || 'Projet'} 
         subtitle={currentProject?.description}
+        rightAction={{
+          icon: 'eye-outline',
+          onPress: handleLabelCounterOpen
+        }}
       />
       
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <View style={styles.headerContainer}>
-          <ProjectHeader
-            project={currentProject}
-            onEyePress={handleLabelCounterOpen}
-            onSwitchChange={updateProjectVisibility}
-          />
-        </View>
-
         <ProjectMenuGrid menuItems={menuItems} />
 
         <ProjectBottomSection />
@@ -122,8 +117,5 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.md,
-  },
-  headerContainer: {
-    marginBottom: theme.spacing.md,
   },
 });

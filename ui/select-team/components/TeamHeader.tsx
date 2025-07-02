@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Input } from "@/components/atoms";
 import { theme } from "@/types/theme";
 
@@ -14,12 +14,11 @@ export const TeamHeader: React.FC<TeamHeaderProps> = ({
 }) => {
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>Sélectionner une équipe</Text>
       <Input
-        placeholder="Rechercher une équipe..."
+        placeholder='Rechercher une équipe...'
         value={searchQuery}
         onChangeText={onSearchChange}
-        icon="search"
+        icon='search'
         containerStyle={styles.searchInput}
       />
     </View>
@@ -31,12 +30,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.md,
     paddingBottom: theme.spacing.lg,
-  },
-  title: {
-    fontSize: theme.fontSize.xxl,
-    fontWeight: "bold",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.lg,
   },
   searchInput: {
     marginBottom: 0,

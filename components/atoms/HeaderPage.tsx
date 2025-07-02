@@ -94,16 +94,20 @@ export const HeaderPage: React.FC<HeaderPageProps> = ({
           <TouchableOpacity
             style={[
               styles.rightButton,
-              rightAction.icon === 'add-circle-outline' && styles.addButton
+              (rightAction.icon === 'add-circle-outline' || rightAction.icon === 'eye-outline') && styles.actionButton
             ]}
             onPress={rightAction.onPress}
             hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
             {rightAction.icon ? (
               <Ionicons
-                name={rightAction.icon === 'add-circle-outline' ? 'add' : rightAction.icon}
-                size={rightAction.icon === 'add-circle-outline' ? 20 : 24}
-                color={rightAction.icon === 'add-circle-outline' ? theme.colors.secondary : theme.colors.primary}
+                name={
+                  rightAction.icon === 'add-circle-outline' ? 'add' : 
+                  rightAction.icon === 'eye-outline' ? 'eye' : 
+                  rightAction.icon
+                }
+                size={(rightAction.icon === 'add-circle-outline' || rightAction.icon === 'eye-outline') ? 20 : 24}
+                color={(rightAction.icon === 'add-circle-outline' || rightAction.icon === 'eye-outline') ? theme.colors.secondary : theme.colors.primary}
               />
             ) : rightAction.text ? (
               <Text style={styles.rightButtonText}>{rightAction.text}</Text>
@@ -150,7 +154,7 @@ const styles = StyleSheet.create({
   rightButton: {
     marginLeft: theme.spacing.md,
   },
-  addButton: {
+  actionButton: {
     backgroundColor: theme.colors.primary,
     width: 36,
     height: 36,
