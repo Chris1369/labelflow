@@ -978,6 +978,129 @@ Le front gère automatiquement les différents cas d'erreur :
 - **409** : L'utilisateur est déjà membre de l'équipe
 - Autres erreurs : Message générique ou message du serveur
 
+## React Query (TanStack Query)
+
+### Architecture des hooks
+
+- **hooks/queries/** : Centralisation des hooks React Query
+  - Un fichier par entité métier : `useProjects.ts`, `useLabels.ts`, etc.
+  - Export centralisé dans `index.ts`
+
+### Pattern des Query Keys
+
+```typescript
+// Structure obligatoire pour les query keys
+export const entityKeys = {
+  all: ['entity'] as const,
+  lists: () => [...entityKeys.all, 'list'] as const,
+  list: (filters?: any) => [...entityKeys.lists(), { filters }] as const,
+  details: () => [...entityKeys.all, 'detail'] as const,
+  detail: (id: string) => [...entityKeys.details(), id] as const,
+  // Ajout de clés spécifiques selon les besoins
+  byCategory: (categoryId: string) => [...entityKeys.all, 'category', categoryId] as const,
+  search: (query: string) => [...entityKeys.all, 'search', query] as const,
+  members: (id: string) => [...entityKeys.detail(id), 'members'] as const,
+};
+```
+
+### Conventions des hooks
+
+1. **Nommage** :
+   - `useEntities` : Pour récupérer toutes les entités
+   - `useEntityDetails` : Pour récupérer une entité par ID
+   - `useMyEntities` : Pour les entités de l'utilisateur connecté
+   - `useEntitiesByX` : Pour filtrer par critère spécifique
+
+2. **Structure des hooks** :
+```typescript
+export const useEntities = (filters?: any, enabled = true) => {
+  return useQuery<Entity[], Error>({
+    queryKey: entityKeys.list(filters),
+    queryFn: async () => {
+      const result = await entityAPI.getAll(filters);
+      // Gérer les réponses paginées si nécessaire
+      if (Array.isArray(result)) {
+        return result;
+      }
+      return result.data || [];
+    },
+    enabled: enabled,
+  });
+};
+```
+
+3. **Paramètres standards** :
+   - Toujours inclure le type générique `<ReturnType, Error>`
+   - Paramètre `enabled` optionnel (défaut: true)
+   - Vérification des paramètres requis dans `enabled`
+
+4. **Gestion des filtres** :
+   - Utiliser le pattern `list({ filters })` pour les variations
+   - Exemples : `{ my: true }`, `{ public: true }`, `{ ownerId }`
+
+5. **Tri et transformation** :
+   - Faire le tri directement dans le queryFn si nécessaire
+   - Exemple : tri alphabétique des labels/teams
+
+### Exemples d'implémentation
+
+```typescript
+// Hook standard
+export const useProjects = () => {
+  return useQuery<Project[], Error>({
+    queryKey: projectKeys.lists(),
+    queryFn: async () => {
+      const projects = await projectAPI.getAll();
+      return projects;
+    },
+  });
+};
+
+// Hook avec filtre et enabled
+export const useProjectsByOwner = (ownerId: string, enabled = true) => {
+  return useQuery<Project[], Error>({
+    queryKey: projectKeys.list({ ownerId }),
+    queryFn: async () => {
+      const projects = await projectAPI.getProjectsByOwnerId(ownerId);
+      return projects;
+    },
+    enabled: enabled && !!ownerId,
+  });
+};
+
+// Hook avec recherche et condition d'activation
+export const useSearchLabels = (query: string, enabled = true) => {
+  return useQuery<Label[], Error>({
+    queryKey: labelKeys.search(query),
+    queryFn: async () => {
+      const labels = await labelAPI.searchLabels(query);
+      return labels;
+    },
+    enabled: enabled && query.length >= 2,
+  });
+};
+```
+
+### Mutations
+
+Les mutations ne sont pas incluses dans les hooks queries. Elles sont gérées directement dans les actions des composants avec `useMutation` si nécessaire.
+
+### Invalidation des queries
+
+Utiliser `queryClient.invalidateQueries` avec les query keys appropriées après les mutations :
+
+```typescript
+import { useQueryClient } from '@tanstack/react-query';
+
+const queryClient = useQueryClient();
+
+// Invalider toutes les queries d'une entité
+queryClient.invalidateQueries({ queryKey: entityKeys.all });
+
+// Invalider une query spécifique
+queryClient.invalidateQueries({ queryKey: entityKeys.detail(id) });
+```
+
 ## Notes importantes
 
 - Toujours créer des fichiers de types

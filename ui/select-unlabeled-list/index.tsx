@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react';
-import { StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { theme } from '@/types/theme';
-import { useStore } from './useStore';
-import { actions } from './actions';
-import { router } from 'expo-router';
+import React, { useCallback, useEffect } from "react";
+import { StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { theme } from "@/types/theme";
+import { useStore } from "./useStore";
+import { actions } from "./actions";
+import { router, useFocusEffect } from "expo-router";
 import {
   ListHeader,
   LoadingListState,
@@ -12,24 +12,30 @@ import {
   UnlabeledListContent,
   FloatingCreateButton,
   type UnlabeledListItem,
-} from './components';
+} from "./components";
+import { useUnlabeledListsByProject } from "@/hooks/queries";
 
 interface SelectUnlabeledListScreenProps {
   projectId: string;
 }
 
-export const SelectUnlabeledListScreen: React.FC<SelectUnlabeledListScreenProps> = ({ projectId }) => {
-  const { 
-    lists, 
-    filteredLists, 
-    searchQuery, 
-    isLoading, 
-    error 
-  } = useStore();
+export const SelectUnlabeledListScreen: React.FC<
+  SelectUnlabeledListScreenProps
+> = ({ projectId }) => {
+  const { searchQuery } = useStore();
 
-  useEffect(() => {
-    actions.loadLists(projectId);
-  }, [projectId]);
+  const {
+    data: filteredLists,
+    isLoading,
+    refetch,
+    error,
+  } = useUnlabeledListsByProject(projectId);
+
+  useFocusEffect(
+    useCallback(() => {
+      refetch();
+    }, [refetch])
+  );
 
   const handleListSelect = (list: UnlabeledListItem) => {
     const listId = list.id || list._id;
@@ -52,14 +58,11 @@ export const SelectUnlabeledListScreen: React.FC<SelectUnlabeledListScreenProps>
       {isLoading ? (
         <LoadingListState />
       ) : error ? (
-        <ErrorListState 
-          error={error} 
-          onRetry={() => actions.loadLists(projectId)} 
-        />
+        <ErrorListState error={error.message} onRetry={() => refetch()} />
       ) : (
         <>
           <UnlabeledListContent
-            lists={filteredLists}
+            lists={filteredLists || []}
             searchQuery={searchQuery}
             onListSelect={handleListSelect}
             onCreateList={handleCreateList}
