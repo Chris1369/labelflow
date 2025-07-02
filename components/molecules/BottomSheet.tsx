@@ -1,15 +1,17 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect } from 'react';
 import {
   View,
+  StyleSheet,
   Modal,
   TouchableOpacity,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  Keyboard,
   Dimensions,
 } from 'react-native';
+import GorhomBottomSheet, {
+  BottomSheetBackdrop,
+  BottomSheetBackdropProps,
+} from '@gorhom/bottom-sheet';
 import { theme } from '@/types/theme';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 const { height: screenHeight } = Dimensions.get('window');
 
@@ -18,99 +20,116 @@ interface BottomSheetProps {
   onClose: () => void;
   children: React.ReactNode;
   height?: number;
+  snapPoints?: (string | number)[];
+  enablePanDownToClose?: boolean;
+  keyboardBehavior?: 'interactive' | 'fillParent' | 'extend';
+  keyboardBlurBehavior?: 'none' | 'restore';
 }
 
 export const BottomSheet: React.FC<BottomSheetProps> = ({
   visible,
   onClose,
   children,
-  height = screenHeight * 0.9,
+  height,
+  snapPoints = height ? [`${(height / screenHeight) * 100}%`] : ['90%'],
+  enablePanDownToClose = true,
+  keyboardBehavior = 'fillParent',
+  keyboardBlurBehavior = 'none',
 }) => {
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const bottomSheetRef = useRef<GorhomBottomSheet>(null);
 
+  // Handle opening/closing
   useEffect(() => {
-    const keyboardWillShow = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
-      (e) => {
-        setKeyboardHeight(e.endCoordinates.height);
-      }
-    );
-    
-    const keyboardWillHide = Keyboard.addListener(
-      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
-      () => {
-        setKeyboardHeight(0);
-      }
-    );
+    if (visible) {
+      bottomSheetRef.current?.expand();
+    } else {
+      bottomSheetRef.current?.close();
+    }
+  }, [visible]);
 
-    return () => {
-      keyboardWillShow.remove();
-      keyboardWillHide.remove();
-    };
-  }, []);
+  // Render backdrop
+  const renderBackdrop = useCallback(
+    (props: BottomSheetBackdropProps) => (
+      <BottomSheetBackdrop
+        {...props}
+        disappearsOnIndex={-1}
+        appearsOnIndex={0}
+        opacity={0.5}
+        pressBehavior="close"
+      />
+    ),
+    []
+  );
+
+  if (!visible) return null;
 
   return (
     <Modal
       visible={visible}
       transparent
-      animationType="slide"
+      animationType="none"
+      statusBarTranslucent
       onRequestClose={onClose}
     >
-      <View style={styles.overlay}>
-        <TouchableOpacity
-          style={styles.backdrop}
-          activeOpacity={1}
-          onPress={onClose}
-        />
-        
-        <View style={styles.container}>
-          <View 
-            style={[
-              styles.sheet,
-              {
-                height: height,
-                paddingBottom: keyboardHeight,
-              }
-            ]}
+      <BottomSheetModalProvider>
+        <View style={styles.modalContainer}>
+          <TouchableOpacity 
+            style={styles.modalBackdrop} 
+            activeOpacity={1}
+            onPress={onClose}
+          />
+          <GorhomBottomSheet
+            ref={bottomSheetRef}
+            snapPoints={snapPoints}
+            index={0}
+            enablePanDownToClose={enablePanDownToClose}
+            onClose={onClose}
+            backdropComponent={renderBackdrop}
+            keyboardBehavior={keyboardBehavior}
+            keyboardBlurBehavior={keyboardBlurBehavior}
+            android_keyboardInputMode="adjustResize"
+            handleIndicatorStyle={styles.handle}
+            backgroundStyle={styles.background}
+            detached={true}
+            bottomInset={0}
+            style={styles.sheetContainer}
           >
-            <View style={styles.handle} />
-            <View style={{ flex: 1 }}>
+            <View style={styles.content}>
               {children}
             </View>
-          </View>
+          </GorhomBottomSheet>
         </View>
-      </View>
+      </BottomSheetModalProvider>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  modalContainer: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
-  backdrop: {
+  modalBackdrop: {
     flex: 1,
   },
-  container: {
+  sheetContainer: {
     position: 'absolute',
-    bottom: 0,
     left: 0,
     right: 0,
+    bottom: 0,
+    height: screenHeight,
   },
-  sheet: {
+  background: {
     backgroundColor: theme.colors.background,
     borderTopLeftRadius: theme.borderRadius.lg,
     borderTopRightRadius: theme.borderRadius.lg,
-    width: '100%',
   },
   handle: {
+    backgroundColor: theme.colors.border,
     width: 40,
     height: 4,
-    backgroundColor: theme.colors.border,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginTop: theme.spacing.sm,
-    marginBottom: theme.spacing.md,
+  },
+  content: {
+    flex: 1,
   },
 });

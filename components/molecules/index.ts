@@ -5,3 +5,6 @@ export { SimpleBoundingBox } from './SimpleBoundingBox';
 export { FixedBoundingBox } from './FixedBoundingBox';
 export { StableBoundingBox } from './StableBoundingBox';
 export { BottomSheet } from './BottomSheet';
+export { BottomSheetModal } from './BottomSheetModal';
+export type { BottomSheetModalRef } from './BottomSheetModal';
+export { SimpleBottomSheet } from './SimpleBottomSheet';

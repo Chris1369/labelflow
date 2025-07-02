@@ -4,59 +4,68 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Switch,
   Alert,
 } from 'react-native';
 import { Input, Button } from '@/components/atoms';
 import { SimpleBottomSheet } from '@/components/molecules';
 import { theme } from '@/types/theme';
-import { categoryAPI } from '@/api/category.api';
-import { useCategoriesStore } from '../useStore';
+import { teamAPI } from '@/api/team.api';
+import { useSelectTeamStore } from '../useStore';
+import { router } from 'expo-router';
 
-export interface CreateCategoryBottomSheetRef {
+export interface CreateTeamBottomSheetRef {
   open: () => void;
   close: () => void;
 }
 
-export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef>((_, ref) => {
+export const CreateTeamBottomSheet = forwardRef<CreateTeamBottomSheetRef>((_, ref) => {
   const [isVisible, setIsVisible] = useState(false);
   const [name, setName] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
+  const [description, setDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
 
   useImperativeHandle(ref, () => ({
     open: () => {
       setIsVisible(true);
       setName('');
-      setIsPublic(false);
+      setDescription('');
     },
     close: () => setIsVisible(false),
   }));
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      Alert.alert('Erreur', 'Veuillez entrer un nom pour la catégorie');
+      Alert.alert('Erreur', 'Veuillez entrer un nom pour l\'équipe');
       return;
     }
 
     setIsCreating(true);
     try {
-      await categoryAPI.create({
+      const newTeam = await teamAPI.create({
         name: name.trim(),
-        isPublic,
+        description: description.trim(),
       });
 
-      // Refresh categories list
-      useCategoriesStore.getState().refreshCategories?.();
+      // Refresh teams list
+      useSelectTeamStore.getState().refreshTeams?.();
 
       // Reset form and close
       setName('');
-      setIsPublic(false);
+      setDescription('');
       setIsVisible(false);
 
-      Alert.alert('Succès', 'Catégorie créée avec succès');
+      Alert.alert('Succès', 'Équipe créée avec succès', [
+        {
+          text: 'OK',
+          onPress: () => {
+            // Navigate to the new team
+            const teamId = newTeam._id || newTeam.id;
+            router.push(`/(team)/${teamId}`);
+          },
+        },
+      ]);
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Impossible de créer la catégorie');
+      Alert.alert('Erreur', error.message || 'Impossible de créer l\'équipe');
     } finally {
       setIsCreating(false);
     }
@@ -70,42 +79,34 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
     <SimpleBottomSheet
       visible={isVisible}
       onClose={handleClose}
-      height="70%"
+      height="60%"
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Nouvelle catégorie</Text>
+          <Text style={styles.title}>Nouvelle équipe</Text>
           <Text style={styles.subtitle}>
-            Organisez vos labels par catégories
+            Créez une équipe pour collaborer sur vos projets
           </Text>
         </View>
 
         <View style={styles.form}>
           <Input
-            placeholder="Nom de la catégorie"
+            placeholder="Nom de l'équipe"
             value={name}
             onChangeText={setName}
             containerStyle={styles.input}
             autoFocus
           />
 
-          <View style={styles.switchContainer}>
-            <View style={styles.switchLabel}>
-              <Text style={styles.switchText}>Rendre publique</Text>
-              <Text style={styles.switchDescription}>
-                Les autres utilisateurs pourront voir cette catégorie
-              </Text>
-            </View>
-            <Switch
-              value={isPublic}
-              onValueChange={setIsPublic}
-              trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary + '80'
-              }}
-              thumbColor={isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
-            />
-          </View>
+          <Input
+            placeholder="Description (optionnel)"
+            value={description}
+            onChangeText={setDescription}
+            containerStyle={styles.input}
+            multiline
+            numberOfLines={3}
+            textAlignVertical="top"
+          />
         </View>
 
         <View style={styles.actions}>
@@ -153,25 +154,6 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: theme.spacing.lg,
-  },
-  switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: theme.spacing.xl,
-  },
-  switchLabel: {
-    flex: 1,
-    marginRight: theme.spacing.md,
-  },
-  switchText: {
-    ...theme.fonts.body,
-    fontWeight: '600',
-  },
-  switchDescription: {
-    ...theme.fonts.caption,
-    color: theme.colors.textSecondary,
-    marginTop: 2,
   },
   actions: {
     flexDirection: 'row',

@@ -5,3 +5,5 @@ export { TeamLoadingState } from './TeamLoadingState';
 export { TeamErrorState } from './TeamErrorState';
 export { TeamsList } from './TeamsList';
 export { FloatingAddButton } from './FloatingAddButton';
+export { CreateTeamBottomSheet } from './CreateTeamBottomSheet';
+export type { CreateTeamBottomSheetRef } from './CreateTeamBottomSheet';

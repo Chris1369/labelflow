@@ -5,3 +5,5 @@ export { LoadingState } from './LoadingState';
 export { ErrorState } from './ErrorState';
 export { ProjectsList } from './ProjectsList';
 export { FloatingAddButton } from './FloatingAddButton';
+export { CreateProjectBottomSheet } from './CreateProjectBottomSheet';
+export type { CreateProjectBottomSheetRef } from './CreateProjectBottomSheet';

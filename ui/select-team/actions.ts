@@ -12,8 +12,4 @@ export const selectTeamActions = {
     const teamId = team._id || team.id;
     router.push(`/(team)/${teamId}`);
   },
-
-  createNewTeam: () => {
-    router.push('/(main)/create-team');
-  },
 };

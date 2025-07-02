@@ -12,9 +12,5 @@ export const selectProjectActions = {
       pathname: '/(project)/[id]',
       params: { id: project.id, name: project.name }
     });
-  },
-
-  createNewProject: () => {
-    router.push('/(main)/create-project');
-  },
+  }
 };
