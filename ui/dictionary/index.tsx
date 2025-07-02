@@ -1,10 +1,10 @@
 import React from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { HeaderPage } from '@/components/atoms';
 import { theme } from '@/types/theme';
 import { dictionaryActions } from './actions';
 import { 
-  DictionaryHeader, 
   DictionaryMenu, 
   type DictionaryMenuItemData 
 } from './components';
@@ -30,9 +30,13 @@ export const DictionaryScreen: React.FC = () => {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title="Dictionnaire" 
+        subtitle="Gérez vos catégories et labels"
+      />
+      
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <DictionaryHeader />
         <DictionaryMenu menuItems={menuItems} />
       </ScrollView>
     </SafeAreaView>

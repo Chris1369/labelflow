@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { useSelectTeamStore } from "./useStore";
 import { selectTeamActions } from "./actions";
@@ -10,7 +11,6 @@ import {
   TeamLoadingState,
   TeamErrorState,
   TeamsList,
-  FloatingAddButton,
   CreateTeamBottomSheet,
   CreateTeamBottomSheetRef,
 } from "./components";
@@ -36,7 +36,16 @@ export const SelectTeamScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title="Sélectionner une équipe" 
+        subtitle="Choisissez ou créez une équipe"
+        rightAction={{
+          icon: 'add-circle-outline',
+          onPress: handleCreateTeam
+        }}
+      />
+      
       <TeamHeader
         searchQuery={searchQuery}
         onSearchChange={selectTeamActions.searchTeams}
@@ -49,15 +58,12 @@ export const SelectTeamScreen: React.FC = () => {
       ) : error ? (
         <TeamErrorState error={error} onRetry={() => refetch()} />
       ) : (
-        <>
-          <TeamsList
-            teams={filteredTeams}
-            searchQuery={searchQuery}
-            onTeamSelect={selectTeamActions.selectTeam}
-            onCreateTeam={handleCreateTeam}
-          />
-          <FloatingAddButton onPress={handleCreateTeam} />
-        </>
+        <TeamsList
+          teams={filteredTeams}
+          searchQuery={searchQuery}
+          onTeamSelect={selectTeamActions.selectTeam}
+          onCreateTeam={handleCreateTeam}
+        />
       )}
       
       <CreateTeamBottomSheet ref={createTeamBottomSheetRef} />

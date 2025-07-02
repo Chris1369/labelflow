@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { ScrollView, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { useSettingsStore } from "./useStore";
 import { settingsActions } from "./actions";
 import {
-  SettingsHeader,
   PreferencesSection,
   ModelTrainingSection,
   InfoSection,
@@ -28,10 +28,13 @@ export const SettingsScreen: React.FC = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title="Paramètres" 
+        subtitle="Gérez vos préférences"
+      />
+      
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <SettingsHeader />
-        
         <PreferencesSection
           includePublicCategories={includePublicCategories}
           includePublicLabels={includePublicLabels}
@@ -57,6 +60,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
   },
 });

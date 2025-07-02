@@ -4,27 +4,10 @@ import { ProtectedRoute } from "@/components/organisms/ProtectedRoute";
 export default function TeamLayout() {
   return (
     <ProtectedRoute>
-      <Stack>
-        <Stack.Screen
-          name="[id]"
-          options={{
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="[id]/members"
-          options={{
-            title: "Gestion des membres",
-            headerBackTitle: "Retour",
-          }}
-        />
-        <Stack.Screen
-          name="[id]/projects"
-          options={{
-            title: "Gestion des projets",
-            headerBackTitle: "Retour",
-          }}
-        />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="[id]" />
+        <Stack.Screen name="[id]/members" />
+        <Stack.Screen name="[id]/projects" />
       </Stack>
     </ProtectedRoute>
   );

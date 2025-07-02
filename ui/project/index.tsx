@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { StyleSheet, ScrollView } from "react-native";
+import { StyleSheet, ScrollView, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { projectActions } from "./actions";
 import { useProjectStore } from "./useStore";
@@ -60,20 +61,44 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
 
 
   if (isLoading) {
-    return <ProjectLoadingView />;
+    return (
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <HeaderPage 
+          title="Projet" 
+          subtitle="Chargement..."
+        />
+        <ProjectLoadingView />
+      </SafeAreaView>
+    );
   }
 
   if (error && !currentProject) {
-    return <ProjectErrorView error={error} onRetry={() => refetch()} />;
-  }
-  return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ProjectHeader
-          project={currentProject}
-          onEyePress={handleLabelCounterOpen}
-          onSwitchChange={updateProjectVisibility}
+    return (
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <HeaderPage 
+          title="Projet" 
+          subtitle="Erreur"
         />
+        <ProjectErrorView error={error} onRetry={() => refetch()} />
+      </SafeAreaView>
+    );
+  }
+  
+  return (
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title={currentProject?.name || 'Projet'} 
+        subtitle={currentProject?.description}
+      />
+      
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        <View style={styles.headerContainer}>
+          <ProjectHeader
+            project={currentProject}
+            onEyePress={handleLabelCounterOpen}
+            onSwitchChange={updateProjectVisibility}
+          />
+        </View>
 
         <ProjectMenuGrid menuItems={menuItems} />
 
@@ -95,6 +120,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+  },
+  headerContainer: {
+    marginBottom: theme.spacing.md,
   },
 });

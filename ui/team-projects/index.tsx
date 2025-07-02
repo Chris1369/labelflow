@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage, Input } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { useTeamProjectsStore } from "./useStore";
 import { teamProjectsActions } from "./actions";
 import {
-  ProjectsHeader,
   LoadingProjectsState,
   ErrorProjectsState,
   ProjectsList,
@@ -39,13 +39,21 @@ export const TeamProjectsScreen: React.FC<TeamProjectsScreenProps> = ({
   }, [teamId]);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ProjectsHeader
-        selectedCount={selectedProjects.size}
-        totalCount={total}
-        searchQuery={searchQuery}
-        onSearchChange={teamProjectsActions.searchProjects}
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title="Projets de l'équipe" 
+        subtitle={`${selectedProjects.size} sur ${total} projets sélectionnés`}
       />
+      
+      <View style={styles.searchContainer}>
+        <Input
+          placeholder="Rechercher un projet..."
+          value={searchQuery}
+          onChangeText={teamProjectsActions.searchProjects}
+          icon="search"
+          containerStyle={styles.searchInput}
+        />
+      </View>
 
       {isLoading ? (
         <LoadingProjectsState />
@@ -76,5 +84,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  searchContainer: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+  },
+  searchInput: {
+    marginBottom: 0,
   },
 });

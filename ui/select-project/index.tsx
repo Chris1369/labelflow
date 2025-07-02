@@ -1,6 +1,7 @@
 import React, { useRef } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { useSelectProjectStore } from "./useStore";
 import { selectProjectActions } from "./actions";
@@ -11,7 +12,6 @@ import {
   LoadingState,
   ErrorState,
   ProjectsList,
-  FloatingAddButton,
   CreateProjectBottomSheet,
   CreateProjectBottomSheetRef,
 } from "./components";
@@ -30,7 +30,16 @@ export const SelectProjectScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title="Sélectionner un projet" 
+        subtitle="Choisissez ou créez un projet"
+        rightAction={{
+          icon: 'add-circle-outline',
+          onPress: handleCreateProject
+        }}
+      />
+      
       <HeaderSection
         searchQuery={searchQuery}
         onSearchChange={selectProjectActions.handleSearchChange}
@@ -44,15 +53,12 @@ export const SelectProjectScreen: React.FC = () => {
           onRetry={() => refetch()}
         />
       ) : (
-        <>
-          <ProjectsList
-            projects={projects || []}
-            searchQuery={searchQuery}
-            onProjectSelect={selectProjectActions.handleProjectSelect}
-            onCreateProject={handleCreateProject}
-          />
-          <FloatingAddButton onPress={handleCreateProject} />
-        </>
+        <ProjectsList
+          projects={projects || []}
+          searchQuery={searchQuery}
+          onProjectSelect={selectProjectActions.handleProjectSelect}
+          onCreateProject={handleCreateProject}
+        />
       )}
 
       <CreateProjectBottomSheet ref={createProjectBottomSheetRef} />

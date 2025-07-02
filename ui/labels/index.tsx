@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { Input } from '@/components/atoms';
+import { Input, HeaderPage } from '@/components/atoms';
 import { theme } from '@/types/theme';
 import { useLabelsStore } from './useStore';
 import { LabelItem } from './components/LabelItem';
@@ -60,9 +60,17 @@ export const LabelsScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Gestion des labels</Text>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title="Labels" 
+        subtitle="Gérez vos labels personnalisés"
+        rightAction={{
+          icon: 'add-circle-outline',
+          onPress: handleCreateLabel
+        }}
+      />
+      
+      <View style={styles.searchContainer}>
         <Input
           placeholder="Rechercher un label..."
           value={searchQuery}
@@ -109,14 +117,6 @@ export const LabelsScreen: React.FC = () => {
         />
       )}
 
-      <TouchableOpacity
-        style={styles.fab}
-        onPress={handleCreateLabel}
-        activeOpacity={0.8}
-      >
-        <Ionicons name="add" size={28} color={theme.colors.secondary} />
-      </TouchableOpacity>
-
       <CreateLabelBottomSheet ref={bottomSheetRef} />
     </SafeAreaView>
   );
@@ -127,23 +127,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
-  header: {
+  searchContainer: {
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.md,
-    paddingBottom: theme.spacing.lg,
-  },
-  title: {
-    fontSize: theme.fontSize.xxl,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
   },
   searchInput: {
     marginBottom: 0,
   },
   listContent: {
     paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl + 60,
+    paddingBottom: theme.spacing.xl,
   },
   emptyContainer: {
     flex: 1,
@@ -200,21 +193,5 @@ const styles = StyleSheet.create({
     color: theme.colors.secondary,
     fontSize: theme.fontSize.md,
     fontWeight: '600',
-  },
-  fab: {
-    position: 'absolute',
-    bottom: theme.spacing.xl,
-    right: theme.spacing.lg,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
   },
 });

@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { useViewItemsStore } from "./useStore";
 import { ViewItemsScreenProps } from "./types";
 import {
-  ItemsHeader,
   LoadingItemsState,
   ErrorItemsState,
   ItemsList,
@@ -40,7 +40,11 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
 
   if (isLoading && items.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <HeaderPage 
+          title="Items" 
+          subtitle="Chargement..."
+        />
         <LoadingItemsState />
       </SafeAreaView>
     );
@@ -48,7 +52,11 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
 
   if (error && items.length === 0) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <HeaderPage 
+          title="Items" 
+          subtitle="Erreur"
+        />
         <ErrorItemsState 
           error={error} 
           onRetry={() => loadItems(true)} 
@@ -58,8 +66,11 @@ export const ViewItemsScreen: React.FC<ViewItemsScreenProps> = ({
   }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ItemsHeader itemCount={items.length} />
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title="Items du projet" 
+        subtitle={`${items.length} items labellisés`}
+      />
       
       <ItemsList
         items={items}

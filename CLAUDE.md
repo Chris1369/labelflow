@@ -30,6 +30,7 @@ labelflow-app/
   - **atoms/** : Composants de base indivisibles
     - `Button.tsx` : Bouton configurable (primary, secondary, outline)
     - `Input.tsx` : Champ de saisie réutilisable
+    - `HeaderPage.tsx` : Header de navigation standard pour toutes les pages
   - **molecules/** : Composants composés d'atoms
     - `DraggableBox.tsx` : Boîte déplaçable
     - `FixedBoundingBox.tsx` : Boîte de délimitation fixe
@@ -1196,3 +1197,106 @@ Le `SimpleBottomSheet` est un composant BottomSheet léger utilisant uniquement 
 - Éviter d'imbriquer des ScrollView avec des FlatList
 - Maintenir une hauteur de 90% maximum pour laisser voir le contenu en dessous
 - Utiliser le séparateur (borderTop) pour les actions en bas
+
+## HeaderPage Component
+
+Le `HeaderPage` est un composant atom réutilisable qui fournit un header de navigation cohérent pour toutes les pages de l'application.
+
+### Utilisation
+
+```typescript
+import { HeaderPage } from '@/components/atoms';
+
+// Header simple avec navigation
+<HeaderPage 
+  title="Catégories" 
+  subtitle="Gérez vos catégories de labels"
+/>
+
+// Header avec action à droite
+<HeaderPage 
+  title="Labels" 
+  subtitle="Gérez vos labels personnalisés"
+  rightAction={{
+    icon: 'add-circle-outline',
+    onPress: handleCreateLabel
+  }}
+/>
+
+// Header sans bouton retour
+<HeaderPage 
+  title="Accueil" 
+  showBack={false}
+/>
+
+// Header centré (ancien style)
+<HeaderPage 
+  title="Bienvenue" 
+  subtitle="Description de la page"
+  centered={true}
+/>
+```
+
+### Props
+
+- **title** (string, requis) : Titre principal de la page
+- **subtitle** (string, optionnel) : Sous-titre descriptif
+- **showBack** (boolean, défaut: true) : Afficher le bouton retour
+- **onBack** (function, optionnel) : Action personnalisée pour le retour
+- **rightAction** (object, optionnel) : Action à droite
+  - `icon`: Nom de l'icône Ionicons
+  - `text`: Texte alternatif si pas d'icône
+  - `onPress`: Fonction à exécuter
+- **centered** (boolean, défaut: false) : Utiliser l'ancien layout centré
+- **style** (ViewStyle, optionnel) : Styles personnalisés
+- **titleStyle** (TextStyle, optionnel) : Styles du titre
+- **subtitleStyle** (TextStyle, optionnel) : Styles du sous-titre
+
+### Caractéristiques
+
+1. **Navigation automatique** :
+   - Gère automatiquement le `router.back()` si `onBack` n'est pas fourni
+   - Vérifie `router.canGoBack()` avant de naviguer
+
+2. **Safe Area** :
+   - Utilise `useSafeAreaInsets()` pour s'adapter aux encoches
+   - Padding top automatique selon le device
+
+3. **Styles visuels** :
+   - Hauteur minimum : 56px
+   - Bordure inférieure : 1px `theme.colors.border`
+   - Icône retour : chevron-back, 28px
+   - Titre : `theme.fonts.subtitle`
+   - Sous-titre : `theme.fonts.caption`, couleur secondaire
+
+4. **Layout responsive** :
+   - Le titre prend toute la largeur disponible
+   - Ellipsis automatique si le texte est trop long
+   - Placeholder à droite pour équilibrer si pas d'action
+
+### Implémentation dans les screens
+
+Tous les screens principaux utilisent maintenant HeaderPage :
+
+```typescript
+// Dans SafeAreaView, exclure le top edge
+<SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+  <HeaderPage 
+    title="Titre de la page" 
+    subtitle="Description"
+  />
+  {/* Contenu de la page */}
+</SafeAreaView>
+```
+
+### Screens utilisant HeaderPage
+
+- **Categories** : Avec action d'ajout
+- **Labels** : Avec action d'ajout  
+- **Settings** : Sans action
+- **Dictionary** : Sans action
+- **Project** : Titre dynamique selon le projet
+- **Team** : Titre dynamique selon l'équipe
+- **Export/Import** : Avec navigation contextuelle
+- **View Items** : Avec compteur d'items
+- Et tous les autres screens de navigation

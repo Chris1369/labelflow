@@ -1,11 +1,11 @@
 import React, { useEffect } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage, Input } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { useTeamMembersStore } from "./useStore";
 import { teamMembersActions } from "./actions";
 import {
-  SearchHeader,
   AddMemberSection,
   MembersList,
 } from "./components";
@@ -42,11 +42,21 @@ export const TeamMembersScreen: React.FC<TeamMembersScreenProps> = ({
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <SearchHeader
-        searchQuery={searchQuery}
-        onSearchChange={teamMembersActions.searchMembers}
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title="Membres de l'équipe" 
+        subtitle={`${filteredMembers.length} membres`}
       />
+      
+      <View style={styles.searchContainer}>
+        <Input
+          placeholder="Rechercher un membre..."
+          value={searchQuery}
+          onChangeText={teamMembersActions.searchMembers}
+          icon="search"
+          containerStyle={styles.searchInput}
+        />
+      </View>
 
       <AddMemberSection
         newMemberEmail={newMemberEmail}
@@ -68,5 +78,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  searchContainer: {
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+  },
+  searchInput: {
+    marginBottom: 0,
   },
 });

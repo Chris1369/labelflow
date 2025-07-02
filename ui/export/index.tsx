@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage } from "@/components/atoms";
 import { useLocalSearchParams } from "expo-router";
 import { theme } from "@/types/theme";
 import { useExportStore } from "./useStore";
@@ -20,7 +21,12 @@ export default function ExportScreen() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title="Export de données" 
+        subtitle="Choisissez un format d'export"
+      />
+      
       <ScrollView contentContainerStyle={{ padding: theme.spacing.sm }}>
         <ExportSection
           title="Formats YOLO"

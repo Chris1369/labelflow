@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
-import { ScrollView, StyleSheet } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { useTeamStore } from "./useStore";
 import {
@@ -31,7 +32,11 @@ export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <HeaderPage 
+          title="Équipe" 
+          subtitle="Chargement..."
+        />
         <TeamLoadingView />
       </SafeAreaView>
     );
@@ -39,7 +44,11 @@ export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+        <HeaderPage 
+          title="Équipe" 
+          subtitle="Erreur"
+        />
         <TeamErrorView
           error={error}
           onRetry={() => refetch()}
@@ -49,9 +58,16 @@ export const TeamScreen: React.FC<TeamScreenProps> = ({ teamId }) => {
   }
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+      <HeaderPage 
+        title={currentTeam?.name || 'Équipe'} 
+        subtitle={currentTeam?.description || `${currentTeam?.members?.length || 0} membres`}
+      />
+      
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <TeamHeader team={currentTeam} />
+        <View style={styles.headerContainer}>
+          <TeamHeader team={currentTeam} />
+        </View>
         <TeamMenuGrid menuItems={menuItems} />
         <TeamBottomSection />
       </ScrollView>
@@ -66,6 +82,10 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    padding: theme.spacing.lg,
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.md,
+  },
+  headerContainer: {
+    marginBottom: theme.spacing.md,
   },
 });

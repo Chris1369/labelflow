@@ -1,7 +1,7 @@
 export const environment = process.env.APP_VARIANT || "development";
 const IS_DEV = environment === "development";
 const IS_STAGING = environment === "staging";
-const IP = "192.168.1.150";
+const IP = "172.20.10.6";
 
 interface EnvironmentValues {
   name: string;
@@ -75,9 +75,12 @@ export default {
       },
       infoPlist: {
         NSCameraUsageDescription:
-          "Cette app a besoin d'acc�der � votre cam�ra pour capturer des images � labelliser.",
+          "Cette app a besoin d'accéder à votre caméra pour capturer des images à labelliser.",
         NSPhotoLibraryUsageDescription:
-          "Cette app a besoin d'acc�der � votre galerie photo pour importer des images.",
+          "Cette app a besoin d'accéder à votre galerie photo pour importer des images.",
+      },
+      statusBar: {
+        barStyle: "dark-content",
       },
     },
     android: {
@@ -91,7 +94,11 @@ export default {
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
       ],
-      edgeToEdgeEnabled: true,
+      statusBar: {
+        barStyle: "dark-content",
+        backgroundColor: "transparent",
+        translucent: true,
+      },
     },
     web: {
       favicon: "./assets/favicon.png",
