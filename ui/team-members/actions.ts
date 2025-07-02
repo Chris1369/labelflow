@@ -30,25 +30,6 @@ const mockMembers: TeamMember[] = [
 ];
 
 export const teamMembersActions = {
-  loadMembers: createSafeAction(
-    async () => {
-      const { teamId } = useTeamMembersStore.getState();
-      
-      try {
-        // Récupérer les membres de l'équipe via l'API
-        const members = await teamAPI.getTeamMembers(teamId);
-        useTeamMembersStore.getState().setMembers(members);
-      } catch (error) {
-        console.error('Erreur lors du chargement des membres:', error);
-        // En cas d'erreur, utiliser les données mockées pour le développement
-        useTeamMembersStore.getState().setMembers(mockMembers);
-      }
-    },
-    {
-      showAlert: false,
-      componentName: 'TeamMembers'
-    }
-  ),
 
   searchMembers: (query: string) => {
     useTeamMembersStore.getState().setSearchQuery(query);
@@ -77,7 +58,7 @@ export const teamMembersActions = {
         await teamAPI.addMember(teamId, newMemberEmail);
         
         // Recharger la liste des membres après ajout
-        await teamMembersActions.loadMembers();
+        useTeamMembersStore.getState().refetchTeamMembers?.();
         
         // Réinitialiser le formulaire
         useTeamMembersStore.getState().resetForm();

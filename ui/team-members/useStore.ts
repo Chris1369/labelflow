@@ -22,6 +22,8 @@ interface TeamMembersActions {
   addMember: () => void;
   removeMember: (id: string) => void;
   resetForm: () => void;
+  initMembers: ({ members, teamId, refetchTeamMembers }: { members: TeamMember[]; teamId: string; refetchTeamMembers: () => void }) => void;
+  refetchTeamMembers?: () => void;
 }
 
 export const useTeamMembersStore = create<
@@ -76,6 +78,10 @@ export const useTeamMembersStore = create<
       members: updatedMembers,
       filteredMembers: updatedMembers,
     });
+  },
+
+  initMembers: ({ members, teamId, refetchTeamMembers }: { members: TeamMember[]; teamId: string; refetchTeamMembers?: () => void }) => {
+    set({ members, filteredMembers: members , teamId, refetchTeamMembers });
   },
 
   resetForm: () =>

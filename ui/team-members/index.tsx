@@ -9,6 +9,7 @@ import {
   AddMemberSection,
   MembersList,
 } from "./components";
+import { useTeamMembers } from "@/hooks/queries";
 
 interface TeamMembersScreenProps {
   teamId: string;
@@ -23,12 +24,18 @@ export const TeamMembersScreen: React.FC<TeamMembersScreenProps> = ({
     newMemberEmail,
     isAddingMember,
     error,
+    initMembers,
   } = useTeamMembersStore();
 
+  const { data: members, refetch: refetchTeamMembers } = useTeamMembers(teamId);
+
   useEffect(() => {
-    useTeamMembersStore.getState().setTeamId(teamId);
-    teamMembersActions.loadMembers();
-  }, [teamId]);
+    initMembers({
+      members: members || [],
+      teamId,
+      refetchTeamMembers
+    });
+  }, [teamId, members]);
 
   const handleEmailChange = (email: string) => {
     useTeamMembersStore.getState().setNewMemberEmail(email);
@@ -40,7 +47,7 @@ export const TeamMembersScreen: React.FC<TeamMembersScreenProps> = ({
         searchQuery={searchQuery}
         onSearchChange={teamMembersActions.searchMembers}
       />
-      
+
       <AddMemberSection
         newMemberEmail={newMemberEmail}
         isAddingMember={isAddingMember}
@@ -48,7 +55,7 @@ export const TeamMembersScreen: React.FC<TeamMembersScreenProps> = ({
         onEmailChange={handleEmailChange}
         onAddMember={teamMembersActions.addMember}
       />
-      
+
       <MembersList
         members={filteredMembers}
         onRemoveMember={teamMembersActions.removeMember}
