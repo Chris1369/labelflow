@@ -1,7 +1,13 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '@/types/theme';
+import React from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextStyle,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "@/types/theme";
 
 interface EmptyListStateProps {
   searchQuery: string;
@@ -14,18 +20,15 @@ export const EmptyListState: React.FC<EmptyListStateProps> = ({
 }) => {
   return (
     <View style={styles.emptyContainer}>
-      <Ionicons 
-        name="folder-open" 
-        size={64} 
-        color={theme.colors.textSecondary} 
+      <Ionicons
+        name='folder-open'
+        size={64}
+        color={theme.colors.textSecondary}
       />
-      <Text style={styles.emptyText}>
+      <Text style={styles.emptyText as TextStyle}>
         {searchQuery ? "Aucune liste trouvée" : "Aucune liste disponible"}
       </Text>
-      <TouchableOpacity
-        style={styles.createButton}
-        onPress={onCreateList}
-      >
+      <TouchableOpacity style={styles.createButton} onPress={onCreateList}>
         <Text style={styles.createButtonText}>Créer une liste</Text>
       </TouchableOpacity>
     </View>
@@ -35,8 +38,8 @@ export const EmptyListState: React.FC<EmptyListStateProps> = ({
 const styles = StyleSheet.create({
   emptyContainer: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     paddingTop: theme.spacing.xxl,
   },
   emptyText: {
@@ -54,5 +57,5 @@ const styles = StyleSheet.create({
   createButtonText: {
     ...theme.fonts.button,
     color: theme.colors.secondary,
-  },
+  } as TextStyle,
 });

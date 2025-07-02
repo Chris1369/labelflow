@@ -5,8 +5,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/helpers/errorBoundary";
 import { QueryProvider } from "@/providers/QueryProvider";
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { StatusBar } from "expo-status-bar";
+import { Platform } from "react-native";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -44,11 +46,19 @@ export default function RootLayout() {
               <Stack>
                 <Stack.Screen name='(auth)' options={{ headerShown: false }} />
                 <Stack.Screen name='(main)' options={{ headerShown: false }} />
-                <Stack.Screen name='(project)' options={{ headerShown: false }} />
+                <Stack.Screen
+                  name='(project)'
+                  options={{ headerShown: false }}
+                />
                 <Stack.Screen name='(team)' options={{ headerShown: false }} />
                 <Stack.Screen name='index' options={{ headerShown: false }} />
               </Stack>
             </BottomSheetModalProvider>
+            <StatusBar 
+              style='auto' 
+              backgroundColor="transparent"
+              translucent={Platform.OS === 'android'}
+            />
           </AuthProvider>
         </QueryProvider>
       </ErrorBoundary>
