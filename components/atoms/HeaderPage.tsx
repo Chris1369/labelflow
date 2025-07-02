@@ -1,15 +1,18 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TextStyle } from "react-native";
 import { theme } from "@/types/theme";
 
 export const HeaderPage: React.FC<{
   title: string;
-  subtitle: string;
+  subtitle?: string;
 }> = ({ title, subtitle }) => {
   return (
     <View style={styles.header}>
-      <Text style={styles.title}>{title}</Text>
-      <Text style={styles.subtitle}>{subtitle}</Text>
+      {!subtitle && (
+        <Text style={styles.simpleTitle as TextStyle}>{title}</Text>
+      )}
+      {subtitle && <Text style={styles.title}>{title}</Text>}
+      {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
     </View>
   );
 };
@@ -25,6 +28,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
+  },
+  simpleTitle: {
+    ...theme.fonts.title,
+    color: theme.colors.text,
+    marginBottom: theme.spacing.lg,
   },
   subtitle: {
     fontSize: theme.fontSize.md,
