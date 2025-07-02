@@ -6,6 +6,7 @@ import { router } from 'expo-router';
 import { projectKeys } from '@/hooks/queries';
 import { invalidateQuery } from '@/helpers/invalidateQuery';
 import { useSettingsStore } from '../settings/useStore';
+import { trainingAnnotationAPI } from '@/api/trainingAnnotation.api';
 
 interface ProjectState {
   currentProject: Project | null;
@@ -56,6 +57,7 @@ export const useProjectStore = create<ProjectState & ProjectActions>((set, get) 
     
     try {
       await projectAPI.delete(currentProject.id);
+      await trainingAnnotationAPI.deleteFolder(currentProject.name);
       const includePublic = useSettingsStore.getState().includePublicProjects;
       invalidateQuery( projectKeys.list({ my: true, includePublic }))
       set({ isModalVisible: false, modalType: null });

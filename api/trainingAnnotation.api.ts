@@ -106,6 +106,16 @@ class TrainingAnnotationAPI {
     }
   }
 
+  async deleteFolder(projectName: string): Promise<void> {
+    try {
+      const response = await axios.delete(`${this.baseURL}/training/deleteFolder?projectName=${encodeURIComponent(projectName)}`);
+      console.log('Training folder deleted successfully:', response.data);
+    } catch (error) {
+      console.error('Error deleting training folder:', error);
+      throw handleApiError(error);
+    }
+  }
+
   /**
    * Helper method to convert bounding box format from app to API format
    * App format: centerX, centerY, width, height (all 0-1)
