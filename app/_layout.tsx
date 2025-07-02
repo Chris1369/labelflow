@@ -1,10 +1,12 @@
 import { Stack } from "expo-router";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ErrorBoundary } from "@/helpers/errorBoundary";
 import { QueryProvider } from "@/providers/QueryProvider";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -34,18 +36,22 @@ export default function RootLayout() {
   }
 
   return (
-    <ErrorBoundary>
-      <QueryProvider>
-        <AuthProvider>
-          <Stack>
-            <Stack.Screen name='(auth)' options={{ headerShown: false }} />
-            <Stack.Screen name='(main)' options={{ headerShown: false }} />
-            <Stack.Screen name='(project)' options={{ headerShown: false }} />
-            <Stack.Screen name='(team)' options={{ headerShown: false }} />
-            <Stack.Screen name='index' options={{ headerShown: false }} />
-          </Stack>
-        </AuthProvider>
-      </QueryProvider>
-    </ErrorBoundary>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ErrorBoundary>
+        <QueryProvider>
+          <AuthProvider>
+            <BottomSheetModalProvider>
+              <Stack>
+                <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+                <Stack.Screen name='(main)' options={{ headerShown: false }} />
+                <Stack.Screen name='(project)' options={{ headerShown: false }} />
+                <Stack.Screen name='(team)' options={{ headerShown: false }} />
+                <Stack.Screen name='index' options={{ headerShown: false }} />
+              </Stack>
+            </BottomSheetModalProvider>
+          </AuthProvider>
+        </QueryProvider>
+      </ErrorBoundary>
+    </GestureHandlerRootView>
   );
 }

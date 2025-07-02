@@ -1114,3 +1114,85 @@ queryClient.invalidateQueries({ queryKey: entityKeys.detail(id) });
 - Respecter les patterns établis
 - Performance et UX avant tout
 - **IMPORTANT** : Quand l'utilisateur donne des informations utiles au projet, les ajouter automatiquement dans ce fichier CLAUDE.md pour maintenir la documentation à jour
+
+## SimpleBottomSheet Component
+
+Le `SimpleBottomSheet` est un composant BottomSheet léger utilisant uniquement les composants natifs de React Native. Il est utilisé pour les modales simples qui n'ont pas besoin des fonctionnalités avancées de @gorhom/bottom-sheet.
+
+### Structure et style
+
+```typescript
+// Utilisation
+<SimpleBottomSheet
+  visible={isVisible}
+  onClose={onClose}
+  height="90%" // Pourcentage de la hauteur de l'écran
+>
+  {/* Contenu */}
+</SimpleBottomSheet>
+```
+
+### Caractéristiques visuelles
+
+1. **Handle (poignée)** :
+   - Largeur : 40px
+   - Hauteur : 4px
+   - Couleur : `theme.colors.border`
+   - Centré en haut du bottomsheet
+   - Marge bottom : `theme.spacing.md`
+
+2. **Container** :
+   - Fond : `theme.colors.background`
+   - Coins arrondis en haut : `borderRadius.lg`
+   - Animation : slide depuis le bas
+   - Overlay : fond noir semi-transparent (50%)
+
+3. **Gestion du clavier** :
+   - Se déplace automatiquement vers le haut quand le clavier s'ouvre
+   - Ajuste sa hauteur pour rester visible
+   - Maintient un espace de 100px minimum entre le haut du bottomsheet et le haut de l'écran
+
+4. **Structure typique du contenu** :
+   ```tsx
+   <View style={styles.container}>
+     {/* Header fixe */}
+     <View style={styles.header}>
+       <Text style={styles.title}>Titre</Text>
+     </View>
+     
+     {/* Contenu scrollable (FlatList, ScrollView, etc.) */}
+     <View style={styles.content}>
+       <FlatList ... />
+     </View>
+     
+     {/* Actions en bas avec séparateur */}
+     <View style={styles.actions}>
+       <TouchableOpacity style={styles.cancelButton}>
+         <Text>Annuler</Text>
+       </TouchableOpacity>
+       <Button title="Valider" />
+     </View>
+   </View>
+   ```
+
+5. **Style des actions (boutons du bas)** :
+   ```typescript
+   actions: {
+     flexDirection: 'row',
+     gap: theme.spacing.md,
+     paddingHorizontal: theme.spacing.lg,
+     paddingTop: theme.spacing.md,
+     paddingBottom: theme.spacing.sm,
+     backgroundColor: theme.colors.background,
+     borderTopWidth: 1,
+     borderTopColor: theme.colors.border, // Séparateur
+   }
+   ```
+
+### Bonnes pratiques
+
+- Utiliser `SimpleBottomSheet` pour les modales simples sans besoins de gestes complexes
+- Toujours inclure un bouton ou une action pour fermer le bottomsheet
+- Éviter d'imbriquer des ScrollView avec des FlatList
+- Maintenir une hauteur de 90% maximum pour laisser voir le contenu en dessous
+- Utiliser le séparateur (borderTop) pour les actions en bas

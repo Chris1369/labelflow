@@ -10,17 +10,19 @@ import {
 import { Input, Button } from '@/components/atoms';
 import { SimpleBottomSheet } from '@/components/molecules';
 import { theme } from '@/types/theme';
-import { categoryAPI } from '@/api/category.api';
-import { useCategoriesStore } from '../useStore';
+import { projectAPI } from '@/api/project.api';
+import { useSelectProjectStore } from '../useStore';
+import { router } from 'expo-router';
 
-export interface CreateCategoryBottomSheetRef {
+export interface CreateProjectBottomSheetRef {
   open: () => void;
   close: () => void;
 }
 
-export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef>((_, ref) => {
+export const CreateProjectBottomSheet = forwardRef<CreateProjectBottomSheetRef>((_, ref) => {
   const [isVisible, setIsVisible] = useState(false);
   const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
   const [isPublic, setIsPublic] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
 
@@ -28,6 +30,7 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
     open: () => {
       setIsVisible(true);
       setName('');
+      setDescription('');
       setIsPublic(false);
     },
     close: () => setIsVisible(false),
@@ -35,28 +38,44 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
 
   const handleCreate = async () => {
     if (!name.trim()) {
-      Alert.alert('Erreur', 'Veuillez entrer un nom pour la catégorie');
+      Alert.alert('Erreur', 'Veuillez entrer un nom pour le projet');
+      return;
+    }
+
+    if (!description.trim()) {
+      Alert.alert('Erreur', 'Veuillez entrer une description pour le projet');
       return;
     }
 
     setIsCreating(true);
     try {
-      await categoryAPI.create({
+      const newProject = await projectAPI.create({
         name: name.trim(),
+        description: description.trim(),
         isPublic,
       });
 
-      // Refresh categories list
-      useCategoriesStore.getState().refreshCategories?.();
+      // Refresh projects list
+      useSelectProjectStore.getState().refreshProjects?.();
 
       // Reset form and close
       setName('');
+      setDescription('');
       setIsPublic(false);
       setIsVisible(false);
 
-      Alert.alert('Succès', 'Catégorie créée avec succès');
+      Alert.alert('Succès', 'Projet créé avec succès', [
+        {
+          text: 'OK',
+          onPress: () => {
+            // Navigate to the new project
+            const projectId = newProject._id || newProject.id;
+            router.push(`/(project)/${projectId}`);
+          },
+        },
+      ]);
     } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Impossible de créer la catégorie');
+      Alert.alert('Erreur', error.message || 'Impossible de créer le projet');
     } finally {
       setIsCreating(false);
     }
@@ -70,30 +89,40 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
     <SimpleBottomSheet
       visible={isVisible}
       onClose={handleClose}
-      height="70%"
+      height="80%"
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Nouvelle catégorie</Text>
+          <Text style={styles.title}>Nouveau projet</Text>
           <Text style={styles.subtitle}>
-            Organisez vos labels par catégories
+            Créez un projet pour organiser vos datasets
           </Text>
         </View>
 
         <View style={styles.form}>
           <Input
-            placeholder="Nom de la catégorie"
+            placeholder="Nom du projet"
             value={name}
             onChangeText={setName}
             containerStyle={styles.input}
             autoFocus
           />
 
+          <Input
+            placeholder="Description du projet"
+            value={description}
+            onChangeText={setDescription}
+            containerStyle={styles.input}
+            multiline
+            numberOfLines={3}
+            textAlignVertical="top"
+          />
+
           <View style={styles.switchContainer}>
             <View style={styles.switchLabel}>
-              <Text style={styles.switchText}>Rendre publique</Text>
+              <Text style={styles.switchText}>Rendre public</Text>
               <Text style={styles.switchDescription}>
-                Les autres utilisateurs pourront voir cette catégorie
+                Les autres utilisateurs pourront voir ce projet
               </Text>
             </View>
             <Switch
@@ -120,7 +149,7 @@ export const CreateCategoryBottomSheet = forwardRef<CreateCategoryBottomSheetRef
           <Button
             title={isCreating ? 'Création...' : 'Créer'}
             onPress={handleCreate}
-            disabled={isCreating || !name.trim()}
+            disabled={isCreating || !name.trim() || !description.trim()}
             style={styles.createButton}
           />
         </View>

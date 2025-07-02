@@ -3,19 +3,9 @@ import { useHomeStore } from "./useStore";
 import { Alert } from "react-native";
 
 export const homeActions = {
-  handleCreateProject: () => {
-    useHomeStore.getState().setSelectedMenuItem("create-project");
-    router.push("/(main)/create-project");
-  },
-
   handleSelectProject: () => {
     useHomeStore.getState().setSelectedMenuItem("select-project");
     router.push("/(main)/select-project");
-  },
-
-  handleCreateTeam: () => {
-    useHomeStore.getState().setSelectedMenuItem("create-team");
-    router.push("/(main)/create-team");
   },
 
   handleSelectTeam: () => {

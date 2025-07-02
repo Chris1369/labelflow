@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from 'react-native';
 import { Input, Button } from '@/components/atoms';
-import { BottomSheet } from '@/components/molecules/BottomSheet';
+import { SimpleBottomSheet } from '@/components/molecules';
 import { theme } from '@/types/theme';
 import { categoryAPI } from '@/api/category.api';
 import { useAddLabelsModalStore } from './addLabelsModal.store';
@@ -57,6 +57,7 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
       resetSelection();
     }
   }, [isVisible, category.labels, labels]);
+
 
 
   const handleSubmit = async () => {
@@ -160,9 +161,10 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
   };
 
   return (
-    <BottomSheet
+    <SimpleBottomSheet
       visible={isVisible}
       onClose={onClose}
+      height="90%"
     >
       <View style={styles.container}>
         <View style={styles.fixedHeader}>
@@ -246,7 +248,7 @@ export const AddLabelsModal: React.FC<AddLabelsModalProps> = ({
           />
         </View>
       </View>
-    </BottomSheet>
+    </SimpleBottomSheet>
   );
 };
 
@@ -440,7 +442,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: theme.spacing.md,
     paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.sm,
     backgroundColor: theme.colors.background,
     borderTopWidth: 1,
     borderTopColor: theme.colors.border,

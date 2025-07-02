@@ -18,8 +18,4 @@ export const selectProjectActions = {
   loadProjects: () => {
     useSelectProjectStore.getState().loadProjects();
   },
-
-  createNewProject: () => {
-    router.push('/(main)/create-project');
-  },
 };

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/types/theme";
@@ -12,11 +12,14 @@ import {
   ErrorState,
   ProjectsList,
   FloatingAddButton,
+  CreateProjectBottomSheet,
+  CreateProjectBottomSheetRef,
 } from "./components";
 
 export const SelectProjectScreen: React.FC = () => {
   const { filteredProjects, searchQuery, isSearching, error, initProjects } =
     useSelectProjectStore();
+  const createProjectBottomSheetRef = useRef<CreateProjectBottomSheetRef>(null);
   const includePublic = useSettingsStore.getState().includePublicProjects;
 
   const { data: projects, isLoading, refetch } = useMyProjects(includePublic);
@@ -26,6 +29,10 @@ export const SelectProjectScreen: React.FC = () => {
       initProjects({ projects, refreshProjects: refetch });
     }
   }, [projects]);
+
+  const handleCreateProject = () => {
+    createProjectBottomSheetRef.current?.open();
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -49,11 +56,13 @@ export const SelectProjectScreen: React.FC = () => {
             projects={filteredProjects}
             searchQuery={searchQuery}
             onProjectSelect={selectProjectActions.handleProjectSelect}
-            onCreateProject={selectProjectActions.createNewProject}
+            onCreateProject={handleCreateProject}
           />
-          <FloatingAddButton onPress={selectProjectActions.createNewProject} />
+          <FloatingAddButton onPress={handleCreateProject} />
         </>
       )}
+      
+      <CreateProjectBottomSheet ref={createProjectBottomSheetRef} />
     </SafeAreaView>
   );
 };

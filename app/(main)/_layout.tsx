@@ -7,16 +7,37 @@ export default function MainLayout() {
       <Stack>
         <Stack.Screen name='home' options={{ headerShown: false }} />
         <Stack.Screen
-          name='create-project'
+          name='select-project'
           options={{
-            title: "Créer un projet",
+            title: "Sélectionner un projet",
             headerBackTitle: "Retour",
           }}
         />
         <Stack.Screen
-          name='select-project'
+          name='select-team'
           options={{
-            title: "Sélectionner un projet",
+            title: "Sélectionner une équipe",
+            headerBackTitle: "Retour",
+          }}
+        />
+        <Stack.Screen
+          name='categories'
+          options={{
+            title: "Catégories",
+            headerBackTitle: "Retour",
+          }}
+        />
+        <Stack.Screen
+          name='labels'
+          options={{
+            title: "Labels",
+            headerBackTitle: "Retour",
+          }}
+        />
+        <Stack.Screen
+          name='dictionary'
+          options={{
+            title: "Dictionnaire",
             headerBackTitle: "Retour",
           }}
         />
