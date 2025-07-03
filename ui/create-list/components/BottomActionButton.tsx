@@ -2,6 +2,8 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button } from '@/components/atoms/Button';
 import { theme } from '@/types/theme';
+import { useStore } from '../useStore';
+import { CAPTURE_TEMPLATES } from '@/constants/CapturesTemplates';
 
 interface BottomActionButtonProps {
   mode: 'create' | 'add';
@@ -16,7 +18,17 @@ export const BottomActionButton: React.FC<BottomActionButtonProps> = ({
   hasImages,
   onPress,
 }) => {
-  if (!hasImages) {
+
+  const { listImageTemplate, selectedImagesByAngle } = useStore();
+  const selectedImageTemplate = CAPTURE_TEMPLATES.find(template => template.id === listImageTemplate);
+
+  const hasCompletedAllAnglesImages = selectedImageTemplate?.angles.every((angle) => {
+    const images = selectedImagesByAngle[angle.position] || [];
+    return images.length >= angle.count;
+  })
+
+  if (selectedImageTemplate && !hasCompletedAllAnglesImages) return null;
+  if (!selectedImageTemplate && !hasImages) {
     return null;
   }
 
@@ -32,7 +44,7 @@ export const BottomActionButton: React.FC<BottomActionButtonProps> = ({
       <Button
         title={getButtonTitle()}
         onPress={onPress}
-        disabled={isCreating || !hasImages}
+        disabled={isCreating || (!hasImages && !selectedImageTemplate) || !hasCompletedAllAnglesImages}
         style={styles.createButton}
       />
     </View>
