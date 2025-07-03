@@ -22,12 +22,12 @@ export const BottomActionButton: React.FC<BottomActionButtonProps> = ({
   const { listImageTemplate, selectedImagesByAngle } = useStore();
   const selectedImageTemplate = CAPTURE_TEMPLATES.find(template => template.id === listImageTemplate);
 
-  const hasCompletedAllAnglesImages = selectedImageTemplate?.angles.every((angle) => {
+  const hasOneAngleSelected = selectedImageTemplate?.angles.some((angle) => {
     const images = selectedImagesByAngle[angle.position] || [];
-    return images.length >= angle.count;
-  })
+    return images.length > 0;
+  });
 
-  if (selectedImageTemplate && !hasCompletedAllAnglesImages) return null;
+  if (selectedImageTemplate && !hasOneAngleSelected) return null;
   if (!selectedImageTemplate && !hasImages) {
     return null;
   }
@@ -44,7 +44,7 @@ export const BottomActionButton: React.FC<BottomActionButtonProps> = ({
       <Button
         title={getButtonTitle()}
         onPress={onPress}
-        disabled={isCreating || (!hasImages && !selectedImageTemplate) || !hasCompletedAllAnglesImages}
+        disabled={isCreating || (!hasImages && !selectedImageTemplate) || !hasOneAngleSelected}
         style={styles.createButton}
       />
     </View>

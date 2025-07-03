@@ -41,6 +41,9 @@ export const createListActions = {
 
   createList: (projectId: string) => createList(projectId),
 
+  //create liste for image template
+  createListWithPictureTempleAngles: (projectId: string) => createListWithPictureTempleAngles(projectId),
+
   selectImages: async (projectId: string) => {
     try {
       const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -326,5 +329,59 @@ const addImagesToList = createSafeAction(
     alertTitle: 'Erreur',
     alertMessage: 'Impossible d\'ajouter les images à la liste',
     componentName: 'AddToList',
+  }
+);
+
+// create list with picture temple angles
+
+const createListWithPictureTempleAngles = createSafeAction(
+  async (projectId: string) => {
+    const { listName, selectedImagesByAngle, setIsCreating, listImageTemplate } = useStore.getState();
+    
+    console.log('selectedImagesByAngle', selectedImagesByAngle);
+    if (Object.values(selectedImagesByAngle).flat().length === 0) {
+      Alert.alert('Erreur', 'Veuillez sélectionner au moins une image');
+      return;
+    }
+
+    setIsCreating(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('name', listName.trim());
+      formData.append('projectId', projectId);
+      formData.append('pictureTemplateId', listImageTemplate);
+
+      Object.entries(selectedImagesByAngle).forEach(([angle, images]) => {
+        images.forEach((imageUri, index) => {
+          formData.append('images', {
+            uri: imageUri,
+            name: `${angle}___image_${index}.jpg`, // using ___ to identify the angle
+            type: 'image/jpeg',
+          } as any);
+        });
+      });
+
+      // Create the unlabeled list
+      const response = await unlabeledListAPI.create(formData);
+
+      // Reset store
+      useStore.getState().reset();
+
+      // Navigate to the list
+      const listId = response.id || response._id;
+      router.replace(`/(project)/${projectId}/label-list?listId=${listId}`);
+      
+    } catch (error) {
+      console.error('Error creating list:', error);
+      throw error;
+    } finally {
+      setIsCreating(false);
+    }
+  },
+  {
+    showAlert: true,
+    alertTitle: 'Erreur',
+    componentName: 'CreateList',
   }
 );

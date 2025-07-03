@@ -63,7 +63,12 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
     if (mode === 'add' && listId) {
       createListActions.addImagesToList(listId, projectId);
     } else {
-      createListActions.createList(projectId);
+
+      if (listImageTemplate) {
+        createListActions.createListWithPictureTempleAngles(projectId);
+      } else {
+        createListActions.createList(projectId);
+      }
     }
   };
 
