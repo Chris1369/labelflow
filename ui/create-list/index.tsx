@@ -29,12 +29,16 @@ interface CreateListScreenProps {
 }
 
 export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, mode = 'create', listId }) => {
-  const { listName, listImageTemplate, isCreating, error, selectedImages, autoCrop, setAutoCrop, isSelectingImages } = useStore();
+  const { listName, listImageTemplate, isCreating, error, selectedImages, autoCrop, setAutoCrop, isSelectingImages, reset } = useStore();
 
   React.useEffect(() => {
     if (mode === 'add' && listId) {
       // Load existing list details
       createListActions.loadExistingList(listId);
+    }
+
+    if (mode === 'create') {
+      reset();
     }
   }, [mode, listId]);
 
