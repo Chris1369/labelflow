@@ -6,11 +6,10 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
-  Modal,
-  KeyboardAvoidingView,
-  Platform,
+  ScrollView,
 } from 'react-native';
 import { Input, Button } from '@/components/atoms';
+import { SimpleBottomSheet } from '@/components/molecules';
 import { theme } from '@/types/theme';
 import { labelAPI } from '@/api/label.api';
 import { useLabelsStore } from '../useStore';
@@ -65,104 +64,101 @@ export const CreateLabelBottomSheet = forwardRef<CreateLabelBottomSheetRef>((_, 
   };
 
   return (
-    <Modal
+    <SimpleBottomSheet
       visible={isVisible}
-      transparent
-      animationType="slide"
-      onRequestClose={() => setIsVisible(false)}
+      onClose={() => setIsVisible(false)}
+      height="60%"
     >
-      <TouchableOpacity
-        style={styles.overlay}
-        activeOpacity={1}
-        onPress={() => setIsVisible(false)}
-      >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          style={styles.keyboardView}
+      <View style={styles.container}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          <TouchableOpacity activeOpacity={1} onPress={(e) => e.stopPropagation()}>
-            <View style={styles.container}>
-              <View style={styles.handle} />
+          <View style={styles.header}>
+            <Text style={styles.title}>Nouveau label</Text>
+            <Text style={styles.subtitle}>
+              Créez un label pour catégoriser vos éléments
+            </Text>
+          </View>
 
-              <Text style={styles.title}>Nouveau label</Text>
+          <View style={styles.form}>
+            <Input
+              placeholder="Nom du label"
+              value={name}
+              onChangeText={setName}
+              containerStyle={styles.input}
+              autoFocus
+            />
 
-              <Input
-                placeholder="Nom du label"
-                value={name}
-                onChangeText={setName}
-                containerStyle={styles.input}
+            <View style={styles.switchContainer}>
+              <View style={styles.switchLabel}>
+                <Text style={styles.switchText}>Rendre public</Text>
+                <Text style={styles.switchDescription}>
+                  Les autres utilisateurs pourront voir ce label
+                </Text>
+              </View>
+              <Switch
+                value={isPublic}
+                onValueChange={setIsPublic}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary + '80'
+                }}
+                thumbColor={isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
               />
-
-              <View style={styles.switchContainer}>
-                <View style={styles.switchLabel}>
-                  <Text style={styles.switchText}>Rendre public</Text>
-                  <Text style={styles.switchDescription}>
-                    Les autres utilisateurs pourront voir ce label
-                  </Text>
-                </View>
-                <Switch
-                  value={isPublic}
-                  onValueChange={setIsPublic}
-                  trackColor={{
-                    false: theme.colors.border,
-                    true: theme.colors.primary + '80'
-                  }}
-                  thumbColor={isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
-                />
-              </View>
-
-              <View style={styles.actions}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={() => setIsVisible(false)}
-                >
-                  <Text style={styles.cancelText}>Annuler</Text>
-                </TouchableOpacity>
-
-                <Button
-                  title={isCreating ? 'Création...' : 'Créer'}
-                  onPress={handleCreate}
-                  disabled={isCreating || !name.trim()}
-                  style={styles.createButton}
-                />
-              </View>
             </View>
+          </View>
+        </ScrollView>
+
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.cancelButton}
+            onPress={() => setIsVisible(false)}
+            disabled={isCreating}
+          >
+            <Text style={styles.cancelText}>Annuler</Text>
           </TouchableOpacity>
-        </KeyboardAvoidingView>
-      </TouchableOpacity>
-    </Modal>
+
+          <Button
+            title={isCreating ? 'Création...' : 'Créer'}
+            onPress={handleCreate}
+            disabled={isCreating || !name.trim()}
+            style={styles.createButton}
+          />
+        </View>
+      </View>
+    </SimpleBottomSheet>
   );
 });
 
 const styles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'flex-end',
-  },
-  keyboardView: {
-    justifyContent: 'flex-end',
-  },
   container: {
-    backgroundColor: theme.colors.background,
-    borderTopLeftRadius: theme.borderRadius.xl,
-    borderTopRightRadius: theme.borderRadius.xl,
-    padding: theme.spacing.lg,
-    paddingBottom: Platform.OS === 'ios' ? 40 : theme.spacing.lg,
+    flex: 1,
   },
-  handle: {
-    width: 40,
-    height: 4,
-    backgroundColor: theme.colors.border,
-    borderRadius: 2,
-    alignSelf: 'center',
-    marginBottom: theme.spacing.lg,
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: theme.spacing.lg,
+  },
+  header: {
+    alignItems: 'center',
+    paddingHorizontal: theme.spacing.lg,
+    paddingVertical: theme.spacing.lg,
   },
   title: {
-    fontSize: theme.fontSize.xl,
-    fontWeight: 'bold',
-    color: theme.colors.text,
-    marginBottom: theme.spacing.lg,
+    ...theme.fonts.subtitle,
+    marginBottom: theme.spacing.xs,
+  },
+  subtitle: {
+    ...theme.fonts.caption,
+    color: theme.colors.textSecondary,
+    textAlign: 'center',
+  },
+  form: {
+    paddingHorizontal: theme.spacing.lg,
   },
   input: {
     marginBottom: theme.spacing.lg,
@@ -178,18 +174,23 @@ const styles = StyleSheet.create({
     marginRight: theme.spacing.md,
   },
   switchText: {
-    fontSize: theme.fontSize.md,
+    ...theme.fonts.body,
     fontWeight: '600',
-    color: theme.colors.text,
   },
   switchDescription: {
-    fontSize: theme.fontSize.xs,
+    ...theme.fonts.caption,
     color: theme.colors.textSecondary,
     marginTop: 2,
   },
   actions: {
     flexDirection: 'row',
     gap: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+    paddingTop: theme.spacing.md,
+    paddingBottom: theme.spacing.sm,
+    backgroundColor: theme.colors.background,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
   },
   cancelButton: {
     flex: 1,
@@ -197,9 +198,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelText: {
-    fontSize: theme.fontSize.md,
+    ...theme.fonts.button,
     color: theme.colors.textSecondary,
-    fontWeight: '600',
   },
   createButton: {
     flex: 1,

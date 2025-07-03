@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/types/theme';
 
@@ -18,38 +18,82 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
   onRemoveImage,
   onAddImages,
 }) => {
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  React.useEffect(() => {
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, [selectedImages.length]);
+
   return (
     <View style={styles.imagesSection}>
-      <Text style={styles.sectionTitle}>
-        Images sélectionnées ({selectedImages.length})
-      </Text>
+      <View style={styles.headerRow}>
+        <Text style={styles.sectionTitle}>
+          Images sélectionnées
+        </Text>
+        <View style={styles.counter}>
+          <Text style={styles.counterText}>{selectedImages.length}</Text>
+        </View>
+      </View>
       
       <View style={styles.imageGrid}>
         {selectedImages.map((uri, index) => (
-          <View key={index} style={styles.imageCard}>
+          <Animated.View 
+            key={index} 
+            style={[
+              styles.imageCard,
+              {
+                opacity: fadeAnim,
+                transform: [{
+                  scale: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.8, 1],
+                  }),
+                }],
+              },
+            ]}
+          >
             <Image source={{ uri }} style={styles.imagePreview} />
-            <TouchableOpacity
-              style={styles.removeButton}
-              onPress={() => onRemoveImage(index)}
-              disabled={isCreating}
-            >
-              <Ionicons name="close" size={20} color={theme.colors.secondary} />
-            </TouchableOpacity>
-          </View>
+            <View style={styles.imageOverlay}>
+              <TouchableOpacity
+                style={styles.removeButton}
+                onPress={() => onRemoveImage(index)}
+                disabled={isCreating}
+              >
+                <Ionicons name="close-circle" size={24} color="white" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.imageNumber}>
+              <Text style={styles.imageNumberText}>{index + 1}</Text>
+            </View>
+          </Animated.View>
         ))}
         
         <TouchableOpacity 
-          style={styles.addImageCard}
+          style={[
+            styles.addImageCard,
+            (isCreating || isSelectingImages) && styles.addImageCardDisabled
+          ]}
           onPress={onAddImages}
           disabled={isCreating || isSelectingImages}
+          activeOpacity={0.7}
         >
           {isSelectingImages ? (
-            <ActivityIndicator size="small" color={theme.colors.primary} />
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color={theme.colors.primary} />
+              <Text style={styles.loadingText}>Chargement...</Text>
+            </View>
           ) : (
-            <>
-              <Ionicons name="add" size={32} color={theme.colors.primary} />
+            <View style={styles.addContent}>
+              <View style={styles.addIconContainer}>
+                <Ionicons name="add-circle-outline" size={32} color={theme.colors.primary} />
+              </View>
               <Text style={styles.addImageText}>Ajouter</Text>
-            </>
+              <Text style={styles.addImageHint}>Cliquez ici</Text>
+            </View>
           )}
         </TouchableOpacity>
       </View>
@@ -61,56 +105,126 @@ const styles = StyleSheet.create({
   imagesSection: {
     marginTop: theme.spacing.lg,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: theme.spacing.md,
+  },
   sectionTitle: {
     ...theme.fonts.body,
     fontWeight: '600',
-    marginBottom: theme.spacing.md,
+    color: theme.colors.text,
+  },
+  counter: {
+    backgroundColor: theme.colors.primary,
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs / 2,
+    borderRadius: theme.borderRadius.sm,
+    minWidth: 28,
+    alignItems: 'center',
+  },
+  counterText: {
+    ...theme.fonts.caption,
+    color: 'white',
+    fontWeight: '600',
   },
   imageGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginHorizontal: -theme.spacing.xs, // Compense les marges des cartes
+    marginHorizontal: -theme.spacing.xs,
   },
   imageCard: {
-    width: 106, // Dimensions fixes
-    height: 106, // Dimensions fixes
+    width: 106,
+    height: 106,
     marginBottom: theme.spacing.md,
     marginHorizontal: theme.spacing.xs,
     borderRadius: theme.borderRadius.md,
     overflow: 'hidden',
     position: 'relative',
+    backgroundColor: theme.colors.backgroundSecondary,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   imagePreview: {
     width: '100%',
     height: '100%',
   },
+  imageOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0,0,0,0.2)',
+  },
   removeButton: {
     position: 'absolute',
     top: theme.spacing.xs,
     right: theme.spacing.xs,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    width: 32,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
   },
+  imageNumber: {
+    position: 'absolute',
+    bottom: theme.spacing.xs,
+    left: theme.spacing.xs,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    paddingHorizontal: theme.spacing.xs,
+    paddingVertical: 2,
+    borderRadius: theme.borderRadius.sm,
+  },
+  imageNumberText: {
+    ...theme.fonts.caption,
+    color: 'white',
+    fontSize: 10,
+    fontWeight: '600',
+  },
   addImageCard: {
-    width: 106, // Dimensions fixes
-    height: 106, // Dimensions fixes
+    width: 106,
+    height: 106,
     marginBottom: theme.spacing.md,
     marginHorizontal: theme.spacing.xs,
     borderRadius: theme.borderRadius.md,
     borderWidth: 2,
-    borderColor: theme.colors.border,
+    borderColor: theme.colors.primary + '40',
     borderStyle: 'dashed',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: theme.colors.backgroundSecondary,
+    backgroundColor: theme.colors.primary + '08',
+  },
+  addImageCardDisabled: {
+    opacity: 0.5,
+  },
+  addContent: {
+    alignItems: 'center',
+  },
+  addIconContainer: {
+    marginBottom: theme.spacing.xs / 2,
   },
   addImageText: {
     ...theme.fonts.caption,
     color: theme.colors.primary,
+    fontWeight: '600',
+  },
+  addImageHint: {
+    ...theme.fonts.caption,
+    color: theme.colors.primary + '80',
+    fontSize: 10,
+    marginTop: 2,
+  },
+  loadingContainer: {
+    alignItems: 'center',
+  },
+  loadingText: {
+    ...theme.fonts.caption,
+    color: theme.colors.primary,
     marginTop: theme.spacing.xs,
+    fontSize: 11,
   },
 });

@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import { Input, Button } from '@/components/atoms';
 import { SimpleBottomSheet } from '@/components/molecules';
@@ -92,53 +95,60 @@ export const CreateProjectBottomSheet = forwardRef<CreateProjectBottomSheetRef>(
     <SimpleBottomSheet
       visible={isVisible}
       onClose={handleClose}
-      height="80%"
+      height="60%"
     >
       <View style={styles.container}>
-        <View style={styles.header}>
-          <Text style={styles.title}>Nouveau projet</Text>
-          <Text style={styles.subtitle}>
-            Créez un projet pour organiser vos datasets
-          </Text>
-        </View>
-
-        <View style={styles.form}>
-          <Input
-            placeholder="Nom du projet"
-            value={name}
-            onChangeText={setName}
-            containerStyle={styles.input}
-            autoFocus
-          />
-
-          <Input
-            placeholder="Description du projet"
-            value={description}
-            onChangeText={setDescription}
-            containerStyle={styles.input}
-            multiline
-            numberOfLines={3}
-            textAlignVertical="top"
-          />
-
-          <View style={styles.switchContainer}>
-            <View style={styles.switchLabel}>
-              <Text style={styles.switchText}>Rendre public</Text>
-              <Text style={styles.switchDescription}>
-                Les autres utilisateurs pourront voir ce projet
-              </Text>
-            </View>
-            <Switch
-              value={isPublic}
-              onValueChange={setIsPublic}
-              trackColor={{
-                false: theme.colors.border,
-                true: theme.colors.primary + '80'
-              }}
-              thumbColor={isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
-            />
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Text style={styles.title}>Nouveau projet</Text>
+            <Text style={styles.subtitle}>
+              Créez un projet pour organiser vos listes
+            </Text>
           </View>
-        </View>
+
+          <View style={styles.form}>
+            <Input
+              placeholder="Nom du projet"
+              value={name}
+              onChangeText={setName}
+              containerStyle={styles.input}
+              autoFocus
+            />
+
+            <Input
+              placeholder="Description du projet"
+              value={description}
+              onChangeText={setDescription}
+              containerStyle={styles.input}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+
+            <View style={styles.switchContainer}>
+              <View style={styles.switchLabel}>
+                <Text style={styles.switchText}>Rendre public</Text>
+                <Text style={styles.switchDescription}>
+                  Les autres utilisateurs pourront voir ce projet
+                </Text>
+              </View>
+              <Switch
+                value={isPublic}
+                onValueChange={setIsPublic}
+                trackColor={{
+                  false: theme.colors.border,
+                  true: theme.colors.primary + '80'
+                }}
+                thumbColor={isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
+              />
+            </View>
+          </View>
+        </ScrollView>
 
         <View style={styles.actions}>
           <TouchableOpacity
@@ -165,6 +175,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: theme.spacing.lg,
+  },
   header: {
     alignItems: 'center',
     paddingHorizontal: theme.spacing.lg,
@@ -180,7 +196,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   form: {
-    flex: 1,
     paddingHorizontal: theme.spacing.lg,
   },
   input: {

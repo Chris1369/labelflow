@@ -135,6 +135,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
                 isCreating={isCreating}
                 isSelectingImages={isSelectingImages}
                 onPress={handleAddImages}
+                hasTemplate={false}
               />
             )}
 

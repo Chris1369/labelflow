@@ -1,7 +1,7 @@
-import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Input } from '@/components/atoms/Input';
-import { theme } from '@/types/theme';
+import React from "react";
+import { View, Text, StyleSheet, TextStyle } from "react-native";
+import { Input } from "@/components/atoms/Input";
+import { theme } from "@/types/theme";
 
 interface ListNameInputProps {
   listName: string;
@@ -18,24 +18,21 @@ export const ListNameInput: React.FC<ListNameInputProps> = ({
 }) => {
   return (
     <View style={styles.inputContainer}>
-      <Text style={styles.label}>Nom de la liste</Text>
       <Input
-        placeholder="Ex: Photos du salon"
+        label='Nom de la liste'
+        placeholder='Ex: Photos du salon'
         value={listName}
         onChangeText={onChangeText}
         editable={!isCreating}
       />
-      <Text style={styles.hint}>
-        Ce nom vous aidera à identifier votre liste d'images
-      </Text>
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={styles.error as TextStyle}>{error}</Text>}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   inputContainer: {
-    marginBottom: theme.spacing.xl,
+    marginBottom: theme.spacing.sm,
   },
   label: {
     ...theme.fonts.body,

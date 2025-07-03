@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,9 +8,9 @@ import {
   StyleSheet,
   ViewStyle,
   TextStyle,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { theme } from '../../types/theme';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { theme } from "../../types/theme";
 
 interface Option {
   label: string;
@@ -41,7 +41,6 @@ export const Select: React.FC<SelectProps> = ({
   style,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
-
   const selectedLabel = options.find((opt) => opt.value === value)?.label;
 
   return (
@@ -60,8 +59,8 @@ export const Select: React.FC<SelectProps> = ({
             style={styles.icon}
           />
         )}
-        <Text style={styles.valueText}>
-          {selectedLabel || 'Sélectionner...'}
+        <Text style={styles.valueText as TextStyle}>
+          {selectedLabel || "Sélectionner..."}
         </Text>
         <Ionicons
           name='chevron-down'
@@ -121,13 +120,13 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   label: {
-    ...theme.fonts.body,
+    ...theme.fonts.label,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
   select: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1,
     borderColor: theme.colors.border,
     borderRadius: theme.borderRadius.md,
@@ -153,20 +152,20 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: theme.spacing.md,
     borderTopLeftRadius: theme.borderRadius.lg,
     borderTopRightRadius: theme.borderRadius.lg,
-    maxHeight: '50%',
+    maxHeight: "50%",
   },
   option: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingVertical: theme.spacing.md,
     paddingHorizontal: theme.spacing.sm,
     borderRadius: theme.borderRadius.sm,
@@ -174,10 +173,10 @@ const styles = StyleSheet.create({
   optionText: {
     ...theme.fonts.body,
     color: theme.colors.text,
-  },
+  } as TextStyle,
   optionTextSelected: {
     color: theme.colors.primary,
-    fontWeight: '600' as const,
+    fontWeight: "600" as const,
   },
   checkIcon: {
     marginLeft: theme.spacing.sm,
