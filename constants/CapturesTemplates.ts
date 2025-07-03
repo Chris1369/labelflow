@@ -3,11 +3,11 @@ import { CaptureTemplate } from "@/types/capturesTemplate";
 export const CAPTURE_TEMPLATES: CaptureTemplate[] = [
   {
     id: "retail-standard",
-    name: "Retail Standard",
+    name: "Standard (220 images)",
     description: "Template équilibré pour la plupart des produits de détail",
     estimatedTime: 25,
     difficulty: "medium",
-    useCase: ["général", "épicerie", "électronique"],
+    useCase: [],
     angles: [
       {
         position: "front",
@@ -69,11 +69,11 @@ export const CAPTURE_TEMPLATES: CaptureTemplate[] = [
   },
   {
     id: "retail-premium",
-    name: "Retail Premium",
+    name: "Premium (450 images)",
     description: "Template complet pour produits critiques ou complexes",
     estimatedTime: 45,
     difficulty: "hard",
-    useCase: ["luxe", "médical", "sécurité", "haute précision"],
+    useCase: [],
     angles: [
       {
         position: "front",
@@ -181,11 +181,11 @@ export const CAPTURE_TEMPLATES: CaptureTemplate[] = [
   },
   {
     id: "retail-fast",
-    name: "Retail Fast",
+    name: "Rapide (128 images)",
     description: "Template rapide pour capture en volume",
     estimatedTime: 12,
     difficulty: "easy",
-    useCase: ["inventaire", "catalogue", "test rapide"],
+    useCase: [],
     angles: [
       {
         position: "front",
@@ -236,11 +236,11 @@ export const CAPTURE_TEMPLATES: CaptureTemplate[] = [
   },
   {
     id: "retail-comprehensive",
-    name: "Retail Comprehensive",
+    name: "Complet (631 images)",
     description: "Template exhaustif pour dataset de référence",
     estimatedTime: 60,
     difficulty: "hard",
-    useCase: ["recherche", "benchmark", "production critique"],
+    useCase: [],
     angles: [
       {
         position: "front",
@@ -365,80 +365,80 @@ export const CAPTURE_TEMPLATES: CaptureTemplate[] = [
     ],
     totalPhotos: 631,
   },
-  {
-    id: "retail-small-objects",
-    name: "Retail Small Objects",
-    description: "Template spécialisé pour petits objets (< 10cm)",
-    estimatedTime: 35,
-    difficulty: "medium",
-    useCase: ["bijoux", "accessoires", "composants", "médicaments"],
-    angles: [
-      {
-        position: "front",
-        count: 50,
-        lighting: "artificial",
-        description: "Face avec éclairage contrôlé",
-        icon: "📦",
-      },
-      {
-        position: "back",
-        count: 35,
-        lighting: "artificial",
-        description: "Arrière détaillé",
-        icon: "📋",
-      },
-      {
-        position: "side-left",
-        count: 30,
-        description: "Profil gauche macro",
-        icon: "👈",
-      },
-      {
-        position: "side-right",
-        count: 30,
-        description: "Profil droit macro",
-        icon: "👉",
-      },
-      {
-        position: "top",
-        count: 40,
-        lighting: "natural",
-        description: "Dessus haute résolution",
-        icon: "⬆️",
-      },
-      {
-        position: "bottom",
-        count: 25,
-        description: "Dessous si accessible",
-        icon: "⬇️",
-      },
-      {
-        position: "close-up-details",
-        count: 40,
-        description: "Détails critiques",
-        icon: "🔍",
-      },
-      {
-        position: "angle-45-tl",
-        count: 25,
-        description: "45° top-left",
-        icon: "↖️",
-      },
-      {
-        position: "angle-45-tr",
-        count: 25,
-        description: "45° top-right",
-        icon: "↗️",
-      },
-      {
-        position: "scale-reference",
-        count: 15,
-        description: "Avec référence taille",
-        icon: "📏",
-      },
-    ],
-    totalPhotos: 315,
-  },
+  // {
+  //   id: "retail-small-objects",
+  //   name: "Petits objets (315 images)",
+  //   description: "Template spécialisé pour petits objets (< 10cm)",
+  //   estimatedTime: 35,
+  //   difficulty: "medium",
+  //   useCase: ["bijoux", "accessoires", "composants", "médicaments"],
+  //   angles: [
+  //     {
+  //       position: "front",
+  //       count: 50,
+  //       lighting: "artificial",
+  //       description: "Face avec éclairage contrôlé",
+  //       icon: "📦",
+  //     },
+  //     {
+  //       position: "back",
+  //       count: 35,
+  //       lighting: "artificial",
+  //       description: "Arrière détaillé",
+  //       icon: "📋",
+  //     },
+  //     {
+  //       position: "side-left",
+  //       count: 30,
+  //       description: "Profil gauche macro",
+  //       icon: "👈",
+  //     },
+  //     {
+  //       position: "side-right",
+  //       count: 30,
+  //       description: "Profil droit macro",
+  //       icon: "👉",
+  //     },
+  //     {
+  //       position: "top",
+  //       count: 40,
+  //       lighting: "natural",
+  //       description: "Dessus haute résolution",
+  //       icon: "⬆️",
+  //     },
+  //     {
+  //       position: "bottom",
+  //       count: 25,
+  //       description: "Dessous si accessible",
+  //       icon: "⬇️",
+  //     },
+  //     {
+  //       position: "close-up-details",
+  //       count: 40,
+  //       description: "Détails critiques",
+  //       icon: "🔍",
+  //     },
+  //     {
+  //       position: "angle-45-tl",
+  //       count: 25,
+  //       description: "45° top-left",
+  //       icon: "↖️",
+  //     },
+  //     {
+  //       position: "angle-45-tr",
+  //       count: 25,
+  //       description: "45° top-right",
+  //       icon: "↗️",
+  //     },
+  //     {
+  //       position: "scale-reference",
+  //       count: 15,
+  //       description: "Avec référence taille",
+  //       icon: "📏",
+  //     },
+  //   ],
+  //   totalPhotos: 315,
+  // },
 ];
 
 export const getTemplateById = (id: string): CaptureTemplate | undefined => {
