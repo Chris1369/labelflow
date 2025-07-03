@@ -7,6 +7,7 @@ import {
   FlatList,
   StyleSheet,
   ViewStyle,
+  TextStyle,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '../../types/theme';
@@ -45,7 +46,7 @@ export const Select: React.FC<SelectProps> = ({
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label && <Text style={styles.label}>{label}</Text>}
+      {label && <Text style={styles.label as TextStyle}>{label}</Text>}
 
       <TouchableOpacity
         style={[styles.select, style, error && styles.selectError]}
@@ -69,7 +70,7 @@ export const Select: React.FC<SelectProps> = ({
         />
       </TouchableOpacity>
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={styles.error as TextStyle}>{error}</Text>}
 
       <Modal visible={modalVisible} transparent animationType='slide'>
         <TouchableOpacity
@@ -120,7 +121,7 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.md,
   },
   label: {
-    ...theme.fonts.label,
+    ...theme.fonts.body,
     color: theme.colors.text,
     marginBottom: theme.spacing.xs,
   },
@@ -171,7 +172,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.sm,
   },
   optionText: {
-    ...theme.fonts.body,
+    ...theme.fonts.label,
     color: theme.colors.text,
   },
   optionTextSelected: {

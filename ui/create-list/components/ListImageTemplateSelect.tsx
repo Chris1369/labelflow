@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TextStyle } from 'react-native';
 import { theme } from '@/types/theme';
 import { Select } from '@/components/atoms/Select';
 import { CAPTURE_TEMPLATES } from '@/constants/CapturesTemplates';
@@ -32,10 +32,10 @@ export const ListImageTemplateSelect: React.FC<ListImageTemplateSelectProps> = (
           height: 60
         }}
       />
-      <Text style={styles.hint}>
+      <Text style={styles.hint as TextStyle}>
         Sélectionnez un template d'image pour votre liste
       </Text>
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={styles.error as TextStyle}>{error}</Text>}
     </View>
   );
 };
