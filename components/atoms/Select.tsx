@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.sm,
   },
   optionText: {
-    ...theme.fonts.label,
+    ...theme.fonts.body,
     color: theme.colors.text,
   },
   optionTextSelected: {
