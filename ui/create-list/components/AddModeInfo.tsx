@@ -13,7 +13,7 @@ export const AddModeInfo: React.FC<AddModeInfoProps> = ({ listName, listImageTem
   return (
     <View style={styles.inputContainer}>
       <Text style={styles.label}>Liste : {listName}</Text>
-      <Text style={styles.label}>Template capture : {listImageTemplateName}</Text>
+      {listImageTemplate && <Text style={styles.label}>Template capture : {listImageTemplateName}</Text>}
       <Text style={styles.hint}>
         Sélectionnez des images à ajouter à cette liste
       </Text>
