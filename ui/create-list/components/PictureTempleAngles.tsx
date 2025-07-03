@@ -21,7 +21,7 @@ export const PictureTempleAngles: React.FC<PictureTempleAnglesProps> = ({
   onAddImagesByAngle,
   onRemoveImageByAngle,
 }) => {
-  const { listImageTemplate, selectedImagesByAngle } = useStore();
+  const { listImageTemplate, selectedImagesByAngle, existingValidatedImagesByAngle } = useStore();
   const selectedImageTemplate = CAPTURE_TEMPLATES.find(
     (template) => template.id === listImageTemplate
   );
@@ -29,15 +29,25 @@ export const PictureTempleAngles: React.FC<PictureTempleAnglesProps> = ({
 
   return angles?.map((angle, index) => {
     const angleSelectedImages = selectedImagesByAngle[angle.position] || [];
+    const existingValidatedImages = existingValidatedImagesByAngle[angle.position];
+
+    const totalSelectedImages = (angleSelectedImages?.length || 0) + (existingValidatedImages?.length || 0);
 
     return (
       <View key={`${index}`} style={styles.imagesSection}>
         <Text style={styles.sectionTitle}>
-          {angle.description} ({angleSelectedImages.length}/{angle.count})
+          {angle.description} ({totalSelectedImages}/{angle.count})
         </Text>
 
         <View style={styles.imageGrid}>
-          {angleSelectedImages.map((uri, index) => (
+
+          {existingValidatedImages && existingValidatedImages.map((uri, index) => (
+            <View key={`${index}`} style={styles.imageCard}>
+              <Image source={{ uri }} style={styles.imagePreview} />
+            </View>
+          ))}
+
+          {angleSelectedImages?.map((uri, index) => (
             <View key={`${index}`} style={styles.imageCard}>
               <Image source={{ uri }} style={styles.imagePreview} />
               <TouchableOpacity
@@ -53,6 +63,7 @@ export const PictureTempleAngles: React.FC<PictureTempleAnglesProps> = ({
               </TouchableOpacity>
             </View>
           ))}
+
 
           <TouchableOpacity
             style={styles.addImageCard}

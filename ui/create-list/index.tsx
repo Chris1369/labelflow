@@ -57,11 +57,13 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
     createListActions.selectImagesByAngle(angle);
   };
 
-
-
   const handleAction = () => {
     if (mode === 'add' && listId) {
-      createListActions.addImagesToList(listId, projectId);
+      if (listImageTemplate) {
+        createListActions.addImagesToListByAngle(listId, projectId);
+      } else {
+        createListActions.addImagesToList(listId, projectId);
+      }
     } else {
 
       if (listImageTemplate) {
@@ -106,7 +108,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
             </View>
           )}
 
-          {mode === 'add' && <AddModeInfo listName={listName} />}
+          {mode === 'add' && <AddModeInfo listName={listName} listImageTemplate={listImageTemplate} />}
 
           <AutoCropToggle
             value={autoCrop}

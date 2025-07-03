@@ -12,6 +12,9 @@ interface CreateListState {
   selectedImagesByAngle: {
     [key: string]: string[];
   };
+  existingValidatedImagesByAngle: {
+    [key: string]: string[];
+  };
 }
 
 interface CreateListActions {
@@ -26,6 +29,9 @@ interface CreateListActions {
 
   setSelectedImagesByAngle: (angle: string, images: string[]) => void;
   addImagesByAngle: (angle: string, images: string[]) => void;
+  setExistingValidatedImagesByAngle: (images: {
+    [key: string]: string[];
+  }) => void;
 }
 
 export const useStore = create<CreateListState & CreateListActions>((set, get) => ({
@@ -40,7 +46,7 @@ export const useStore = create<CreateListState & CreateListActions>((set, get) =
 
   // selected images by angle
   selectedImagesByAngle: {},
-
+  existingValidatedImagesByAngle: {},
   // actions
   setListName: (name) => set({ listName: name, error: null }),
   setListImageTemplate: (template) => set({ listImageTemplate: template }),
@@ -63,7 +69,10 @@ export const useStore = create<CreateListState & CreateListActions>((set, get) =
       },
     });
   },
-  
+
+  setExistingValidatedImagesByAngle: (images) => {
+    set({ existingValidatedImagesByAngle: images });
+  },
 
   reset: () => set({
     listName: '',
@@ -73,5 +82,7 @@ export const useStore = create<CreateListState & CreateListActions>((set, get) =
     error: null,
     autoCrop: false,
     isSelectingImages: false,
+    selectedImagesByAngle: {},
+    existingValidatedImagesByAngle: {},
   }),
 }));

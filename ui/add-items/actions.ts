@@ -357,12 +357,8 @@ export const addItemsActions = {
       
       // Load the unlabeled list
       const response = await unlabeledListAPI.getById(listId);
-      console.log("Unlabeled list response:", response);
-      
       // The response is the data directly, not wrapped in { data: ... }
       const list = response;
-      console.log("List items:", list.items);
-      
       store.setUnlabeledListData(list.items || [], listId);
       
       // Load the first image if available

@@ -67,19 +67,16 @@ class UnlabeledListAPI {
    * @param formData - FormData with files
    */
   async addImages(listId: string, formData: FormData): Promise<any> {
+
     try {
-      const response = await axiosInstance.put(
-        `${this.basePath}/${listId}/add-images`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await axiosInstance.put(`${this.basePath}/${listId}/add-images`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       return handleApiResponse(response);
     } catch (error) {
-      throw handleApiError(error, `${this.basePath} - addImages`);
+      throw handleApiError(error, `${this.basePath} - create`);
     }
   }
 
