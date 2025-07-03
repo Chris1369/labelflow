@@ -44,7 +44,7 @@ export const BottomActionButton: React.FC<BottomActionButtonProps> = ({
       <Button
         title={getButtonTitle()}
         onPress={onPress}
-        disabled={isCreating || (!hasImages && !selectedImageTemplate) || !hasOneAngleSelected}
+        disabled={isCreating || (!hasImages && !selectedImageTemplate) || (selectedImageTemplate && !hasOneAngleSelected)}
         style={styles.createButton}
       />
     </View>
