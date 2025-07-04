@@ -34,7 +34,6 @@ interface CreateListScreenProps {
 
 export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, mode = 'create', listId }) => {
   const { listName, listImageTemplate, isCreating, error, selectedImages, selectedImagesByAngle, autoCrop, setAutoCrop, isSelectingImages, reset } = useStore();
-  const [pendingAngle, setPendingAngle] = React.useState<string | undefined>();
 
   React.useEffect(() => {
     if (mode === 'add' && listId) {
@@ -53,8 +52,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
       createListActions.setError('Veuillez entrer un nom pour la liste');
       return;
     }
-    setPendingAngle(angle);
-    handleSelectGallery();
+    handleSelectGallery(angle);
   };
 
   // Handle long press for camera
@@ -63,8 +61,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
       createListActions.setError('Veuillez entrer un nom pour la liste');
       return;
     }
-    setPendingAngle(angle);
-    handleSelectCamera();
+    handleSelectCamera(angle);
   };
 
   // image picker handle by picture temple angles
@@ -72,19 +69,19 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
     handleAddImages(angle);
   };
 
-  const handleSelectCamera = async () => {
-    console.log('handleSelectCamera called with angle:', pendingAngle);
+  const handleSelectCamera = async (angle?: string) => {
+    console.log('handleSelectCamera called with angle:', angle);
     try {
-      await createListActions.selectImages({ angle: pendingAngle, source: 'camera' });
+      await createListActions.selectImages({ angle, source: 'camera' });
     } catch (error) {
       console.error('Error in handleSelectCamera:', error);
     }
   };
 
-  const handleSelectGallery = async () => {
-    console.log('handleSelectGallery called with angle:', pendingAngle);
+  const handleSelectGallery = async (angle?: string) => {
+    console.log('handleSelectGallery called with angle:', angle);
     try {
-      await createListActions.selectImages({ angle: pendingAngle, source: 'gallery' });
+      await createListActions.selectImages({ angle, source: 'gallery' });
     } catch (error) {
       console.error('Error in handleSelectGallery:', error);
     }

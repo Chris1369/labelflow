@@ -92,6 +92,9 @@ export const createListActions = {
 
       const store = useStore.getState();
       const { autoCrop, setIsSelectingImages } = store;
+      
+      // Ensure we start with a clean state
+      setIsSelectingImages(true);
 
       console.log('Launching picker with source:', params?.source);
       console.log('Auto crop enabled:', autoCrop);
@@ -135,8 +138,6 @@ export const createListActions = {
       
       if (!result.canceled && result.assets && result.assets.length > 0) {
         console.log('Processing', result.assets.length, 'images...');
-        // Show loader while processing images
-        setIsSelectingImages(true);
 
         const currentImages = store.selectedImages;
         const newImages: string[] = [];
@@ -192,10 +193,12 @@ export const createListActions = {
           // add image without angle
           store.setSelectedImages([...currentImages, ...newImages]);
         }
-      
-        // Hide loader
-        setIsSelectingImages(false);
+      } else {
+        console.log('Image picker cancelled or no images selected');
       }
+      
+      // Always hide loader
+      setIsSelectingImages(false);
     } catch (error) {
       console.error('Error selecting image:', error);
       Alert.alert('Erreur', "Impossible de sélectionner l'image");
