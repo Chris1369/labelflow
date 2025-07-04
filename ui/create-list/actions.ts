@@ -62,7 +62,7 @@ export const createListActions = {
   addImagesToListByAngle: (listId: string, projectId: string) =>
     addImagesToListByAngle(listId, projectId),
 
-  selectImages: async (projectId: string) => {
+  selectImages: async (angle: string) => {
     try {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -138,97 +138,14 @@ export const createListActions = {
         }
 
         // Store all processed images
-        store.setSelectedImages([...currentImages, ...newImages]);
-
-        // Hide loader
-        setIsSelectingImages(false);
-      }
-    } catch (error) {
-      console.error('Error selecting image:', error);
-      Alert.alert('Erreur', "Impossible de sélectionner l'image");
-      useStore.getState().setIsSelectingImages(false);
-    }
-  },
-
-  // image picker handle by picture temple angles
-  selectImagesByAngle: async (angle: string) => {
-    try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permission refusée',
-          "L'accès à la galerie est nécessaire pour ajouter des images.",
-          [{ text: 'OK' }]
-        );
-        return;
-      }
-
-      const store = useStore.getState();
-      const { autoCrop, setIsSelectingImages } = store;
-
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: !autoCrop, // Allow manual editing only when autoCrop is disabled
-        aspect: !autoCrop ? [1, 1] : undefined, // Force square aspect ratio for manual crop
-        quality: 1,
-        allowsMultipleSelection: autoCrop, // Enable multi-select when autoCrop is enabled
-      });
-
-      if (!result.canceled && result.assets.length > 0) {
-        // Show loader while processing images
-        setIsSelectingImages(true);
-
-        const currentImages = store.selectedImages;
-        const newImages: string[] = [];
-
-        // Process each selected image
-        for (const asset of result.assets) {
-          let finalUri = asset.uri;
-
-          // Process the image based on autoCrop setting
-          if (autoCrop) {
-            // Automatically crop and resize to 640x640
-            const { width, height } = asset;
-
-            // Calculate crop to center square
-            const cropSize = Math.min(width, height);
-            const cropX = (width - cropSize) / 2;
-            const cropY = (height - cropSize) / 2;
-
-            const manipResult = await ImageManipulator.manipulateAsync(
-              asset.uri,
-              [
-                {
-                  crop: {
-                    originX: cropX,
-                    originY: cropY,
-                    width: cropSize,
-                    height: cropSize,
-                  },
-                },
-                { resize: { width: 640, height: 640 } },
-              ],
-              { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
-            );
-            finalUri = manipResult.uri;
-          } else {
-            // Manual crop was already done by the user, just resize to 640x640
-            const manipResult = await ImageManipulator.manipulateAsync(
-              asset.uri,
-              [{ resize: { width: 640, height: 640 } }],
-              { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
-            );
-            finalUri = manipResult.uri;
-          }
-
-          newImages.push(finalUri);
+        if (angle) {
+          // add image by angle
+          store.addImagesByAngle(angle, newImages);
+        }else{
+          // add image without angle
+          store.setSelectedImages([...currentImages, ...newImages]);
         }
-
-        // Store all processed images
-        store.addImagesByAngle(angle, newImages);
-
+      
         // Hide loader
         setIsSelectingImages(false);
       }

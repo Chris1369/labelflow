@@ -58,7 +58,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
       createListActions.setError('Veuillez entrer un nom pour la liste');
       return;
     }
-    createListActions.selectImagesByAngle(angle);
+    createListActions.selectImages(angle);
   };
 
   const handleAction = () => {
