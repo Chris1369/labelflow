@@ -47,7 +47,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
       createListActions.setError('Veuillez entrer un nom pour la liste');
       return;
     }
-    createListActions.selectImages(projectId);
+    createListActions.selectImages();
   };
 
 
@@ -58,7 +58,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
       createListActions.setError('Veuillez entrer un nom pour la liste');
       return;
     }
-    createListActions.selectImages(angle);
+    createListActions.selectImages({ angle });
   };
 
   const handleAction = () => {

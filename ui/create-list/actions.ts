@@ -62,7 +62,7 @@ export const createListActions = {
   addImagesToListByAngle: (listId: string, projectId: string) =>
     addImagesToListByAngle(listId, projectId),
 
-  selectImages: async (angle: string) => {
+  selectImages: async (params?: {angle?: string}) => {
     try {
       const { status } =
         await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -138,9 +138,9 @@ export const createListActions = {
         }
 
         // Store all processed images
-        if (angle) {
+        if (params?.angle) {
           // add image by angle
-          store.addImagesByAngle(angle, newImages);
+          store.addImagesByAngle(params.angle, newImages);
         }else{
           // add image without angle
           store.setSelectedImages([...currentImages, ...newImages]);
