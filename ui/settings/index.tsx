@@ -7,7 +7,7 @@ import { useSettingsStore } from "./useStore";
 import { settingsActions } from "./actions";
 import {
   PreferencesSection,
-  ModelTrainingSection,
+  // ModelTrainingSection,
   InfoSection,
 } from "./components";
 
@@ -28,12 +28,9 @@ export const SettingsScreen: React.FC = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <HeaderPage 
-        title="Paramètres" 
-        subtitle="Gérez vos préférences"
-      />
-      
+    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+      <HeaderPage title='Paramètres' subtitle='Gérez vos préférences' />
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <PreferencesSection
           includePublicCategories={includePublicCategories}
@@ -44,9 +41,9 @@ export const SettingsScreen: React.FC = () => {
           setIncludePublicLabels={setIncludePublicLabels}
           setIncludePublicProjects={setIncludePublicProjects}
         />
-        
-        <ModelTrainingSection isTraining={isTraining} />
-        
+
+        {/* <ModelTrainingSection isTraining={isTraining} /> */}
+
         <InfoSection />
       </ScrollView>
     </SafeAreaView>
