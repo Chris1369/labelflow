@@ -7,10 +7,11 @@ interface EmptyImageCardProps {
   isCreating: boolean;
   isSelectingImages: boolean;
   onPress: () => void;
+  onLongPress?: () => void;
   hasTemplate?: boolean;
 }
 
-export const EmptyImageCard: React.FC<EmptyImageCardProps> = ({ isCreating, isSelectingImages, onPress, hasTemplate = true }) => {
+export const EmptyImageCard: React.FC<EmptyImageCardProps> = ({ isCreating, isSelectingImages, onPress, onLongPress, hasTemplate = true }) => {
   const scaleAnim = React.useRef(new Animated.Value(1)).current;
 
   React.useEffect(() => {
@@ -41,8 +42,10 @@ export const EmptyImageCard: React.FC<EmptyImageCardProps> = ({ isCreating, isSe
         !hasTemplate && styles.firstImageCardNoTemplate
       ]}
       onPress={onPress}
+      onLongPress={onLongPress}
       disabled={isCreating || isSelectingImages}
       activeOpacity={0.8}
+      delayLongPress={500}
     >
       {isSelectingImages ? (
         <Animated.View style={[styles.loadingContainer, { transform: [{ scale: scaleAnim }] }]}>
@@ -89,15 +92,15 @@ export const EmptyImageCard: React.FC<EmptyImageCardProps> = ({ isCreating, isSe
           ) : (
             <>
               <Text style={styles.firstImageHint}>
-                Sélectionnez ou glissez vos images ici
+                Appuyez pour la galerie • Appui long pour la caméra
               </Text>
               <View style={styles.infoRow}>
-                <Ionicons name="checkmark-circle-outline" size={16} color={theme.colors.success} />
-                <Text style={styles.infoText}>Format: JPG, PNG</Text>
+                <Ionicons name="images-outline" size={16} color={theme.colors.textSecondary} />
+                <Text style={styles.infoText}>Appui court : Galerie</Text>
               </View>
               <View style={styles.infoRow}>
-                <Ionicons name="checkmark-circle-outline" size={16} color={theme.colors.success} />
-                <Text style={styles.infoText}>Redimensionnement automatique</Text>
+                <Ionicons name="camera-outline" size={16} color={theme.colors.textSecondary} />
+                <Text style={styles.infoText}>Appui long : Caméra</Text>
               </View>
             </>
           )}

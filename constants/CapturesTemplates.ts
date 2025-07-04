@@ -12,24 +12,28 @@ export const CAPTURE_TEMPLATES: CaptureTemplate[] = [
       {
         position: "front",
         count: 40,
+        maxCount: 60,
         description: "Face principale du produit",
         icon: "📦",
       },
       {
         position: "back",
         count: 25,
+        maxCount: 30,
         description: "Arrière avec informations",
         icon: "📋",
       },
       {
         position: "side-left",
         count: 25,
+        maxCount: 30,
         description: "Profil gauche",
         icon: "👈",
       },
       {
         position: "side-right",
         count: 25,
+        maxCount: 30,
         description: "Profil droit",
         icon: "👉",
       },

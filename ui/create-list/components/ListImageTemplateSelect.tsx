@@ -21,6 +21,7 @@ interface ListImageTemplateSelectProps {
   isCreating: boolean;
   onChangeText: (text: string) => void;
   containerStyle?: ViewStyle;
+  hasImages?: boolean;
 }
 
 export const ListImageTemplateSelect: React.FC<
@@ -31,8 +32,10 @@ export const ListImageTemplateSelect: React.FC<
   isCreating,
   onChangeText,
   containerStyle,
+  hasImages = false,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
+  const isDisabled = isCreating || hasImages;
 
   const selectedTemplate = CAPTURE_TEMPLATES.find(
     (t) => t.id === listImageTemplate
@@ -46,10 +49,10 @@ export const ListImageTemplateSelect: React.FC<
         style={[
           styles.selectButton,
           error && styles.selectButtonError,
-          isCreating && styles.selectButtonDisabled,
+          isDisabled && styles.selectButtonDisabled,
         ]}
-        onPress={() => !isCreating && setModalVisible(true)}
-        disabled={isCreating}
+        onPress={() => !isDisabled && setModalVisible(true)}
+        disabled={isDisabled}
       >
         <View style={styles.selectContent}>
           {selectedTemplate ? (
@@ -74,6 +77,11 @@ export const ListImageTemplateSelect: React.FC<
       </TouchableOpacity>
 
       {error && <Text style={styles.error as TextStyle}>{error}</Text>}
+      {hasImages && (
+        <Text style={styles.disabledInfo as TextStyle}>
+          Le template ne peut pas être modifié après l'ajout d'images
+        </Text>
+      )}
 
       <Modal
         visible={modalVisible}
@@ -191,5 +199,11 @@ const styles = StyleSheet.create({
   templatesList: {
     flex: 1,
     padding: theme.spacing.lg,
+  },
+  disabledInfo: {
+    ...theme.fonts.caption,
+    color: theme.colors.textSecondary,
+    marginTop: theme.spacing.xs,
+    fontStyle: 'italic',
   },
 });

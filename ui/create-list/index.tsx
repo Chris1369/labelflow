@@ -5,6 +5,10 @@ import {
   Platform,
   ScrollView,
   View,
+  Text,
+  TouchableOpacity,
+  InteractionManager,
+  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { theme } from '@/types/theme';
@@ -29,7 +33,8 @@ interface CreateListScreenProps {
 }
 
 export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, mode = 'create', listId }) => {
-  const { listName, listImageTemplate, isCreating, error, selectedImages, autoCrop, setAutoCrop, isSelectingImages, reset } = useStore();
+  const { listName, listImageTemplate, isCreating, error, selectedImages, selectedImagesByAngle, autoCrop, setAutoCrop, isSelectingImages, reset } = useStore();
+  const [pendingAngle, setPendingAngle] = React.useState<string | undefined>();
 
   React.useEffect(() => {
     if (mode === 'add' && listId) {
@@ -42,23 +47,47 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
     }
   }, [mode, listId]);
 
-  const handleAddImages = () => {
+  // Handle press for gallery
+  const handleAddImages = (angle?: string) => {
     if (mode === 'create' && !listName.trim()) {
       createListActions.setError('Veuillez entrer un nom pour la liste');
       return;
     }
-    createListActions.selectImages();
+    setPendingAngle(angle);
+    handleSelectGallery();
   };
 
+  // Handle long press for camera
+  const handleAddImagesLongPress = (angle?: string) => {
+    if (mode === 'create' && !listName.trim()) {
+      createListActions.setError('Veuillez entrer un nom pour la liste');
+      return;
+    }
+    setPendingAngle(angle);
+    handleSelectCamera();
+  };
 
   // image picker handle by picture temple angles
   const handleAddImagesByAngle = (angle: string) => {
+    handleAddImages(angle);
+  };
 
-    if (mode === 'create' && !listName.trim()) {
-      createListActions.setError('Veuillez entrer un nom pour la liste');
-      return;
+  const handleSelectCamera = async () => {
+    console.log('handleSelectCamera called with angle:', pendingAngle);
+    try {
+      await createListActions.selectImages({ angle: pendingAngle, source: 'camera' });
+    } catch (error) {
+      console.error('Error in handleSelectCamera:', error);
     }
-    createListActions.selectImages({ angle });
+  };
+
+  const handleSelectGallery = async () => {
+    console.log('handleSelectGallery called with angle:', pendingAngle);
+    try {
+      await createListActions.selectImages({ angle: pendingAngle, source: 'gallery' });
+    } catch (error) {
+      console.error('Error in handleSelectGallery:', error);
+    }
   };
 
   const handleAction = () => {
@@ -108,6 +137,10 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
                 error={error}
                 isCreating={isCreating}
                 onChangeText={createListActions.setListImageTemplate}
+                hasImages={
+                  selectedImages.length > 0 || 
+                  Object.values(selectedImagesByAngle).flat().length > 0
+                }
               />
             </View>
           )}
@@ -121,6 +154,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
           {listImageTemplate ?
             <PictureTempleAngles
               onAddImagesByAngle={handleAddImagesByAngle}
+              onAddImagesByAngleLongPress={(angle) => handleAddImagesLongPress(angle)}
               onRemoveImageByAngle={createListActions.removeImageByAngle} /> :
             selectedImages.length > 0 ? (
               <ImageGrid
@@ -128,13 +162,15 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
                 isCreating={isCreating}
                 isSelectingImages={isSelectingImages}
                 onRemoveImage={createListActions.removeImage}
-                onAddImages={handleAddImages}
+                onAddImages={() => handleAddImages()}
+                onLongPress={() => handleAddImagesLongPress()}
               />
             ) : (
               <EmptyImageCard
                 isCreating={isCreating}
                 isSelectingImages={isSelectingImages}
-                onPress={handleAddImages}
+                onPress={() => handleAddImages()}
+                onLongPress={() => handleAddImagesLongPress()}
                 hasTemplate={false}
               />
             )}
@@ -144,7 +180,11 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
         <BottomActionButton
           mode={mode}
           isCreating={isCreating}
-          hasImages={selectedImages.length > 0}
+          hasImages={
+            listImageTemplate 
+              ? Object.values(selectedImagesByAngle).flat().length > 0
+              : selectedImages.length > 0
+          }
           onPress={handleAction}
         />
       </KeyboardAvoidingView>

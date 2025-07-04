@@ -9,6 +9,7 @@ interface ImageGridProps {
   isSelectingImages: boolean;
   onRemoveImage: (index: number) => void;
   onAddImages: () => void;
+  onLongPress?: () => void;
 }
 
 export const ImageGrid: React.FC<ImageGridProps> = ({
@@ -17,6 +18,7 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
   isSelectingImages,
   onRemoveImage,
   onAddImages,
+  onLongPress,
 }) => {
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
 
@@ -78,8 +80,10 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
             (isCreating || isSelectingImages) && styles.addImageCardDisabled
           ]}
           onPress={onAddImages}
+          onLongPress={onLongPress}
           disabled={isCreating || isSelectingImages}
           activeOpacity={0.7}
+          delayLongPress={500}
         >
           {isSelectingImages ? (
             <View style={styles.loadingContainer}>
@@ -92,7 +96,7 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
                 <Ionicons name="add-circle-outline" size={32} color={theme.colors.primary} />
               </View>
               <Text style={styles.addImageText}>Ajouter</Text>
-              <Text style={styles.addImageHint}>Cliquez ici</Text>
+              <Text style={styles.addImageHint}>Appuyer</Text>
             </View>
           )}
         </TouchableOpacity>

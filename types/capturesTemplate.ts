@@ -1,6 +1,7 @@
 export interface CaptureAngle {
   position: string;
   count: number;
+  maxCount?: number;
   lighting?: "natural" | "artificial" | "mixed" | "low";
   description?: string;
   icon?: string;

@@ -62,32 +62,79 @@ export const createListActions = {
   addImagesToListByAngle: (listId: string, projectId: string) =>
     addImagesToListByAngle(listId, projectId),
 
-  selectImages: async (params?: {angle?: string}) => {
+  selectImages: async (params?: {angle?: string, source?: 'camera' | 'gallery'}) => {
+    console.log('selectImages called with params:', params);
     try {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (status !== 'granted') {
-        Alert.alert(
-          'Permission refusée',
-          "L'accès à la galerie est nécessaire pour ajouter des images.",
-          [{ text: 'OK' }]
-        );
-        return;
+      // Request appropriate permissions
+      if (params?.source === 'camera') {
+        console.log('Requesting camera permissions...');
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permission refusée',
+            "L'accès à la caméra est nécessaire pour prendre des photos.",
+            [{ text: 'OK' }]
+          );
+          return;
+        }
+      } else {
+        console.log('Requesting media library permissions...');
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            'Permission refusée',
+            "L'accès à la galerie est nécessaire pour ajouter des images.",
+            [{ text: 'OK' }]
+          );
+          return;
+        }
       }
 
       const store = useStore.getState();
       const { autoCrop, setIsSelectingImages } = store;
 
-      const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
-        allowsEditing: !autoCrop, // Allow manual editing only when autoCrop is disabled
-        aspect: !autoCrop ? [1, 1] : undefined, // Force square aspect ratio for manual crop
-        quality: 1,
-        allowsMultipleSelection: autoCrop, // Enable multi-select when autoCrop is enabled
-      });
-
-      if (!result.canceled && result.assets.length > 0) {
+      console.log('Launching picker with source:', params?.source);
+      console.log('Auto crop enabled:', autoCrop);
+      
+      let result;
+      
+      try {
+        if (params?.source === 'camera') {
+          console.log('About to launch camera with options:', {
+            allowsEditing: !autoCrop,
+            aspect: !autoCrop ? [1, 1] : undefined,
+            quality: 1,
+          });
+          
+          result = await ImagePicker.launchCameraAsync({
+            allowsEditing: !autoCrop,
+            aspect: !autoCrop ? [1, 1] : undefined,
+            quality: 1,
+          });
+        } else {
+          console.log('About to launch gallery with options:', {
+            allowsEditing: !autoCrop,
+            aspect: !autoCrop ? [1, 1] : undefined,
+            quality: 1,
+            allowsMultipleSelection: autoCrop,
+          });
+          
+          result = await ImagePicker.launchImageLibraryAsync({
+            allowsEditing: !autoCrop,
+            aspect: !autoCrop ? [1, 1] : undefined,
+            quality: 1,
+            allowsMultipleSelection: autoCrop,
+          });
+        }
+        
+        console.log('Image picker returned with result:', result);
+      } catch (pickerError) {
+        console.error('Error launching picker:', pickerError);
+        throw pickerError;
+      }
+      
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        console.log('Processing', result.assets.length, 'images...');
         // Show loader while processing images
         setIsSelectingImages(true);
 
