@@ -91,10 +91,11 @@ export const createListActions = {
       }
 
       const store = useStore.getState();
-      const { autoCrop, setIsSelectingImages } = store;
+      const { autoCrop, setIsSelectingImages, setProcessingProgress } = store;
       
       // Ensure we start with a clean state
       setIsSelectingImages(true);
+      setProcessingProgress(0, 0, 0);
 
       console.log('Launching picker with source:', params?.source);
       console.log('Auto crop enabled:', autoCrop);
@@ -138,12 +139,21 @@ export const createListActions = {
       
       if (!result.canceled && result.assets && result.assets.length > 0) {
         console.log('Processing', result.assets.length, 'images...');
+        
+        // Update total images for progress
+        setProcessingProgress(0, 0, result.assets.length);
 
         const currentImages = store.selectedImages;
         const newImages: string[] = [];
 
         // Process each selected image
-        for (const asset of result.assets) {
+        for (let index = 0; index < result.assets.length; index++) {
+          const asset = result.assets[index];
+          
+          // Update progress
+          const progress = ((index + 1) / result.assets.length) * 100;
+          setProcessingProgress(progress, index + 1, result.assets.length);
+          
           let finalUri = asset.uri;
 
           // Process the image based on autoCrop setting

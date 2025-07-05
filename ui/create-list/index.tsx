@@ -22,6 +22,7 @@ import {
   EmptyImageCard,
   BottomActionButton,
   AutoCropToggle,
+  ProcessingOverlay,
 } from './components';
 import { ListImageTemplateSelect } from './components/ListImageTemplateSelect';
 import { PictureTempleAngles } from './components/PictureTempleAngles';
@@ -33,7 +34,21 @@ interface CreateListScreenProps {
 }
 
 export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, mode = 'create', listId }) => {
-  const { listName, listImageTemplate, isCreating, error, selectedImages, selectedImagesByAngle, autoCrop, setAutoCrop, isSelectingImages, reset } = useStore();
+  const { 
+    listName, 
+    listImageTemplate, 
+    isCreating, 
+    error, 
+    selectedImages, 
+    selectedImagesByAngle, 
+    autoCrop, 
+    setAutoCrop, 
+    isSelectingImages,
+    processingProgress,
+    currentProcessingImage,
+    totalProcessingImages,
+    reset 
+  } = useStore();
 
   React.useEffect(() => {
     if (mode === 'add' && listId) {
@@ -185,6 +200,14 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
           onPress={handleAction}
         />
       </KeyboardAvoidingView>
+      
+      <ProcessingOverlay
+        visible={isSelectingImages && totalProcessingImages > 0}
+        progress={processingProgress}
+        currentImage={currentProcessingImage}
+        totalImages={totalProcessingImages}
+        message={totalProcessingImages > 1 ? "Traitement des images..." : "Traitement de l'image..."}
+      />
     </SafeAreaView>
   );
 };
