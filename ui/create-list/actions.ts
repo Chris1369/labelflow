@@ -140,8 +140,14 @@ export const createListActions = {
       if (!result.canceled && result.assets && result.assets.length > 0) {
         console.log('Processing', result.assets.length, 'images...');
         
-        // Update total images for progress
-        setProcessingProgress(0, 0, result.assets.length);
+        // Show processing overlay only if we have images to process
+        if (result.assets.length === 1 && !autoCrop) {
+          // For single image without auto-crop, don't show the overlay
+          // as the processing is very quick
+        } else {
+          // Update total images for progress
+          setProcessingProgress(0, 0, result.assets.length);
+        }
 
         const currentImages = store.selectedImages;
         const newImages: string[] = [];
@@ -150,9 +156,11 @@ export const createListActions = {
         for (let index = 0; index < result.assets.length; index++) {
           const asset = result.assets[index];
           
-          // Update progress
-          const progress = ((index + 1) / result.assets.length) * 100;
-          setProcessingProgress(progress, index + 1, result.assets.length);
+          // Update progress only if overlay should be visible
+          if (!(result.assets.length === 1 && !autoCrop)) {
+            const progress = ((index + 1) / result.assets.length) * 100;
+            setProcessingProgress(progress, index + 1, result.assets.length);
+          }
           
           let finalUri = asset.uri;
 
@@ -207,12 +215,14 @@ export const createListActions = {
         console.log('Image picker cancelled or no images selected');
       }
       
-      // Always hide loader
+      // Always hide loader and reset processing progress
       setIsSelectingImages(false);
+      setProcessingProgress(0, 0, 0);
     } catch (error) {
       console.error('Error selecting image:', error);
       Alert.alert('Erreur', "Impossible de sélectionner l'image");
       useStore.getState().setIsSelectingImages(false);
+      useStore.getState().setProcessingProgress(0, 0, 0);
     }
   },
   removeImageByAngle: (angle: string, index: number) => {
@@ -229,7 +239,7 @@ export const createListActions = {
 
 const createList = createSafeAction(
   async (projectId: string) => {
-    const { listName, selectedImages, setIsCreating } = useStore.getState();
+    const { listName, selectedImages, setIsCreating, setUploadProgress } = useStore.getState();
 
     if (selectedImages.length === 0) {
       Alert.alert('Erreur', 'Veuillez sélectionner au moins une image');
@@ -237,6 +247,7 @@ const createList = createSafeAction(
     }
 
     setIsCreating(true);
+    setUploadProgress(0);
 
     try {
       const formData = new FormData();
@@ -252,8 +263,20 @@ const createList = createSafeAction(
         } as any);
       });
 
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        const currentProgress = useStore.getState().uploadProgress;
+        if (currentProgress < 90) {
+          useStore.getState().setUploadProgress(currentProgress + 10);
+        }
+      }, 200);
+
       // Create the unlabeled list
       const response = await unlabeledListAPI.create(formData);
+      
+      // Complete the progress
+      clearInterval(progressInterval);
+      useStore.getState().setUploadProgress(100);
 
       // Reset store
       useStore.getState().reset();
@@ -278,13 +301,14 @@ const createList = createSafeAction(
 const addImagesToList = createSafeAction(
   async (listId: string, projectId: string) => {
     const store = useStore.getState();
-    const { selectedImages, setIsCreating } = store;
+    const { selectedImages, setIsCreating, setUploadProgress } = store;
 
     if (selectedImages.length === 0) {
       throw new Error('Aucune image sélectionnée');
     }
 
     setIsCreating(true);
+    setUploadProgress(0);
 
     try {
       const formData = new FormData();
@@ -298,8 +322,20 @@ const addImagesToList = createSafeAction(
         } as any);
       });
 
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        const currentProgress = useStore.getState().uploadProgress;
+        if (currentProgress < 90) {
+          useStore.getState().setUploadProgress(currentProgress + 10);
+        }
+      }, 200);
+
       // Add images to existing list
       await unlabeledListAPI.addImages(listId, formData);
+      
+      // Complete the progress
+      clearInterval(progressInterval);
+      useStore.getState().setUploadProgress(100);
 
       // Reset store
       useStore.getState().reset();
@@ -329,6 +365,7 @@ const createListWithPictureTempleAngles = createSafeAction(
       selectedImagesByAngle,
       setIsCreating,
       listImageTemplate,
+      setUploadProgress,
     } = useStore.getState();
 
     const selectedImageTemplateData = CAPTURE_TEMPLATES.find(
@@ -341,6 +378,7 @@ const createListWithPictureTempleAngles = createSafeAction(
     }
 
     setIsCreating(true);
+    setUploadProgress(0);
 
     try {
       const formData = new FormData();
@@ -365,8 +403,20 @@ const createListWithPictureTempleAngles = createSafeAction(
         });
       });
 
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        const currentProgress = useStore.getState().uploadProgress;
+        if (currentProgress < 90) {
+          useStore.getState().setUploadProgress(currentProgress + 10);
+        }
+      }, 200);
+
       // Create the unlabeled list
       const response = await unlabeledListAPI.create(formData);
+      
+      // Complete the progress
+      clearInterval(progressInterval);
+      useStore.getState().setUploadProgress(100);
 
       // Reset store
       useStore.getState().reset();
@@ -393,13 +443,14 @@ const createListWithPictureTempleAngles = createSafeAction(
 const addImagesToListByAngle = createSafeAction(
   async (listId: string, projectId: string) => {
     const store = useStore.getState();
-    const { selectedImagesByAngle, setIsCreating } = store;
+    const { selectedImagesByAngle, setIsCreating, setUploadProgress } = store;
 
     if (Object.values(selectedImagesByAngle).flat().length === 0) {
       throw new Error('Aucune image sélectionnée');
     }
 
     setIsCreating(true);
+    setUploadProgress(0);
 
     try {
       const formData = new FormData();
@@ -416,8 +467,20 @@ const addImagesToListByAngle = createSafeAction(
         });
       });
 
+      // Simulate upload progress
+      const progressInterval = setInterval(() => {
+        const currentProgress = useStore.getState().uploadProgress;
+        if (currentProgress < 90) {
+          useStore.getState().setUploadProgress(currentProgress + 10);
+        }
+      }, 200);
+
       // Add images to existing list
       await unlabeledListAPI.addImages(listId, formData);
+      
+      // Complete the progress
+      clearInterval(progressInterval);
+      useStore.getState().setUploadProgress(100);
 
       // Reset store
       useStore.getState().reset();

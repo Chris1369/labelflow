@@ -19,7 +19,7 @@ export const BottomActionButton: React.FC<BottomActionButtonProps> = ({
   onPress,
 }) => {
 
-  const { listImageTemplate, selectedImagesByAngle } = useStore();
+  const { listImageTemplate, selectedImagesByAngle, uploadProgress } = useStore();
   const selectedImageTemplate = CAPTURE_TEMPLATES.find(template => template.id === listImageTemplate);
 
   const hasOneAngleSelected = selectedImageTemplate?.angles.some((angle) => {
@@ -34,6 +34,9 @@ export const BottomActionButton: React.FC<BottomActionButtonProps> = ({
 
   const getButtonTitle = () => {
     if (isCreating) {
+      if (uploadProgress > 0 && uploadProgress < 100) {
+        return `${mode === 'add' ? "Ajout" : "Création"} ${Math.round(uploadProgress)}%`;
+      }
       return mode === 'add' ? "Ajout..." : "Création...";
     }
     return mode === 'add' ? "Ajouter les images" : "Créer la liste";

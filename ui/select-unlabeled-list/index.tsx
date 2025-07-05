@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/types/theme";
@@ -10,6 +10,8 @@ import {
   ErrorListState,
   UnlabeledListContent,
   type UnlabeledListItem,
+  ListActionBottomSheet,
+  type ListActionBottomSheetRef,
 } from "./components";
 import { HeaderPage, Input } from "@/components/atoms";
 import { useUnlabeledListsByProject } from "@/hooks/queries";
@@ -22,6 +24,7 @@ export const SelectUnlabeledListScreen: React.FC<
   SelectUnlabeledListScreenProps
 > = ({ projectId }) => {
   const { searchQuery } = useStore();
+  const listActionBottomSheetRef = useRef<ListActionBottomSheetRef>(null);
 
   const {
     data: filteredLists,
@@ -37,9 +40,20 @@ export const SelectUnlabeledListScreen: React.FC<
   );
 
   const handleListSelect = (list: UnlabeledListItem) => {
+    listActionBottomSheetRef.current?.open(list);
+  };
+
+  const handleLabelImages = (list: UnlabeledListItem) => {
     const listId = list.id || list._id;
     if (listId) {
       router.push(`/(project)/${projectId}/label-list?listId=${listId}`);
+    }
+  };
+
+  const handleAddImages = (list: UnlabeledListItem) => {
+    const listId = list.id || list._id;
+    if (listId) {
+      router.push(`/(project)/${projectId}/create-list?mode=add&listId=${listId}`);
     }
   };
 
@@ -80,6 +94,12 @@ export const SelectUnlabeledListScreen: React.FC<
         </>
       )}
       </View>
+      
+      <ListActionBottomSheet
+        ref={listActionBottomSheetRef}
+        onLabelImages={handleLabelImages}
+        onAddImages={handleAddImages}
+      />
     </SafeAreaView>
   );
 };

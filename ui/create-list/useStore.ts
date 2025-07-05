@@ -11,6 +11,7 @@ interface CreateListState {
   processingProgress: number;
   currentProcessingImage: number;
   totalProcessingImages: number;
+  uploadProgress: number;
 
   selectedImagesByAngle: {
     [key: string]: string[];
@@ -29,6 +30,7 @@ interface CreateListActions {
   setAutoCrop: (autoCrop: boolean) => void;
   setIsSelectingImages: (isSelecting: boolean) => void;
   setProcessingProgress: (progress: number, current: number, total: number) => void;
+  setUploadProgress: (progress: number) => void;
   reset: () => void;
 
   setSelectedImagesByAngle: (angle: string, images: string[]) => void;
@@ -50,6 +52,7 @@ export const useStore = create<CreateListState & CreateListActions>((set, get) =
   processingProgress: 0,
   currentProcessingImage: 0,
   totalProcessingImages: 0,
+  uploadProgress: 0,
 
   // selected images by angle
   selectedImagesByAngle: {},
@@ -67,6 +70,7 @@ export const useStore = create<CreateListState & CreateListActions>((set, get) =
     currentProcessingImage: current,
     totalProcessingImages: total
   }),
+  setUploadProgress: (progress) => set({ uploadProgress: progress }),
   addImagesByAngle: (angle, images) => {
     const currentImages = get().selectedImagesByAngle[angle] || [];
     const newImages = [...currentImages, ...images];
@@ -97,6 +101,7 @@ export const useStore = create<CreateListState & CreateListActions>((set, get) =
     processingProgress: 0,
     currentProcessingImage: 0,
     totalProcessingImages: 0,
+    uploadProgress: 0,
     selectedImagesByAngle: {},
     existingValidatedImagesByAngle: {},
   }),

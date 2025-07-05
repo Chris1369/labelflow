@@ -47,6 +47,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
     processingProgress,
     currentProcessingImage,
     totalProcessingImages,
+    uploadProgress,
     reset 
   } = useStore();
 
