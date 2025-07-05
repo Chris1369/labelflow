@@ -1,5 +1,11 @@
 import React, { forwardRef, useImperativeHandle, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextStyle,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { SimpleBottomSheet } from "@/components/molecules/SimpleBottomSheet";
 import { theme } from "@/types/theme";
@@ -59,7 +65,7 @@ export const ListActionBottomSheet = forwardRef<
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.title}>Choisir une action</Text>
+          <Text style={styles.title as TextStyle}>Choisir une action</Text>
           {selectedList && (
             <>
               <Text style={styles.listName}>{selectedList.name}</Text>
@@ -153,7 +159,7 @@ const styles = StyleSheet.create({
   listInfo: {
     ...theme.fonts.caption,
     color: theme.colors.textSecondary,
-  },
+  } as TextStyle,
   actions: {
     flex: 1,
     paddingTop: theme.spacing.lg,
@@ -189,5 +195,5 @@ const styles = StyleSheet.create({
   actionDescription: {
     ...theme.fonts.caption,
     color: theme.colors.textSecondary,
-  },
+  } as TextStyle,
 });
