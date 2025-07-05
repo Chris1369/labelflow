@@ -15,6 +15,7 @@ interface AddItemsState {
   showSaveButton: boolean;
   isSaving: boolean;
   flashMode: FlashMode;
+  isPredicting: boolean;
   // UnlabeledList state
   unlabeledListItems: any[];
   currentUnlabeledIndex: number;
@@ -48,6 +49,7 @@ interface AddItemsActions {
   setCurrentUnlabeledIndex: (index: number) => void;
   generateObjectItemTrainingId: () => string;
   setCurrentProject: (project: Project | null) => void;
+  setIsPredicting: (isPredicting: boolean) => void;
 }
 
 const createInitialBox = (withUnknownLabel: boolean = false): BoundingBox => ({
@@ -72,6 +74,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     showSaveButton: false,
     isSaving: false,
     flashMode: 'off',
+    isPredicting: false,
     // UnlabeledList state
     unlabeledListItems: [],
     currentUnlabeledIndex: 0,
@@ -204,5 +207,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     generateObjectItemTrainingId: () => {
       return uuid.v4();
     },
+    
+    setIsPredicting: (isPredicting) => set({ isPredicting }),
   })
 );

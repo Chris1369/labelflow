@@ -22,6 +22,7 @@ import {
   CapturedImageView,
   ControlButtons,
   RecentLabelsBar,
+  PredictionIndicator,
 } from "./components";
 import { RecentLabelsManager } from "@/helpers/recentLabels";
 import { resetLabelColors } from "@/helpers/labelColors";
@@ -56,6 +57,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
     setFlashMode,
     unlabeledListItems,
     currentUnlabeledIndex,
+    isPredicting,
   } = useAddItemsStore();
 
   const { data: currentProject } = useProjectDetails(projectId);
@@ -267,6 +269,8 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
           }
           labelCounters={currentProject?.labelCounter || []}
         />
+        
+        <PredictionIndicator isVisible={isPredicting} />
         </View>
       </SafeAreaView>
     );

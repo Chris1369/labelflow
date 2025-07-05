@@ -107,7 +107,7 @@ export const ControlButtons: React.FC<ControlButtonsProps> = ({
             <Ionicons
               name='sparkles'
               size={20}
-              color={theme.colors.secondary}
+              color={theme.colors.background}
             />
           </TouchableOpacity>
           <Text style={styles.buttonLabel}>Auto</Text>
@@ -200,7 +200,9 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
   },
   magicButton: {
-    backgroundColor: "#9333EA",
+    backgroundColor: theme.colors.primary,
+    borderWidth: 2,
+    borderColor: theme.colors.secondary,
   },
   disabledButton: {
     opacity: 0.5,
@@ -228,7 +230,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: theme.colors.success || theme.colors.primary,
+    backgroundColor: theme.colors.success || '#4CAF50',
   },
   saveAllButton: {
     width: 72,
@@ -240,13 +242,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -8,
     right: -8,
-    backgroundColor: theme.colors.error,
+    backgroundColor: theme.colors.primary,
     borderRadius: 12,
     minWidth: 24,
     height: 24,
     justifyContent: "center",
     alignItems: "center",
     paddingHorizontal: 6,
+    borderWidth: 2,
+    borderColor: theme.colors.background,
   },
   badgeText: {
     color: theme.colors.secondary,

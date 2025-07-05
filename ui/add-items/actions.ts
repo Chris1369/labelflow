@@ -103,6 +103,11 @@ export const addItemsActions = {
       useAddItemsStore.getState().setCapturedImage(result.uri);
       // Reset capturing state after successful capture
       useAddItemsStore.getState().setIsCapturing(false);
+
+      // Auto-predict after capture
+      setTimeout(() => {
+        addItemsActions.predictBoundingBoxes(result.uri);
+      }, 500);
     } catch (error) {
       console.error("Error taking picture:", error);
       // Ensure we reset capturing state even on error
@@ -142,8 +147,13 @@ export const addItemsActions = {
   },
 
   saveAllItems: async (projectId: string) => {
-    const { boundingBoxes, capturedImageUri,currentProject, setIsSaving, generateObjectItemTrainingId } =
-      useAddItemsStore.getState();
+    const {
+      boundingBoxes,
+      capturedImageUri,
+      currentProject,
+      setIsSaving,
+      generateObjectItemTrainingId,
+    } = useAddItemsStore.getState();
     const completedBoxes = boundingBoxes.filter((box) => box.isComplete);
     const objectItemTrainingId = generateObjectItemTrainingId();
 
@@ -226,39 +236,42 @@ export const addItemsActions = {
       // Send annotations for training (fire and forget - don't wait for response)
       try {
         // Get project name from the project store
-        const projectName = currentProject?.name || 'Unknown Project';
-        
+        const projectName = currentProject?.name || "Unknown Project";
+
         // Get image dimensions (we know it's 640x640 from resizing)
         const imageWidth = 640;
         const imageHeight = 640;
-        
+
         // Convert bounding boxes to training format
         const annotations = trainingAnnotationAPI.convertBoundingBoxFormat(
-          completedBoxes.map(box => ({
+          completedBoxes.map((box) => ({
             centerX: box.centerX,
             centerY: box.centerY,
             width: box.width,
             height: box.height,
-            label: box.label || 'unknown',
+            label: box.label || "unknown",
           }))
         );
-        
+
         // Send annotations asynchronously (don't await)
-        trainingAnnotationAPI.sendAnnotations(
-          capturedImageUri,
-          imageWidth,
-          imageHeight,
-          annotations,
-          projectName,
-          objectItemTrainingId as string
-        ).then(() => {
-          console.log('Training annotations sent successfully');
-        }).catch(error => {
-          console.error('Failed to send training annotations:', error);
-          // Don't show error to user - training is optional
-        });
+        trainingAnnotationAPI
+          .sendAnnotations(
+            capturedImageUri,
+            imageWidth,
+            imageHeight,
+            annotations,
+            projectName,
+            objectItemTrainingId as string
+          )
+          .then(() => {
+            console.log("Training annotations sent successfully");
+          })
+          .catch((error) => {
+            console.error("Failed to send training annotations:", error);
+            // Don't show error to user - training is optional
+          });
       } catch (error) {
-        console.error('Error preparing training annotations:', error);
+        console.error("Error preparing training annotations:", error);
         // Don't fail the save operation
       }
 
@@ -352,27 +365,31 @@ export const addItemsActions = {
   loadUnlabeledList: async (listId: string) => {
     try {
       const store = useAddItemsStore.getState();
-      
+
       console.log("Loading unlabeled list with ID:", listId);
-      
+
       // Load the unlabeled list
       const response = await unlabeledListAPI.getById(listId);
       // The response is the data directly, not wrapped in { data: ... }
       const list = response;
       store.setUnlabeledListData(list.items || [], listId);
-      
+
       // Load the first image if available
       if (list.items && list.items.length > 0) {
         const firstItem = list.items[0];
         console.log("First item:", firstItem);
-        
+
         // Use fileUrl field
         const imageUrl = firstItem.fileUrl;
         console.log("Image URL found:", imageUrl);
-        
+
         if (imageUrl) {
           console.log("Setting first image URL:", imageUrl);
           store.setCurrentUnlabeledImage(imageUrl);
+          // Auto-predict after loading unlabeled image
+          setTimeout(() => {
+            addItemsActions.predictBoundingBoxes(imageUrl);
+          }, 500);
         } else {
           console.error("No fileUrl found in item:", firstItem);
         }
@@ -389,19 +406,23 @@ export const addItemsActions = {
   loadNextUnlabeledImage: () => {
     const store = useAddItemsStore.getState();
     const { currentUnlabeledIndex, unlabeledListItems } = store;
-    
+
     const nextIndex = currentUnlabeledIndex + 1;
-    
+
     if (nextIndex < unlabeledListItems.length) {
       store.setCurrentUnlabeledIndex(nextIndex);
       const nextItem = unlabeledListItems[nextIndex];
       console.log("Loading next item:", nextItem);
-      
+
       // Use fileUrl field
       const imageUrl = nextItem.fileUrl;
-      
+
       if (imageUrl) {
         store.setCurrentUnlabeledImage(imageUrl);
+        // Auto-predict after loading next unlabeled image
+        setTimeout(() => {
+          addItemsActions.predictBoundingBoxes(imageUrl);
+        }, 500);
       } else {
         console.error("No fileUrl found in next item:", nextItem);
       }
@@ -410,102 +431,127 @@ export const addItemsActions = {
 
   validateUnlabeledItem: async (projectId: string, listId: string) => {
     const store = useAddItemsStore.getState();
-    const { boundingBoxes, currentUnlabeledIndex, unlabeledListItems, setIsSaving , generateObjectItemTrainingId, currentProject} = store;
-    
+    const {
+      boundingBoxes,
+      currentUnlabeledIndex,
+      unlabeledListItems,
+      setIsSaving,
+      generateObjectItemTrainingId,
+      currentProject,
+    } = store;
+
     if (!boundingBoxes.length || !listId) return;
 
     const objectItemTrainingId = generateObjectItemTrainingId();
-    
+
     try {
       setIsSaving(true);
-      
+
       // Get current item
       const currentItem = unlabeledListItems[currentUnlabeledIndex];
       if (!currentItem || !currentItem._id) {
         throw new Error("No current item found");
       }
-      
+
       // Prepare labels with positions
       const labels = boundingBoxes
-        .filter(box => box.isComplete && box.label)
-        .map(box => ({
+        .filter((box) => box.isComplete && box.label)
+        .map((box) => ({
           name: box.label!,
-          position: [box.centerX, box.centerY, box.width, box.height, box.rotation],
+          position: [
+            box.centerX,
+            box.centerY,
+            box.width,
+            box.height,
+            box.rotation,
+          ],
         }));
-      
+
       if (labels.length === 0) {
         Alert.alert("Erreur", "Veuillez ajouter au moins un label");
         setIsSaving(false);
         return;
       }
-      
+
       // Call validate API
-      const response = await unlabeledListAPI.validateItem(listId, currentItem._id, {
-        projectId,
-        labels,
-        objectItemTrainingId: objectItemTrainingId as string
-      });
-      
+      const response = await unlabeledListAPI.validateItem(
+        listId,
+        currentItem._id,
+        {
+          projectId,
+          labels,
+          objectItemTrainingId: objectItemTrainingId as string,
+        }
+      );
+
       console.log("Validate response:", response);
-      
+
       // Check if validation was successful (response exists and no error)
       if (response && response.projectItem) {
         // Send training annotations (fire and forget - don't wait for response)
         try {
           // Get project name from the project store
-          const projectName = currentProject?.name || 'Unknown Project';
-          
+          const projectName = currentProject?.name || "Unknown Project";
+
           // Get current image URL
           const currentImageUrl = currentItem.fileUrl;
-          
+
           if (currentImageUrl) {
             // Get image dimensions (we know it's 640x640 from resizing)
             const imageWidth = 640;
             const imageHeight = 640;
-            
+
             // Convert bounding boxes to training format
             const annotations = trainingAnnotationAPI.convertBoundingBoxFormat(
               boundingBoxes
-                .filter(box => box.isComplete && box.label)
-                .map(box => ({
+                .filter((box) => box.isComplete && box.label)
+                .map((box) => ({
                   centerX: box.centerX,
                   centerY: box.centerY,
                   width: box.width,
                   height: box.height,
-                  label: box.label || 'unknown',
+                  label: box.label || "unknown",
                 }))
             );
-            
+
             // Send annotations asynchronously (don't await)
-            trainingAnnotationAPI.sendAnnotations(
-              currentImageUrl,
-              imageWidth,
-              imageHeight,
-              annotations,
-              projectName,
-              objectItemTrainingId as string
-            ).then(() => {
-              console.log('Training annotations sent successfully for validated item');
-            }).catch(error => {
-              console.error('Failed to send training annotations:', error);
-              // Don't show error to user - training is optional
-            });
+            trainingAnnotationAPI
+              .sendAnnotations(
+                currentImageUrl,
+                imageWidth,
+                imageHeight,
+                annotations,
+                projectName,
+                objectItemTrainingId as string
+              )
+              .then(() => {
+                console.log(
+                  "Training annotations sent successfully for validated item"
+                );
+              })
+              .catch((error) => {
+                console.error("Failed to send training annotations:", error);
+                // Don't show error to user - training is optional
+              });
           }
         } catch (error) {
-          console.error('Error preparing training annotations:', error);
+          console.error("Error preparing training annotations:", error);
           // Don't fail the validation operation
         }
-        
+
         // Remove the validated item from the local list
         const updatedItems = [...unlabeledListItems];
         updatedItems.splice(currentUnlabeledIndex, 1);
         store.setUnlabeledListData(updatedItems, listId);
-        
+
         // Check if there are more items
         if (updatedItems.length > 0) {
           // If we're at the end of the list, go back to the previous item
-          const newIndex = currentUnlabeledIndex >= updatedItems.length ? updatedItems.length - 1 : currentUnlabeledIndex;
-          
+          const newIndex =
+            currentUnlabeledIndex >= updatedItems.length
+              ? updatedItems.length - 1
+              : currentUnlabeledIndex;
+
           // Load the image at the current index (which is now the next item since we removed one)
           const nextItem = updatedItems[newIndex];
           if (nextItem && nextItem.fileUrl) {
@@ -516,34 +562,38 @@ export const addItemsActions = {
             if (newIndex !== currentUnlabeledIndex) {
               store.setCurrentUnlabeledIndex(newIndex);
             }
+            // Auto-predict after loading next image
+            setTimeout(() => {
+              addItemsActions.predictBoundingBoxes(nextItem.fileUrl);
+            }, 500);
           }
         } else {
           // All items processed
-          Alert.alert(
-            "Liste complétée", 
-            "Tous les items ont été labellisés.",
-            [
-              {
-                text: "OK",
-                onPress: () => router.back(),
-              }
-            ]
-          );
+          Alert.alert("Liste complétée", "Tous les items ont été labellisés.", [
+            {
+              text: "OK",
+              onPress: () => router.back(),
+            },
+          ]);
         }
       }
-      
+
       setIsSaving(false);
     } catch (error: any) {
       console.error("Error validating item:", error);
       setIsSaving(false);
-      Alert.alert("Erreur", error.response?.data?.message || "Impossible de valider l'item");
+      Alert.alert(
+        "Erreur",
+        error.response?.data?.message || "Impossible de valider l'item"
+      );
     }
   },
 
   openImagePicker: async (listId: string) => {
     try {
-      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+
       if (status !== "granted") {
         Alert.alert(
           "Permission refusée",
@@ -562,25 +612,25 @@ export const addItemsActions = {
       if (!result.canceled && result.assets.length > 0) {
         const store = useAddItemsStore.getState();
         store.setIsSaving(true);
-        
+
         try {
           // Create FormData with multiple images
           const formData = new FormData();
-          
+
           for (let i = 0; i < result.assets.length; i++) {
             const asset = result.assets[i];
             const resizedUri = await resizeImageTo640x640(asset.uri);
-            
-            formData.append('images', {
+
+            formData.append("images", {
               uri: resizedUri,
               name: `image_${i}.jpg`,
-              type: 'image/jpeg',
+              type: "image/jpeg",
             } as any);
           }
 
           // Add images to the unlabeled list
           const response = await unlabeledListAPI.addImages(listId, formData);
-          
+
           if (response.success) {
             Alert.alert(
               "Images ajoutées",
@@ -591,8 +641,8 @@ export const addItemsActions = {
                   onPress: () => {
                     // Reload the list to show the new images
                     addItemsActions.loadUnlabeledList(listId);
-                  }
-                }
+                  },
+                },
               ]
             );
           }
@@ -634,6 +684,11 @@ export const addItemsActions = {
         // Resize image to 640x640
         const resizedUri = await resizeImageTo640x640(result.assets[0].uri);
         useAddItemsStore.getState().setCapturedImage(resizedUri);
+
+        // Auto-predict after import
+        setTimeout(() => {
+          addItemsActions.predictBoundingBoxes(resizedUri);
+        }, 500);
       }
     } catch (error) {
       console.error("Error importing image:", error);
@@ -642,33 +697,54 @@ export const addItemsActions = {
   },
 
   predictBoundingBoxes: async (imageUri: string) => {
+    const store = useAddItemsStore.getState();
+
+    // Don't predict if already predicting
+    if (store.isPredicting) {
+      console.log("Already predicting, skipping...");
+      return;
+    }
+
+    store.setIsPredicting(true);
+
     try {
       console.log("Starting prediction for image:", imageUri);
-      
+
       // Check if it's a URL (starts with http:// or https://)
-      const isUrl = imageUri.startsWith('http://') || imageUri.startsWith('https://');
-      
-      // Call prediction API with appropriate method
-      const response = await predictionAPI.predict(imageUri, isUrl);
+      const isUrl =
+        imageUri.startsWith("http://") || imageUri.startsWith("https://");
+
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Prediction timeout")), 15000); // 15 seconds timeout
+      });
+
+      // Call prediction API with timeout
+      const response = (await Promise.race([
+        predictionAPI.predict(imageUri, isUrl),
+        timeoutPromise,
+      ])) as any;
       console.log("Prediction response:", response);
-      
+
       // Process detections if any
       if (response.detections && response.detections.length > 0) {
         const store = useAddItemsStore.getState();
-        
+
         // Clear existing boxes and prepare for new ones
         const newBoundingBoxes: any[] = [];
-        
+
         // Process predicted boxes
-        response.detections.forEach((detection, index) => {
+        response.detections.forEach((detection: any, index: number) => {
           // Convert API bbox format (x1,y1,x2,y2) to our format (centerX, centerY, width, height in 0-1 range)
           const width = detection.bbox.x2 - detection.bbox.x1;
           const height = detection.bbox.y2 - detection.bbox.y1;
-          const centerX = (detection.bbox.x1 + width / 2) / response.image_size.width;
-          const centerY = (detection.bbox.y1 + height / 2) / response.image_size.height;
+          const centerX =
+            (detection.bbox.x1 + width / 2) / response.image_size.width;
+          const centerY =
+            (detection.bbox.y1 + height / 2) / response.image_size.height;
           const normalizedWidth = width / response.image_size.width;
           const normalizedHeight = height / response.image_size.height;
-          
+
           console.log(`Detection ${index + 1} - ${detection.label}:`, {
             original: {
               x1: detection.bbox.x1,
@@ -690,7 +766,7 @@ export const addItemsActions = {
             },
             imageSize: response.image_size,
           });
-          
+
           // Create new box with prediction data
           const newBox = {
             id: `pred_${Date.now()}_${index}`,
@@ -700,31 +776,52 @@ export const addItemsActions = {
             height: normalizedHeight,
             rotation: 0,
             label: detection.confidence < 0.7 ? "???" : detection.label,
-            isComplete: true,  // Always mark as complete, even for ??? boxes
+            isComplete: true, // Always mark as complete, even for ??? boxes
           };
-          
+
           newBoundingBoxes.push(newBox);
         });
-        
+
         // Update store with all new boxes at once
         store.setBoundingBoxes(newBoundingBoxes);
-        
+
         // Auto-select first unknown box if any
-        const firstUnknownBox = newBoundingBoxes.find(box => box.label === "???");
+        const firstUnknownBox = newBoundingBoxes.find(
+          (box) => box.label === "???"
+        );
         if (firstUnknownBox) {
           store.setCurrentBox(firstUnknownBox.id);
         }
-        
+
+        // Alert.alert(
+        //   "Prédiction terminée",
+        //   `${response.detections.length} objet${response.detections.length > 1 ? 's' : ''} détecté${response.detections.length > 1 ? 's' : ''}`
+        // );
+      } else {
         Alert.alert(
-          "Prédiction terminée",
-          `${response.detections.length} objet${response.detections.length > 1 ? 's' : ''} détecté${response.detections.length > 1 ? 's' : ''}`
+          "Aucun objet détecté",
+          "La prédiction n'a trouvé aucun objet dans l'image."
+        );
+      }
+    } catch (error: any) {
+      console.error("Error in predictBoundingBoxes:", error);
+
+      // Check if it's a timeout error
+      if (error.message === "Prediction timeout") {
+        Alert.alert(
+          "Erreur",
+          "La prédiction a pris trop de temps. Vérifiez votre connexion."
         );
       } else {
-        Alert.alert("Aucun objet détecté", "La prédiction n'a trouvé aucun objet dans l'image.");
+        Alert.alert(
+          "Erreur",
+          "Impossible d'effectuer la prédiction. Vérifiez que le serveur est en ligne."
+        );
       }
-    } catch (error) {
-      console.error("Error in predictBoundingBoxes:", error);
-      Alert.alert("Erreur", "Impossible d'effectuer la prédiction. Vérifiez que le serveur est en ligne.");
+    } finally {
+      // Always hide the loader
+      store.setIsPredicting(false);
+      console.log("Prediction finished, isPredicting set to false");
     }
   },
 };

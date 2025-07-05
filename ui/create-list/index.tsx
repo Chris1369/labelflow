@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   StyleSheet,
   KeyboardAvoidingView,
@@ -9,12 +9,12 @@ import {
   TouchableOpacity,
   InteractionManager,
   Alert,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { theme } from '@/types/theme';
-import { useStore } from './useStore';
-import { createListActions } from './actions';
-import { HeaderPage } from '@/components/atoms';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { theme } from "@/types/theme";
+import { useStore } from "./useStore";
+import { createListActions } from "./actions";
+import { HeaderPage } from "@/components/atoms";
 import {
   ListNameInput,
   AddModeInfo,
@@ -23,17 +23,21 @@ import {
   BottomActionButton,
   AutoCropToggle,
   ProcessingOverlay,
-} from './components';
-import { ListImageTemplateSelect } from './components/ListImageTemplateSelect';
-import { PictureTempleAngles } from './components/PictureTempleAngles';
+} from "./components";
+import { ListImageTemplateSelect } from "./components/ListImageTemplateSelect";
+import { PictureTempleAngles } from "./components/PictureTempleAngles";
 
 interface CreateListScreenProps {
   projectId: string;
-  mode?: 'create' | 'add';
+  mode?: "create" | "add";
   listId?: string;
 }
 
-export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, mode = 'create', listId }) => {
+export const CreateListScreen: React.FC<CreateListScreenProps> = ({
+  projectId,
+  mode = "create",
+  listId,
+}) => {
   const {
     listName,
     listImageTemplate,
@@ -53,7 +57,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
   } = useStore();
 
   React.useEffect(() => {
-    if (mode === 'add' && listId) {
+    if (mode === "add" && listId) {
       // Load existing list details
       createListActions.loadExistingList(listId);
     }
@@ -65,8 +69,8 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
 
   // Handle press for gallery
   const handleAddImages = (angle?: string) => {
-    if (mode === 'create' && !listName.trim()) {
-      createListActions.setError('Veuillez entrer un nom pour la liste');
+    if (mode === "create" && !listName.trim()) {
+      createListActions.setError("Veuillez entrer un nom pour la liste");
       return;
     }
     handleSelectGallery(angle);
@@ -74,8 +78,8 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
 
   // Handle long press for camera
   const handleAddImagesLongPress = (angle?: string) => {
-    if (mode === 'create' && !listName.trim()) {
-      createListActions.setError('Veuillez entrer un nom pour la liste');
+    if (mode === "create" && !listName.trim()) {
+      createListActions.setError("Veuillez entrer un nom pour la liste");
       return;
     }
     handleSelectCamera(angle);
@@ -87,32 +91,31 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
   };
 
   const handleSelectCamera = async (angle?: string) => {
-    console.log('handleSelectCamera called with angle:', angle);
+    console.log("handleSelectCamera called with angle:", angle);
     try {
-      await createListActions.selectImages({ angle, source: 'camera' });
+      await createListActions.selectImages({ angle, source: "camera" });
     } catch (error) {
-      console.error('Error in handleSelectCamera:', error);
+      console.error("Error in handleSelectCamera:", error);
     }
   };
 
   const handleSelectGallery = async (angle?: string) => {
-    console.log('handleSelectGallery called with angle:', angle);
+    console.log("handleSelectGallery called with angle:", angle);
     try {
-      await createListActions.selectImages({ angle, source: 'gallery' });
+      await createListActions.selectImages({ angle, source: "gallery" });
     } catch (error) {
-      console.error('Error in handleSelectGallery:', error);
+      console.error("Error in handleSelectGallery:", error);
     }
   };
 
   const handleAction = () => {
-    if (mode === 'add' && listId) {
+    if (mode === "add" && listId) {
       if (listImageTemplate) {
         createListActions.addImagesToListByAngle(listId, projectId);
       } else {
         createListActions.addImagesToList(listId, projectId);
       }
     } else {
-
       if (listImageTemplate) {
         createListActions.createListWithPictureTempleAngles(projectId);
       } else {
@@ -122,22 +125,26 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
       <HeaderPage
-        title={mode === 'add' ? 'Ajouter des images' : 'Créer une liste'}
-        subtitle={mode === 'add' ? 'Ajoutez des images à votre liste' : 'Créez une nouvelle liste d\'images'}
+        title={mode === "add" ? "Ajouter des images" : "Créer une liste"}
+        subtitle={
+          mode === "add"
+            ? "Ajoutez des images à votre liste"
+            : "Créez une nouvelle liste d'images"
+        }
       />
 
       <KeyboardAvoidingView
         style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {mode === 'create' && (
+          {mode === "create" && (
             <View>
               <ListNameInput
                 listName={listName}
@@ -159,37 +166,41 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
             </View>
           )}
 
-          {mode === 'add' && <AddModeInfo listName={listName} listImageTemplate={listImageTemplate} />}
+          {mode === "add" && (
+            <AddModeInfo
+              listName={listName}
+              listImageTemplate={listImageTemplate}
+            />
+          )}
 
-          <AutoCropToggle
-            value={autoCrop}
-            onChange={setAutoCrop}
-          />
-          {listImageTemplate ?
+          <AutoCropToggle value={autoCrop} onChange={setAutoCrop} />
+          {listImageTemplate ? (
             <PictureTempleAngles
               onAddImagesByAngle={handleAddImagesByAngle}
-              onAddImagesByAngleLongPress={(angle) => handleAddImagesLongPress(angle)}
-              onRemoveImageByAngle={createListActions.removeImageByAngle} /> :
-            selectedImages.length > 0 || existingImagesSelected.length > 0 ? (
-              <ImageGrid
-                existingImagesSelected={existingImagesSelected}
-                selectedImages={selectedImages}
-                isCreating={isCreating}
-                isSelectingImages={isSelectingImages}
-                onRemoveImage={createListActions.removeImage}
-                onAddImages={() => handleAddImages()}
-                onLongPress={() => handleAddImagesLongPress()}
-              />
-            ) : (
-              <EmptyImageCard
-                isCreating={isCreating}
-                isSelectingImages={isSelectingImages}
-                onPress={() => handleAddImages()}
-                onLongPress={() => handleAddImagesLongPress()}
-                hasTemplate={false}
-              />
-            )}
-
+              onAddImagesByAngleLongPress={(angle) =>
+                handleAddImagesLongPress(angle)
+              }
+              onRemoveImageByAngle={createListActions.removeImageByAngle}
+            />
+          ) : selectedImages.length > 0 || existingImagesSelected.length > 0 ? (
+            <ImageGrid
+              existingImagesSelected={existingImagesSelected}
+              selectedImages={selectedImages}
+              isCreating={isCreating}
+              isSelectingImages={isSelectingImages}
+              onRemoveImage={createListActions.removeImage}
+              onAddImages={() => handleAddImages()}
+              onLongPress={() => handleAddImagesLongPress()}
+            />
+          ) : (
+            <EmptyImageCard
+              isCreating={isCreating}
+              isSelectingImages={isSelectingImages}
+              onPress={() => handleAddImages()}
+              onLongPress={() => handleAddImagesLongPress()}
+              hasTemplate={false}
+            />
+          )}
         </ScrollView>
 
         <BottomActionButton
@@ -209,7 +220,11 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
         progress={processingProgress}
         currentImage={currentProcessingImage}
         totalImages={totalProcessingImages}
-        message={totalProcessingImages > 1 ? "Traitement des images..." : "Traitement de l'image..."}
+        message={
+          totalProcessingImages > 1
+            ? "Traitement des images..."
+            : "Traitement de l'image..."
+        }
       />
     </SafeAreaView>
   );
