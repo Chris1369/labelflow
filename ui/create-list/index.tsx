@@ -34,21 +34,22 @@ interface CreateListScreenProps {
 }
 
 export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, mode = 'create', listId }) => {
-  const { 
-    listName, 
-    listImageTemplate, 
-    isCreating, 
-    error, 
-    selectedImages, 
-    selectedImagesByAngle, 
-    autoCrop, 
-    setAutoCrop, 
+  const {
+    listName,
+    listImageTemplate,
+    isCreating,
+    error,
+    selectedImages,
+    existingImagesSelected,
+    selectedImagesByAngle,
+    autoCrop,
+    setAutoCrop,
     isSelectingImages,
     processingProgress,
     currentProcessingImage,
     totalProcessingImages,
     uploadProgress,
-    reset 
+    reset,
   } = useStore();
 
   React.useEffect(() => {
@@ -56,11 +57,11 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
       // Load existing list details
       createListActions.loadExistingList(listId);
     }
-
-    if (mode === 'create') {
-      reset();
-    }
   }, [mode, listId]);
+
+  React.useEffect(() => {
+    reset();
+  }, []);
 
   // Handle press for gallery
   const handleAddImages = (angle?: string) => {
@@ -151,7 +152,7 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
                 isCreating={isCreating}
                 onChangeText={createListActions.setListImageTemplate}
                 hasImages={
-                  selectedImages.length > 0 || 
+                  selectedImages.length > 0 ||
                   Object.values(selectedImagesByAngle).flat().length > 0
                 }
               />
@@ -169,8 +170,9 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
               onAddImagesByAngle={handleAddImagesByAngle}
               onAddImagesByAngleLongPress={(angle) => handleAddImagesLongPress(angle)}
               onRemoveImageByAngle={createListActions.removeImageByAngle} /> :
-            selectedImages.length > 0 ? (
+            selectedImages.length > 0 || existingImagesSelected.length > 0 ? (
               <ImageGrid
+                existingImagesSelected={existingImagesSelected}
                 selectedImages={selectedImages}
                 isCreating={isCreating}
                 isSelectingImages={isSelectingImages}
@@ -194,14 +196,14 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({ projectId, m
           mode={mode}
           isCreating={isCreating}
           hasImages={
-            listImageTemplate 
+            listImageTemplate
               ? Object.values(selectedImagesByAngle).flat().length > 0
-              : selectedImages.length > 0
+              : selectedImages.length > 0 || existingImagesSelected.length > 0
           }
           onPress={handleAction}
         />
       </KeyboardAvoidingView>
-      
+
       <ProcessingOverlay
         visible={isSelectingImages && totalProcessingImages > 0}
         progress={processingProgress}

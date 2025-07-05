@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Animated } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ActivityIndicator, Animated, ImageStyle, TextStyle } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/types/theme';
 
 interface ImageGridProps {
   selectedImages: string[];
+  existingImagesSelected: string[];
   isCreating: boolean;
   isSelectingImages: boolean;
   onRemoveImage: (index: number) => void;
@@ -14,6 +15,7 @@ interface ImageGridProps {
 
 export const ImageGrid: React.FC<ImageGridProps> = ({
   selectedImages,
+  existingImagesSelected,
   isCreating,
   isSelectingImages,
   onRemoveImage,
@@ -21,6 +23,11 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
   onLongPress,
 }) => {
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
+
+  const combinedImages = [
+    ...existingImagesSelected.map(uri => ({ uri, isValidated: true })),
+    ...selectedImages.map(uri => ({ uri, isValidated: false }))
+  ];
 
   React.useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -37,44 +44,61 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
           Images sélectionnées
         </Text>
         <View style={styles.counter}>
-          <Text style={styles.counterText}>{selectedImages.length}</Text>
+          <Text style={styles.counterText}>{combinedImages.length}</Text>
         </View>
       </View>
-      
+
       <View style={styles.imageGrid}>
-        {selectedImages.map((uri, index) => (
-          <Animated.View 
-            key={index} 
-            style={[
-              styles.imageCard,
-              {
-                opacity: fadeAnim,
-                transform: [{
-                  scale: fadeAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.8, 1],
-                  }),
-                }],
-              },
-            ]}
-          >
-            <Image source={{ uri }} style={styles.imagePreview} />
-            <View style={styles.imageOverlay}>
-              <TouchableOpacity
-                style={styles.removeButton}
-                onPress={() => onRemoveImage(index)}
-                disabled={isCreating}
-              >
-                <Ionicons name="close-circle" size={24} color="white" />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.imageNumber}>
-              <Text style={styles.imageNumberText}>{index + 1}</Text>
-            </View>
-          </Animated.View>
-        ))}
-        
-        <TouchableOpacity 
+        {combinedImages.map(({ uri, isValidated }, index) => {
+
+          if (isValidated) {
+            return (
+              <View style={styles.imageCard}>
+                <Image source={{ uri }} style={styles.imagePreview as ImageStyle} />
+                <View style={styles.validatedOverlay}>
+                  <Ionicons name='lock-closed' size={16} color='white' />
+                  <View style={styles.imageNumber}>
+                    <Text style={styles.imageNumberText}>{index + 1}</Text>
+                  </View>
+                </View>
+              </View>
+            )
+          }
+
+          return (
+            <Animated.View
+              key={index}
+              style={[
+                styles.imageCard,
+                {
+                  opacity: fadeAnim,
+                  transform: [{
+                    scale: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.8, 1],
+                    }),
+                  }],
+                },
+              ]}
+            >
+              <Image source={{ uri }} style={styles.imagePreview} />
+              <View style={styles.imageOverlay}>
+                <TouchableOpacity
+                  style={styles.removeButton}
+                  onPress={() => onRemoveImage(index)}
+                  disabled={isCreating}
+                >
+                  <Ionicons name="close-circle" size={24} color="white" />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.imageNumber}>
+                <Text style={styles.imageNumberText}>{index + 1}</Text>
+              </View>
+            </Animated.View>
+          )
+        })}
+
+        <TouchableOpacity
           style={[
             styles.addImageCard,
             (isCreating || isSelectingImages) && styles.addImageCardDisabled
@@ -88,7 +112,7 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
           {isSelectingImages ? (
             <View style={styles.loadingContainer}>
               <ActivityIndicator size="small" color={theme.colors.primary} />
-              <Text style={styles.loadingText}>Chargement...</Text>
+              <Text style={styles.loadingText as TextStyle}>Chargement...</Text>
             </View>
           ) : (
             <View style={styles.addContent}>
@@ -96,7 +120,7 @@ export const ImageGrid: React.FC<ImageGridProps> = ({
                 <Ionicons name="add-circle-outline" size={32} color={theme.colors.primary} />
               </View>
               <Text style={styles.addImageText}>Ajouter</Text>
-              <Text style={styles.addImageHint}>Appuyer</Text>
+              <Text style={styles.addImageHint as TextStyle}>Appuyer</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -230,5 +254,15 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     marginTop: theme.spacing.xs,
     fontSize: 11,
+  },
+  validatedOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.3)",
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

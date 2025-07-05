@@ -34,9 +34,15 @@ export const createListActions = {
       if (response) {
         useStore.getState().setListName(response.name || 'Liste sans nom');
 
-        //init existing validated images by angle
+        if(response.pictureTemplateId){
+          //init existing validated images by angle
         const images: Record<string, string[]> = {};
         response.validatedItems?.forEach((item: any) => {
+          if (item.angle) {
+            images[item.angle] = [...(images[item.angle] || []), item.fileUrl];
+          }
+        });
+        response.items?.forEach((item: any) => {
           if (item.angle) {
             images[item.angle] = [...(images[item.angle] || []), item.fileUrl];
           }
@@ -44,6 +50,10 @@ export const createListActions = {
 
         useStore.getState().setExistingValidatedImagesByAngle(images);
         useStore.getState().setListImageTemplate(response.pictureTemplateId);
+        }else{
+          useStore.getState().setExistingImagesSelected(response.items?.map((item: any) => item.fileUrl) || []);
+        }
+       
       }
     } catch (error) {
       console.error('Error loading list:', error);
