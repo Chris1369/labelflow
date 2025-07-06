@@ -18,7 +18,9 @@ interface ProjectMenuGridProps {
   menuItems: MenuItem[];
 }
 
-export const ProjectMenuGrid: React.FC<ProjectMenuGridProps> = ({ menuItems }) => {
+export const ProjectMenuGrid: React.FC<ProjectMenuGridProps> = ({
+  menuItems,
+}) => {
   return (
     <View style={styles.menuGrid}>
       {menuItems.map((item) => (
@@ -33,7 +35,10 @@ export const ProjectMenuGrid: React.FC<ProjectMenuGridProps> = ({ menuItems }) =
               <View
                 style={[
                   styles.iconContainer,
-                  { backgroundColor: (item.color || theme.colors.primary) + "15" },
+                  {
+                    backgroundColor:
+                      (item.color || theme.colors.primary) + "15",
+                  },
                 ]}
               >
                 <Ionicons
@@ -43,7 +48,12 @@ export const ProjectMenuGrid: React.FC<ProjectMenuGridProps> = ({ menuItems }) =
                 />
               </View>
               {item.count !== undefined && item.count > 0 && (
-                <View style={[styles.badge, { backgroundColor: item.color || theme.colors.primary }]}>
+                <View
+                  style={[
+                    styles.badge,
+                    { backgroundColor: item.color || theme.colors.primary },
+                  ]}
+                >
                   <Text style={styles.badgeText}>
                     {item.count > 99 ? "99+" : item.count}
                   </Text>
@@ -87,8 +97,8 @@ const styles = StyleSheet.create({
     padding: theme.spacing.lg,
     borderWidth: 1,
     borderColor: theme.colors.border,
-    minHeight: 140,
-    shadowColor: '#000',
+    minHeight: 180,
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 1,

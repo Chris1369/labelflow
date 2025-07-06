@@ -20,7 +20,7 @@ export const buildMenuItems: (
 ) => ProjectMenuItem[] = (projectId, project) => [
   {
     id: "add-items",
-    title: "Ajouter des items",
+    title: "Ajouter",
     subtitle: "Capturer de nouvelles images",
     icon: "camera-outline",
     onPress: () => projectActions.handleAddItems(projectId),
@@ -29,7 +29,7 @@ export const buildMenuItems: (
   },
   {
     id: "view-items",
-    title: "Voir les items",
+    title: "Voir",
     subtitle: "Parcourir vos images",
     icon: "images-outline",
     onPress: () => projectActions.handleViewItems(projectId),
@@ -56,7 +56,7 @@ export const buildMenuItems: (
   {
     id: "reset",
     title: "Entraîner",
-    subtitle: "Lancer l'apprentissage IA",
+    subtitle: "Lancer l'entraînement",
     icon: "refresh-outline",
     onPress: projectActions.startTraining,
     color: theme.colors.warning,
@@ -65,7 +65,7 @@ export const buildMenuItems: (
   {
     id: "delete",
     title: "Supprimer",
-    subtitle: "Effacer ce projet",
+    subtitle: "Effacer ce projet et ses items",
     icon: "trash-outline",
     onPress: projectActions.handleDelete,
     color: theme.colors.error,
