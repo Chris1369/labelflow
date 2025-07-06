@@ -23,6 +23,7 @@ import {
   BottomActionButton,
   AutoCropToggle,
   ProcessingOverlay,
+  PredictionLabelsSelect,
 } from "./components";
 import { ListImageTemplateSelect } from "./components/ListImageTemplateSelect";
 import { PictureTempleAngles } from "./components/PictureTempleAngles";
@@ -53,8 +54,17 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({
     currentProcessingImage,
     totalProcessingImages,
     uploadProgress,
+    selectedPredictionLabels,
+    setSelectedPredictionLabels,
     reset,
   } = useStore();
+
+  React.useEffect(() => {
+    // Reset only in create mode
+    if (mode === "create") {
+      reset();
+    }
+  }, [mode]);
 
   React.useEffect(() => {
     if (mode === "add" && listId) {
@@ -62,10 +72,6 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({
       createListActions.loadExistingList(listId);
     }
   }, [mode, listId]);
-
-  React.useEffect(() => {
-    reset();
-  }, []);
 
   // Handle press for gallery
   const handleAddImages = (angle?: string) => {
@@ -163,14 +169,34 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({
                   Object.values(selectedImagesByAngle).flat().length > 0
                 }
               />
+
+              <PredictionLabelsSelect
+                projectId={projectId}
+                selectedLabels={selectedPredictionLabels}
+                onLabelsChange={setSelectedPredictionLabels}
+                isCreating={isCreating}
+                mode={mode}
+                listId={listId}
+              />
             </View>
           )}
 
           {mode === "add" && (
-            <AddModeInfo
-              listName={listName}
-              listImageTemplate={listImageTemplate}
-            />
+            <>
+              <AddModeInfo
+                listName={listName}
+                listImageTemplate={listImageTemplate}
+              />
+              
+              <PredictionLabelsSelect
+                projectId={projectId}
+                selectedLabels={selectedPredictionLabels}
+                onLabelsChange={setSelectedPredictionLabels}
+                isCreating={isCreating}
+                mode={mode}
+                listId={listId}
+              />
+            </>
           )}
 
           <AutoCropToggle value={autoCrop} onChange={setAutoCrop} />

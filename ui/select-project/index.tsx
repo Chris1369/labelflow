@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
@@ -17,12 +17,20 @@ import {
 } from "./components";
 
 export const SelectProjectScreen: React.FC = () => {
-  const { filterQuery, searchQuery } =
-    useSelectProjectStore();
+  const { filterQuery, searchQuery } = useSelectProjectStore();
   const createProjectBottomSheetRef = useRef<CreateProjectBottomSheetRef>(null);
   const includePublic = useSettingsStore.getState().includePublicProjects;
 
-  const { projects, isLoading, error: projectsError, refetch } = useMyProjects({ includePublic, withTeamsProjects: true, searchQuery: filterQuery });
+  const {
+    projects,
+    isLoading,
+    error: projectsError,
+    refetch,
+  } = useMyProjects({
+    includePublic,
+    withTeamsProjects: true,
+    searchQuery: filterQuery,
+  });
   const error = projectsError?.message;
 
   const handleCreateProject = () => {
@@ -30,36 +38,40 @@ export const SelectProjectScreen: React.FC = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <HeaderPage 
-        title="Sélectionner un projet" 
-        subtitle="Choisissez ou créez un projet"
+    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+      <HeaderPage
+        title='Projets'
         rightAction={{
-          icon: 'add-circle-outline',
-          onPress: handleCreateProject
+          icon: "add-circle-outline",
+          onPress: handleCreateProject,
         }}
       />
-      
-      <HeaderSection
-        searchQuery={searchQuery}
-        onSearchChange={selectProjectActions.handleSearchChange}
-      />
 
-      {isLoading ? (
-        <LoadingState text="Chargement des projets..." />
-      ) : error ? (
-        <ErrorState
-          error={error}
-          onRetry={() => refetch()}
-        />
-      ) : (
-        <ProjectsList
-          projects={projects || []}
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <HeaderSection
           searchQuery={searchQuery}
-          onProjectSelect={selectProjectActions.handleProjectSelect}
-          onCreateProject={handleCreateProject}
+          onSearchChange={selectProjectActions.handleSearchChange}
         />
-      )}
+
+        {isLoading ? (
+          <LoadingState text='Chargement des projets...' />
+        ) : error ? (
+          <ErrorState error={error} onRetry={() => refetch()} />
+        ) : (
+          <View style={styles.projectsContainer}>
+            <ProjectsList
+              projects={projects || []}
+              searchQuery={searchQuery}
+              onProjectSelect={selectProjectActions.handleProjectSelect}
+              onCreateProject={handleCreateProject}
+            />
+          </View>
+        )}
+      </ScrollView>
 
       <CreateProjectBottomSheet ref={createProjectBottomSheetRef} />
     </SafeAreaView>
@@ -70,5 +82,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: theme.spacing.xxl,
+  },
+  projectsContainer: {
+    flex: 1,
   },
 });

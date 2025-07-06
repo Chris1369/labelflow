@@ -13,6 +13,7 @@ interface CreateListState {
   currentProcessingImage: number;
   totalProcessingImages: number;
   uploadProgress: number;
+  selectedPredictionLabels: string[];
 
   selectedImagesByAngle: {
     [key: string]: string[];
@@ -38,6 +39,7 @@ interface CreateListActions {
   ) => void;
   setUploadProgress: (progress: number) => void;
   reset: () => void;
+  setSelectedPredictionLabels: (labels: string[]) => void;
 
   setSelectedImagesByAngle: (angle: string, images: string[]) => void;
   addImagesByAngle: (angle: string, images: string[]) => void;
@@ -61,6 +63,7 @@ export const useStore = create<CreateListState & CreateListActions>(
     currentProcessingImage: 0,
     totalProcessingImages: 0,
     uploadProgress: 0,
+    selectedPredictionLabels: [],
 
     // selected images by angle
     selectedImagesByAngle: {},
@@ -107,6 +110,8 @@ export const useStore = create<CreateListState & CreateListActions>(
       set({ existingValidatedImagesByAngle: images });
     },
 
+    setSelectedPredictionLabels: (labels) => set({ selectedPredictionLabels: labels }),
+
     reset: () =>
       set({
         listName: "",
@@ -121,6 +126,7 @@ export const useStore = create<CreateListState & CreateListActions>(
         currentProcessingImage: 0,
         totalProcessingImages: 0,
         uploadProgress: 0,
+        selectedPredictionLabels: [],
         selectedImagesByAngle: {},
         existingValidatedImagesByAngle: {},
       }),

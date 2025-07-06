@@ -91,28 +91,56 @@ export const HeaderPage: React.FC<HeaderPageProps> = ({
         </View>
 
         {rightAction && (
-          <TouchableOpacity
-            style={[
-              styles.rightButton,
-              (rightAction.icon === 'add-circle-outline' || rightAction.icon === 'eye-outline') && styles.actionButton
-            ]}
-            onPress={rightAction.onPress}
-            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-          >
-            {rightAction.icon ? (
-              <Ionicons
-                name={
-                  rightAction.icon === 'add-circle-outline' ? 'add' : 
-                  rightAction.icon === 'eye-outline' ? 'eye' : 
-                  rightAction.icon
-                }
-                size={(rightAction.icon === 'add-circle-outline' || rightAction.icon === 'eye-outline') ? 20 : 24}
-                color={(rightAction.icon === 'add-circle-outline' || rightAction.icon === 'eye-outline') ? theme.colors.secondary : theme.colors.primary}
-              />
-            ) : rightAction.text ? (
-              <Text style={styles.rightButtonText}>{rightAction.text}</Text>
-            ) : null}
-          </TouchableOpacity>
+          <View style={styles.rightActionContainer}>
+            <TouchableOpacity
+              style={[
+                styles.rightButton,
+                (rightAction.icon === "add-circle-outline" ||
+                  rightAction.icon === "eye-outline") &&
+                  styles.actionButton,
+              ]}
+              onPress={rightAction.onPress}
+              hitSlop={{
+                top: 10,
+                bottom: 10,
+                left: 10,
+                right: 10,
+              }}
+            >
+              {rightAction.icon ? (
+                <Ionicons
+                  name={
+                    rightAction.icon === "add-circle-outline"
+                      ? "add"
+                      : rightAction.icon === "eye-outline"
+                      ? "eye"
+                      : rightAction.icon
+                  }
+                  size={
+                    rightAction.icon === "add-circle-outline" ||
+                    rightAction.icon === "eye-outline"
+                      ? 20
+                      : 24
+                  }
+                  color={
+                    rightAction.icon === "add-circle-outline" ||
+                    rightAction.icon === "eye-outline"
+                      ? theme.colors.secondary
+                      : theme.colors.primary
+                  }
+                />
+              ) : rightAction.text ? (
+                <Text style={styles.rightButtonText}>{rightAction.text}</Text>
+              ) : null}
+            </TouchableOpacity>
+            {rightAction.badge !== undefined && rightAction.badge > 0 && (
+              <View style={styles.badge}>
+                <Text style={styles.badgeText}>
+                  {rightAction.badge > 99 ? "99+" : rightAction.badge}
+                </Text>
+              </View>
+            )}
+          </View>
         )}
 
         {!rightAction && showBack && <View style={styles.placeholder} />}
@@ -175,6 +203,30 @@ const styles = StyleSheet.create({
     width: 28,
     marginLeft: theme.spacing.md,
   },
+  rightActionContainer: {
+    position: "relative",
+    marginLeft: theme.spacing.md,
+  },
+  badge: {
+    position: "absolute",
+    top: -8,
+    right: -8,
+    backgroundColor: theme.colors.primary,
+    borderRadius: 10,
+    minWidth: 20,
+    minHeight: 20,
+    paddingHorizontal: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: theme.colors.background,
+  },
+  badgeText: {
+    ...theme.fonts.caption,
+    color: theme.colors.background,
+    fontSize: 10,
+    fontWeight: "600",
+  } as TextStyle,
 
   // Centered header styles
   centeredHeader: {

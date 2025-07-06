@@ -6,10 +6,12 @@ import { theme } from "@/types/theme";
 export interface MenuItem {
   id: string;
   title: string;
+  subtitle?: string;
   icon: keyof typeof Ionicons.glyphMap;
   onPress: () => void;
   color?: string;
   variant?: "default" | "warning" | "danger";
+  count?: number;
 }
 
 interface ProjectMenuGridProps {
@@ -24,31 +26,45 @@ export const ProjectMenuGrid: React.FC<ProjectMenuGridProps> = ({ menuItems }) =
           key={item.id}
           style={styles.menuItem}
           onPress={item.onPress}
-          activeOpacity={0.7}
+          activeOpacity={0.8}
         >
-          <View
-            style={[
-              styles.iconContainer,
-              item.color && { backgroundColor: item.color + "20" },
-              item.variant === "warning" && styles.warningContainer,
-              item.variant === "danger" && styles.dangerContainer,
-            ]}
-          >
-            <Ionicons
-              name={item.icon}
-              size={48}
-              color={item.color || theme.colors.primary}
-            />
+          <View style={styles.menuCard}>
+            <View style={styles.menuHeader}>
+              <View
+                style={[
+                  styles.iconContainer,
+                  { backgroundColor: (item.color || theme.colors.primary) + "15" },
+                ]}
+              >
+                <Ionicons
+                  name={item.icon}
+                  size={28}
+                  color={item.color || theme.colors.primary}
+                />
+              </View>
+              {item.count !== undefined && item.count > 0 && (
+                <View style={[styles.badge, { backgroundColor: item.color || theme.colors.primary }]}>
+                  <Text style={styles.badgeText}>
+                    {item.count > 99 ? "99+" : item.count}
+                  </Text>
+                </View>
+              )}
+            </View>
+            <View style={styles.menuContent}>
+              <Text
+                style={[
+                  styles.menuItemTitle,
+                  item.variant === "warning" && styles.warningText,
+                  item.variant === "danger" && styles.dangerText,
+                ]}
+              >
+                {item.title}
+              </Text>
+              {item.subtitle && (
+                <Text style={styles.menuItemSubtitle}>{item.subtitle}</Text>
+              )}
+            </View>
           </View>
-          <Text
-            style={[
-              styles.menuItemText,
-              item.variant === "warning" && styles.warningText,
-              item.variant === "danger" && styles.dangerText,
-            ]}
-          >
-            {item.title}
-          </Text>
         </TouchableOpacity>
       ))}
     </View>
@@ -60,35 +76,68 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    paddingHorizontal: theme.spacing.md,
   },
   menuItem: {
-    width: "47%",
-    alignItems: "center",
-    marginBottom: theme.spacing.xl,
+    width: "48%",
+    marginBottom: theme.spacing.lg,
   },
-  iconContainer: {
-    width: 100,
-    height: 100,
-    borderRadius: theme.borderRadius.lg,
+  menuCard: {
     backgroundColor: theme.colors.backgroundSecondary,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: theme.spacing.md,
+    borderRadius: theme.borderRadius.lg,
+    padding: theme.spacing.lg,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    minHeight: 140,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
-  warningContainer: {
-    borderColor: theme.colors.warning,
+  menuHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: theme.spacing.md,
   },
-  dangerContainer: {
-    borderColor: theme.colors.error,
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: theme.borderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  menuItemText: {
-    fontSize: theme.fontSize.md,
+  badge: {
+    minWidth: 28,
+    height: 28,
+    borderRadius: 14,
+    paddingHorizontal: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    ...theme.fonts.caption,
+    color: theme.colors.background,
+    fontWeight: "600",
+  },
+  menuContent: {
+    flex: 1,
+    justifyContent: "flex-end",
+  },
+  menuItemTitle: {
+    ...theme.fonts.body,
     color: theme.colors.text,
-    fontWeight: "500",
-    textAlign: "center",
+    fontWeight: "600",
+    marginBottom: theme.spacing.xs,
+    lineHeight: 20,
+  },
+  menuItemSubtitle: {
+    ...theme.fonts.caption,
+    color: theme.colors.textSecondary,
+    lineHeight: 16,
   },
   warningText: {
     color: theme.colors.warning,

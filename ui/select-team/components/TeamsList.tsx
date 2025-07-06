@@ -1,5 +1,5 @@
 import React from "react";
-import { View, FlatList, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { theme } from "@/types/theme";
 import { Team } from "@/types/team";
 import { TeamCard } from "./TeamCard";
@@ -18,27 +18,25 @@ export const TeamsList: React.FC<TeamsListProps> = ({
   onTeamSelect,
   onCreateTeam,
 }) => {
+  if (teams.length === 0) {
+    return <TeamEmptyState searchQuery={searchQuery} onCreateTeam={onCreateTeam} />;
+  }
+
   return (
-    <FlatList
-      data={teams}
-      keyExtractor={(item) => item._id || item.id}
-      renderItem={({ item }) => (
-        <TeamCard team={item} onPress={onTeamSelect} />
-      )}
-      contentContainerStyle={styles.listContent}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
-      ListEmptyComponent={
-        <TeamEmptyState searchQuery={searchQuery} onCreateTeam={onCreateTeam} />
-      }
-      showsVerticalScrollIndicator={false}
-    />
+    <View style={styles.listContent}>
+      {teams.map((team, index) => (
+        <View key={team._id || team.id}>
+          <TeamCard team={team} onPress={onTeamSelect} />
+          {index < teams.length - 1 && <View style={styles.separator} />}
+        </View>
+      ))}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
   },
   separator: {
     height: theme.spacing.md,

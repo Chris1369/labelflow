@@ -28,10 +28,14 @@ export const HeaderSection: React.FC<HeaderSectionProps> = ({
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: theme.spacing.lg,
-    paddingTop: theme.spacing.md,
-    paddingBottom: theme.spacing.lg,
+    paddingTop: theme.spacing.lg,
+    paddingBottom: theme.spacing.md,
   },
   searchInput: {
     marginBottom: 0,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    borderRadius: theme.borderRadius.md,
   },
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { StyleSheet } from "react-native";
+import { StyleSheet, View, Text, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
@@ -38,33 +38,40 @@ export const SelectTeamScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
       <HeaderPage 
-        title="Sélectionner une équipe" 
-        subtitle="Choisissez ou créez une équipe"
+        title="Équipes" 
         rightAction={{
           icon: 'add-circle-outline',
           onPress: handleCreateTeam
         }}
       />
       
-      <TeamHeader
-        searchQuery={searchQuery}
-        onSearchChange={selectTeamActions.searchTeams}
-      />
-
-      {isLoading ? (
-        <TeamLoadingState text="Chargement des équipes..." />
-      ) : isSearching ? (
-        <TeamLoadingState text="Recherche en cours..." />
-      ) : error ? (
-        <TeamErrorState error={error} onRetry={() => refetch()} />
-      ) : (
-        <TeamsList
-          teams={filteredTeams}
+      <ScrollView 
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        <TeamHeader
           searchQuery={searchQuery}
-          onTeamSelect={selectTeamActions.selectTeam}
-          onCreateTeam={handleCreateTeam}
+          onSearchChange={selectTeamActions.searchTeams}
         />
-      )}
+
+        {isLoading ? (
+          <TeamLoadingState text="Chargement des équipes..." />
+        ) : isSearching ? (
+          <TeamLoadingState text="Recherche en cours..." />
+        ) : error ? (
+          <TeamErrorState error={error} onRetry={() => refetch()} />
+        ) : (
+          <View style={styles.teamsContainer}>
+            <TeamsList
+              teams={filteredTeams}
+              searchQuery={searchQuery}
+              onTeamSelect={selectTeamActions.selectTeam}
+              onCreateTeam={handleCreateTeam}
+            />
+          </View>
+        )}
+      </ScrollView>
       
       <CreateTeamBottomSheet ref={createTeamBottomSheetRef} />
     </SafeAreaView>
@@ -75,5 +82,15 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: theme.spacing.xxl,
+  },
+  teamsContainer: {
+    flex: 1,
   },
 });

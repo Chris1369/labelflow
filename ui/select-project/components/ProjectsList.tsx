@@ -1,5 +1,5 @@
 import React from "react";
-import { View, FlatList, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { theme } from "@/types/theme";
 import { Project } from "@/types/project";
 import { ProjectCard } from "./ProjectCard";
@@ -18,27 +18,25 @@ export const ProjectsList: React.FC<ProjectsListProps> = ({
   onProjectSelect,
   onCreateProject,
 }) => {
+  if (projects.length === 0) {
+    return <EmptyState searchQuery={searchQuery} onCreateProject={onCreateProject} />;
+  }
+
   return (
-    <FlatList
-      data={projects}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
-        <ProjectCard project={item} onPress={onProjectSelect} />
-      )}
-      contentContainerStyle={styles.listContent}
-      ItemSeparatorComponent={() => <View style={styles.separator} />}
-      ListEmptyComponent={
-        <EmptyState searchQuery={searchQuery} onCreateProject={onCreateProject} />
-      }
-      showsVerticalScrollIndicator={false}
-    />
+    <View style={styles.listContent}>
+      {projects.map((project, index) => (
+        <View key={project.id}>
+          <ProjectCard project={project} onPress={onProjectSelect} />
+          {index < projects.length - 1 && <View style={styles.separator} />}
+        </View>
+      ))}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   listContent: {
     paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xxl,
   },
   separator: {
     height: theme.spacing.md,

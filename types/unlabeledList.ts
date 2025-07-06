@@ -11,6 +11,7 @@ export interface UnlabeledList {
   name: string;
   projectId: string;
   items: UnlabeledListItem[];
+  labelsListPredictions?: string[]; // IDs of labels for prediction
   createdAt: string;
   updatedAt: string;
 }
@@ -19,6 +20,7 @@ export interface CreateUnlabeledListRequest {
   name: string;
   projectId: string;
   images: File[];
+  labelsListPredictions?: string[];
 }
 
 export interface AddImagesToListRequest {

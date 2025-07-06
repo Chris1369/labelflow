@@ -1,11 +1,20 @@
-import React, { useCallback, useEffect, useRef } from "react";
-import { StyleSheet, ScrollView, View } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import {
+  StyleSheet,
+  ScrollView,
+  View,
+  Text,
+  ActivityIndicator,
+  Switch,
+  TouchableOpacity,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HeaderPage } from "@/components/atoms";
 import { theme } from "@/types/theme";
 import { projectActions } from "./actions";
 import { useProjectStore } from "./useStore";
 import { useFocusEffect } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import {
   LabelCounterBottomSheet,
   LabelCounterBottomSheetRef,
@@ -16,7 +25,6 @@ import {
   ProjectMenuGrid,
   ProjectLoadingView,
   ProjectErrorView,
-  ProjectBottomSection,
 } from "./components";
 
 interface ProjectScreenProps {
@@ -24,14 +32,20 @@ interface ProjectScreenProps {
 }
 
 export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
-  const { isModalVisible, modalType, error, updateProjectVisibility, setCurrentProject } =
-    useProjectStore();
+  const {
+    isModalVisible,
+    modalType,
+    error,
+    setCurrentProject,
+    updateProjectVisibility,
+  } = useProjectStore();
   const {
     data: currentProject,
     refetch,
     isLoading,
   } = useProjectDetails(projectId);
   const labelCounterBottomSheetRef = useRef<LabelCounterBottomSheetRef>(null);
+  const [isUpdatingVisibility, setIsUpdatingVisibility] = useState(false);
 
   useEffect(() => {
     if (currentProject) {
@@ -51,21 +65,19 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
     }, [projectId])
   );
 
-
-  const menuItems = buildMenuItems(projectId);
+  const menuItems = buildMenuItems(projectId, currentProject);
 
   const handleLabelCounterOpen = () => {
     labelCounterBottomSheetRef.current?.open();
   };
 
-
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-        <HeaderPage 
-          title="Projet" 
-          subtitle="Chargement..."
-        />
+      <SafeAreaView
+        style={styles.container}
+        edges={["left", "right", "bottom"]}
+      >
+        <HeaderPage title='Projet' subtitle='Chargement...' />
         <ProjectLoadingView />
       </SafeAreaView>
     );
@@ -73,31 +85,39 @@ export const ProjectScreen: React.FC<ProjectScreenProps> = ({ projectId }) => {
 
   if (error && !currentProject) {
     return (
-      <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-        <HeaderPage 
-          title="Projet" 
-          subtitle="Erreur"
-        />
+      <SafeAreaView
+        style={styles.container}
+        edges={["left", "right", "bottom"]}
+      >
+        <HeaderPage title='Projet' subtitle='Erreur' />
         <ProjectErrorView error={error} onRetry={() => refetch()} />
       </SafeAreaView>
     );
   }
-  
+
+  console.log(currentProject);
+
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right', 'bottom']}>
-      <HeaderPage 
-        title={currentProject?.name || 'Projet'} 
+    <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
+      <HeaderPage
+        title={currentProject?.name || "Projet"}
         subtitle={currentProject?.description}
         rightAction={{
-          icon: 'eye-outline',
-          onPress: handleLabelCounterOpen
+          icon: "stats-chart-outline",
+          onPress: handleLabelCounterOpen,
+          badge: currentProject?.labelCounter?.length || 0,
         }}
       />
-      
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <ProjectMenuGrid menuItems={menuItems} />
 
-        <ProjectBottomSection />
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+
+        <View style={styles.menuContainer}>
+          <ProjectMenuGrid menuItems={menuItems} />
+        </View>
       </ScrollView>
 
       <LabelCounterBottomSheet
@@ -113,9 +133,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: theme.colors.background,
   },
+  scrollView: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
+    paddingBottom: theme.spacing.xxl,
+    paddingTop: theme.spacing.lg,
+  },
+  menuContainer: {
     paddingHorizontal: theme.spacing.lg,
-    paddingVertical: theme.spacing.md,
   },
 });

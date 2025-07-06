@@ -17,18 +17,31 @@ export const TeamCard: React.FC<TeamCardProps> = ({ team, onPress }) => {
       activeOpacity={0.7}
     >
       <View style={styles.teamHeader}>
+        <View style={styles.iconContainer}>
+          <Ionicons
+            name="people-outline"
+            size={24}
+            color="#4CAF50"
+          />
+        </View>
         <View style={styles.teamInfo}>
           <Text style={styles.teamName}>{team.name}</Text>
         </View>
         <Ionicons
           name="chevron-forward"
-          size={24}
+          size={20}
           color={theme.colors.textSecondary}
         />
       </View>
-      <Text style={styles.teamDescription} numberOfLines={2}>
-        {team.description}
-      </Text>
+      {team.description ? (
+        <Text style={styles.teamDescription} numberOfLines={2}>
+          {team.description}
+        </Text>
+      ) : (
+        <Text style={[styles.teamDescription, { fontStyle: 'italic' }]}>
+          Aucune description
+        </Text>
+      )}
       <View style={styles.teamStats}>
         <View style={styles.stat}>
           <Ionicons
@@ -72,12 +85,29 @@ const styles = StyleSheet.create({
     padding: theme.spacing.lg,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   teamHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: theme.spacing.sm,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: "#4CAF50" + "15",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: theme.spacing.md,
   },
   teamInfo: {
     flex: 1,
@@ -86,12 +116,11 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
   },
   teamName: {
-    fontSize: theme.fontSize.lg,
-    fontWeight: "600",
+    ...theme.fonts.subtitle,
     color: theme.colors.text,
   },
   teamDescription: {
-    fontSize: theme.fontSize.sm,
+    ...theme.fonts.caption,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
   },
@@ -105,7 +134,7 @@ const styles = StyleSheet.create({
     gap: theme.spacing.xs,
   },
   statText: {
-    fontSize: theme.fontSize.xs,
+    ...theme.fonts.label,
     color: theme.colors.textSecondary,
   },
 });

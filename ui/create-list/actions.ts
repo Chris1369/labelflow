@@ -33,6 +33,11 @@ export const createListActions = {
 
       if (response) {
         useStore.getState().setListName(response.name || 'Liste sans nom');
+        
+        // Load prediction labels if they exist
+        if (response.labelsListPredictions) {
+          useStore.getState().setSelectedPredictionLabels(response.labelsListPredictions);
+        }
 
         if(response.pictureTemplateId){
           //init existing validated images by angle
@@ -249,7 +254,7 @@ export const createListActions = {
 
 const createList = createSafeAction(
   async (projectId: string) => {
-    const { listName, selectedImages, setIsCreating, setUploadProgress } = useStore.getState();
+    const { listName, selectedImages, setIsCreating, setUploadProgress, selectedPredictionLabels } = useStore.getState();
 
     if (selectedImages.length === 0) {
       Alert.alert('Erreur', 'Veuillez sélectionner au moins une image');
@@ -263,6 +268,11 @@ const createList = createSafeAction(
       const formData = new FormData();
       formData.append('name', listName.trim());
       formData.append('projectId', projectId);
+      
+      // Add prediction labels if any selected
+      if (selectedPredictionLabels.length > 0) {
+        formData.append('labelsListPredictions', JSON.stringify(selectedPredictionLabels));
+      }
 
       // Append all images - l'API attend 'images' et non 'files'
       selectedImages.forEach((imageUri, index) => {
@@ -376,6 +386,7 @@ const createListWithPictureTempleAngles = createSafeAction(
       setIsCreating,
       listImageTemplate,
       setUploadProgress,
+      selectedPredictionLabels,
     } = useStore.getState();
 
     const selectedImageTemplateData = CAPTURE_TEMPLATES.find(
@@ -401,6 +412,11 @@ const createListWithPictureTempleAngles = createSafeAction(
           'totalRequiredValidatedItems',
           selectedImageTemplateData.totalPhotos.toString()
         );
+      }
+      
+      // Add prediction labels if any selected
+      if (selectedPredictionLabels.length > 0) {
+        formData.append('labelsListPredictions', JSON.stringify(selectedPredictionLabels));
       }
 
       Object.entries(selectedImagesByAngle).forEach(([angle, images]) => {

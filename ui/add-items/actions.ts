@@ -10,6 +10,7 @@ import { predictionAPI } from "@/api/prediction.api";
 import { trainingAnnotationAPI } from "@/api/trainingAnnotation.api";
 import { unlabeledListAPI } from "@/api/unlabeledList.api";
 import { useProjectStore } from "@/ui/project/useStore";
+import { labelAPI } from "@/api/label.api";
 
 export const addItemsActions = {
   requestCameraPermission: async () => {
@@ -372,7 +373,7 @@ export const addItemsActions = {
       const response = await unlabeledListAPI.getById(listId);
       // The response is the data directly, not wrapped in { data: ... }
       const list = response;
-      store.setUnlabeledListData(list.items || [], listId);
+      store.setUnlabeledListData(list.items || [], listId, list.labelsListPredictions);
 
       // Load the first image if available
       if (list.items && list.items.length > 0) {
@@ -542,7 +543,9 @@ export const addItemsActions = {
         // Remove the validated item from the local list
         const updatedItems = [...unlabeledListItems];
         updatedItems.splice(currentUnlabeledIndex, 1);
-        store.setUnlabeledListData(updatedItems, listId);
+        // Keep the prediction labels when updating the list
+        const { unlabeledListPredictionLabels } = store;
+        store.setUnlabeledListData(updatedItems, listId, unlabeledListPredictionLabels);
 
         // Check if there are more items
         if (updatedItems.length > 0) {
@@ -708,6 +711,28 @@ export const addItemsActions = {
     store.setIsPredicting(true);
 
     try {
+      // Fetch label names for prediction labels if needed
+      let predictionLabelNames: string[] = [];
+      const { unlabeledListPredictionLabels } = store;
+      
+      if (unlabeledListPredictionLabels && unlabeledListPredictionLabels.length > 0) {
+        try {
+          // Fetch all user labels
+          const allLabels = await labelAPI.getMyLabels(true);
+          
+          // Map label IDs to names
+          predictionLabelNames = unlabeledListPredictionLabels
+            .map(labelId => {
+              const label = allLabels.find(l => (l._id || l.id) === labelId);
+              return label ? label.name : null;
+            })
+            .filter(Boolean) as string[];
+          
+          console.log("Mapped prediction label IDs to names:", predictionLabelNames);
+        } catch (error) {
+          console.error("Failed to fetch label names:", error);
+        }
+      }
       console.log("Starting prediction for image:", imageUri);
 
       // Check if it's a URL (starts with http:// or https://)
@@ -767,6 +792,18 @@ export const addItemsActions = {
             imageSize: response.image_size,
           });
 
+          // Determine the label based on predictionLabelNames
+          let boxLabel = "???";
+          
+          // If we have exactly one prediction label, use it for all boxes
+          if (predictionLabelNames && predictionLabelNames.length === 1) {
+            boxLabel = predictionLabelNames[0];
+          } else if (detection.confidence >= 0.7) {
+            // If multiple or no prediction labels, use the detected label only if confidence is high
+            boxLabel = detection.label;
+          }
+          // Otherwise keep "???" for low confidence or when multiple prediction labels exist
+
           // Create new box with prediction data
           const newBox = {
             id: `pred_${Date.now()}_${index}`,
@@ -775,8 +812,8 @@ export const addItemsActions = {
             width: normalizedWidth,
             height: normalizedHeight,
             rotation: 0,
-            label: detection.confidence < 0.7 ? "???" : detection.label,
-            isComplete: true, // Always mark as complete, even for ??? boxes
+            label: boxLabel,
+            isComplete: true, // Always mark as complete
           };
 
           newBoundingBoxes.push(newBox);

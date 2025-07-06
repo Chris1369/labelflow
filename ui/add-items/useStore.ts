@@ -21,6 +21,7 @@ interface AddItemsState {
   currentUnlabeledIndex: number;
   isForUnlabeled: boolean;
   unlabeledListId: string | null;
+  unlabeledListPredictionLabels: string[];
 
   currentProject: Project | null;
 }
@@ -42,7 +43,7 @@ interface AddItemsActions {
   setBoundingBoxes: (boxes: BoundingBox[]) => void;
   setFlashMode: (mode: FlashMode) => void;
   // UnlabeledList actions
-  setUnlabeledListData: (items: any[], listId: string) => void;
+  setUnlabeledListData: (items: any[], listId: string, predictionLabels?: string[]) => void;
   setIsForUnlabeled: (isFor: boolean) => void;
   nextUnlabeledItem: () => void;
   setCurrentUnlabeledImage: (uri: string) => void;
@@ -80,6 +81,7 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     currentUnlabeledIndex: 0,
     isForUnlabeled: false,
     unlabeledListId: null,
+    unlabeledListPredictionLabels: [],
     currentProject: null,
     setCurrentProject: (project) => set({ currentProject: project }),
     
@@ -175,10 +177,11 @@ export const useAddItemsStore = create<AddItemsState & AddItemsActions>(
     setFlashMode: (mode) => set({ flashMode: mode }),
 
     // UnlabeledList actions
-    setUnlabeledListData: (items, listId) => set({ 
+    setUnlabeledListData: (items, listId, predictionLabels) => set({ 
       unlabeledListItems: items, 
       unlabeledListId: listId,
-      currentUnlabeledIndex: 0 
+      currentUnlabeledIndex: 0,
+      unlabeledListPredictionLabels: predictionLabels || []
     }),
 
     setIsForUnlabeled: (isFor) => set({ isForUnlabeled: isFor }),

@@ -58,6 +58,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
     unlabeledListItems,
     currentUnlabeledIndex,
     isPredicting,
+    unlabeledListPredictionLabels,
   } = useAddItemsStore();
 
   const { data: currentProject } = useProjectDetails(projectId);
@@ -268,6 +269,7 @@ export const AddItemsScreen: React.FC<AddItemsScreenProps> = ({
               : false
           }
           labelCounters={currentProject?.labelCounter || []}
+          suggestedLabelIds={unlabeledListPredictionLabels.length > 1 ? unlabeledListPredictionLabels : []}
         />
         
         <PredictionIndicator isVisible={isPredicting} />

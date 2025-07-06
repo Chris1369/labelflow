@@ -17,6 +17,13 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress }) =>
       activeOpacity={0.7}
     >
       <View style={styles.projectHeader}>
+        <View style={styles.iconContainer}>
+          <Ionicons
+            name="folder-outline"
+            size={24}
+            color={theme.colors.primary}
+          />
+        </View>
         <View style={styles.projectInfo}>
           <Text style={styles.projectName}>{project.name}</Text>
           {project.isPublic && (
@@ -27,13 +34,19 @@ export const ProjectCard: React.FC<ProjectCardProps> = ({ project, onPress }) =>
         </View>
         <Ionicons
           name="chevron-forward"
-          size={24}
+          size={20}
           color={theme.colors.textSecondary}
         />
       </View>
-      <Text style={styles.projectDescription as TextStyle} numberOfLines={2}>
-        {project.description}
-      </Text>
+      {project.description ? (
+        <Text style={styles.projectDescription as TextStyle} numberOfLines={2}>
+          {project.description}
+        </Text>
+      ) : (
+        <Text style={[styles.projectDescription as TextStyle, { fontStyle: 'italic' }]}>
+          Aucune description
+        </Text>
+      )}
       <View style={styles.projectStats}>
         <View style={styles.stat}>
           <Ionicons
@@ -65,12 +78,29 @@ const styles = StyleSheet.create({
     padding: theme.spacing.lg,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   projectHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: theme.spacing.sm,
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.primary + "15",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: theme.spacing.md,
   },
   projectInfo: {
     flex: 1,

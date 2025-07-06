@@ -44,6 +44,7 @@ interface LabelBottomSheetProps {
   onSelectLabel: (label: string) => void;
   hasExistingLabel?: boolean;
   labelCounters?: LabelCounter[];
+  suggestedLabelIds?: string[];
 }
 
 export interface LabelBottomSheetRef {
@@ -54,7 +55,7 @@ export interface LabelBottomSheetRef {
 export const LabelBottomSheet = forwardRef<
   LabelBottomSheetRef,
   LabelBottomSheetProps
->(({ onSelectLabel, hasExistingLabel = false, labelCounters = [] }, ref) => {
+>(({ onSelectLabel, hasExistingLabel = false, labelCounters = [], suggestedLabelIds = [] }, ref) => {
   const [isVisible, setIsVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -180,6 +181,53 @@ export const LabelBottomSheet = forwardRef<
       );
     }
 
+    // If we have suggested labels and no search/category filter, show them first
+    if (!selectedCategory && !searchQuery && suggestedLabelIds.length > 0) {
+      const suggestedLabelObjects: ObjectLabel[] = [];
+      const suggestedNames = new Set<string>();
+      
+      // First, add suggested labels
+      for (const labelId of suggestedLabelIds) {
+        const found = userLabels.find((l) => (l._id || l.id) === labelId);
+        if (found) {
+          suggestedLabelObjects.push({
+            id: found.id || found._id || `suggested-${found.name}`,
+            name: found.name,
+            category: "Suggestions",
+            icon: "sparkles" as any,
+            isDynamic: true,
+            isSuggested: true,
+          });
+          suggestedNames.add(found.name);
+        }
+      }
+      
+      // Then add recent labels that aren't already suggested
+      const recentLabelObjects: ObjectLabel[] = recentLabels
+        .filter((labelName) => !suggestedNames.has(labelName))
+        .map((labelName) => {
+          const found = allLabels.find((l) => l.name === labelName);
+          if (found) return { ...found, isRecent: true };
+          return {
+            id: `recent-${labelName}`,
+            name: labelName,
+            category: "Récents",
+            icon: "time" as any,
+            isDynamic: userLabelNames.has(labelName.toLowerCase()),
+            isRecent: true,
+          };
+        })
+        .filter(Boolean);
+
+      // Remove duplicates from the main list
+      const priorityNames = new Set([...suggestedNames, ...recentLabels]);
+      const otherLabels = allLabels.filter(
+        (label) => !priorityNames.has(label.name)
+      );
+
+      return [...suggestedLabelObjects, ...recentLabelObjects, ...otherLabels];
+    }
+    
     // If no search query and showing all labels, show recent labels first
     if (!selectedCategory && !searchQuery && recentLabels.length > 0) {
       const recentLabelObjects: ObjectLabel[] = recentLabels
@@ -216,6 +264,7 @@ export const LabelBottomSheet = forwardRef<
     recentLabels,
     searchResults,
     isSearching,
+    suggestedLabelIds,
   ]);
 
   useImperativeHandle(ref, () => ({
