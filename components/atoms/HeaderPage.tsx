@@ -21,6 +21,7 @@ interface HeaderPageProps {
     icon?: keyof typeof Ionicons.glyphMap;
     text?: string;
     onPress: () => void;
+    badge?: number;
   };
   style?: ViewStyle;
   titleStyle?: TextStyle;

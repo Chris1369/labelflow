@@ -1,4 +1,3 @@
-export { ProjectHeader } from './ProjectHeader';
 export { ProjectMenuGrid } from './ProjectMenuGrid';
 export { ProjectLoadingView } from './ProjectLoadingView';
 export { ProjectErrorView } from './ProjectErrorView';

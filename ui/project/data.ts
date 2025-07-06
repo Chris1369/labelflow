@@ -51,7 +51,7 @@ export const buildMenuItems: (
     icon: "list-outline",
     onPress: () => projectActions.handleImport(projectId),
     color: "#9C27B0",
-    count: project?.unlabeledList?.length || 0,
+    count: 0, // TODO: Add unlabeled list count when available
   },
   {
     id: "reset",

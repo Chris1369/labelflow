@@ -13,6 +13,7 @@ export interface Project {
   ownerId: string;
   isPublic: boolean;
   labelCounter?: LabelCounter[]; // Array of label counters
+  teamId?: string[]; // Array of team IDs
   createdAt: string;
   updatedAt: string;
   __v?: number; // MongoDB version key

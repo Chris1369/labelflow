@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, TextStyle } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/types/theme";
 
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     ...theme.fonts.caption,
     color: theme.colors.background,
     fontWeight: "600",
-  },
+  } as TextStyle,
   menuContent: {
     flex: 1,
     justifyContent: "flex-end",
@@ -143,16 +143,16 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginBottom: theme.spacing.xs,
     lineHeight: 20,
-  },
+  } as TextStyle,
   menuItemSubtitle: {
     ...theme.fonts.caption,
     color: theme.colors.textSecondary,
     lineHeight: 16,
-  },
+  } as TextStyle,
   warningText: {
     color: theme.colors.warning,
-  },
+  } as TextStyle,
   dangerText: {
     color: theme.colors.error,
-  },
+  } as TextStyle,
 });
