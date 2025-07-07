@@ -153,7 +153,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.xs,
   },
   subtitle: {
-    ...theme.fonts.caption,
+    fontSize: theme.fonts.caption.fontSize,
+    fontWeight: theme.fonts.caption.fontWeight as '400',
+    lineHeight: theme.fonts.caption.lineHeight,
     color: theme.colors.textSecondary,
     textAlign: 'center',
   },
@@ -198,7 +200,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cancelText: {
-    ...theme.fonts.button,
+    fontSize: theme.fonts.button.fontSize,
+    fontWeight: theme.fonts.button.fontWeight as '600',
+    lineHeight: theme.fonts.button.lineHeight,
     color: theme.colors.textSecondary,
   },
   createButton: {

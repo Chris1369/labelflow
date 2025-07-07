@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,13 +6,13 @@ import {
   StyleSheet,
   Alert,
   Switch,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Category } from '@/types/category';
-import { Label } from '@/types/label';
-import { theme } from '@/types/theme';
-import { AddLabelsModal } from './AddLabelsModal';
-import { categoryAPI } from '@/api/category.api';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Category } from "@/types/category";
+import { Label } from "@/types/label";
+import { theme } from "@/types/theme";
+import { AddLabelsModal } from "./AddLabelsModal";
+import { categoryAPI } from "@/api/category.api";
 
 interface CategoryItemProps {
   category: Category;
@@ -37,14 +37,14 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
 
   const handleDelete = () => {
     Alert.alert(
-      'Supprimer la catégorie',
+      "Supprimer la catégorie",
       `Êtes-vous sûr de vouloir supprimer "${category.name}" ?`,
       [
-        { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Supprimer', 
+        { text: "Annuler", style: "cancel" },
+        {
+          text: "Supprimer",
           onPress: onDelete,
-          style: 'destructive'
+          style: "destructive",
         },
       ]
     );
@@ -54,19 +54,19 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
     try {
       setIsUpdating(true);
       setIsPublic(value);
-      
+
       const categoryId = category._id || category.id;
       await categoryAPI.update(categoryId, { isPublic: value });
-      
+
       if (onLabelsUpdated) {
         onLabelsUpdated();
       }
     } catch (error) {
-      console.error('Error updating category visibility:', error);
+      console.error("Error updating category visibility:", error);
       setIsPublic(!value);
       Alert.alert(
-        'Erreur',
-        'Impossible de modifier la visibilité de la catégorie'
+        "Erreur",
+        "Impossible de modifier la visibilité de la catégorie"
       );
     } finally {
       setIsUpdating(false);
@@ -76,41 +76,71 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={styles.header}
+        style={styles.content}
         onPress={onToggle}
         activeOpacity={0.7}
       >
-        <View style={styles.headerLeft}>
-          <Ionicons
-            name={isExpanded ? 'chevron-down' : 'chevron-forward'}
-            size={20}
-            color={theme.colors.textSecondary}
-          />
-          <View style={styles.categoryInfo}>
-            <Text style={styles.categoryName}>{category.name}</Text>
-            <Text style={styles.labelCount}>
-              {category.labels?.length || 0} labels
-            </Text>
-          </View>
-        </View>
-        <View style={styles.headerRight}>
-          <View style={styles.switchContainer}>
-            <Text style={styles.switchLabel}>{isPublic ? 'Public' : 'Privé'}</Text>
-            <Switch
-              value={isPublic}
-              onValueChange={handleTogglePublic}
-              disabled={isUpdating}
-              trackColor={{ false: theme.colors.border, true: theme.colors.primary }}
-              thumbColor={isPublic ? theme.colors.secondary : theme.colors.backgroundSecondary}
-              ios_backgroundColor={theme.colors.border}
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Ionicons
+              name='grid-outline'
+              size={24}
+              color={theme.colors.primary}
             />
+          </View>
+          <View style={styles.categoryInfo}>
+            <Text style={styles.categoryName} numberOfLines={1}>
+              {category.name}
+            </Text>
           </View>
           <TouchableOpacity
             onPress={handleDelete}
             style={styles.deleteButton}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           >
-            <Ionicons name="trash-outline" size={20} color={theme.colors.error} />
+            <Ionicons
+              name='trash-outline'
+              size={20}
+              color={theme.colors.textSecondary}
+            />
           </TouchableOpacity>
+        </View>
+
+        {category.description && (
+          <Text style={styles.categoryDescription} numberOfLines={2}>
+            {category.description}
+          </Text>
+        )}
+
+        <View style={styles.categoryStats}>
+          <View style={styles.stat}>
+            <Ionicons
+              name='pricetags'
+              size={16}
+              color={theme.colors.textSecondary}
+            />
+            <Text style={styles.statText}>
+              {category.labels?.length || 0} labels
+            </Text>
+          </View>
+          <View style={styles.stat}>
+            <Ionicons
+              name={isPublic ? "globe-outline" : "lock-closed-outline"}
+              size={16}
+              color={theme.colors.textSecondary}
+            />
+            <Text style={styles.statText}>{isPublic ? "Public" : "Privé"}</Text>
+          </View>
+          <View style={styles.stat}>
+            <Ionicons
+              name='calendar'
+              size={16}
+              color={theme.colors.textSecondary}
+            />
+            <Text style={styles.statText}>
+              {new Date(category.createdAt).toLocaleDateString("fr-FR")}
+            </Text>
+          </View>
         </View>
       </TouchableOpacity>
 
@@ -124,7 +154,9 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
                 </View>
               ))
             ) : (
-              <Text style={styles.emptyText}>Aucun label dans cette catégorie</Text>
+              <Text style={styles.emptyText}>
+                Aucun label dans cette catégorie
+              </Text>
             )}
           </View>
           <TouchableOpacity
@@ -132,7 +164,11 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
             onPress={() => setIsAddLabelsModalVisible(true)}
             activeOpacity={0.7}
           >
-            <Ionicons name="add-circle-outline" size={20} color={theme.colors.primary} />
+            <Ionicons
+              name='add-circle-outline'
+              size={20}
+              color={theme.colors.primary}
+            />
             <Text style={styles.addLabelText}>Ajouter des labels</Text>
           </TouchableOpacity>
         </View>
@@ -154,82 +190,111 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
 const styles = StyleSheet.create({
   container: {
     backgroundColor: theme.colors.backgroundSecondary,
-    borderRadius: theme.borderRadius.md,
+    borderRadius: theme.borderRadius.lg,
     marginBottom: theme.spacing.md,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  content: {
+    padding: theme.spacing.lg,
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: theme.spacing.md,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: theme.spacing.sm,
   },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flex: 1,
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: theme.borderRadius.md,
+    backgroundColor: theme.colors.primary + "15",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: theme.spacing.md,
   },
   categoryInfo: {
-    marginLeft: theme.spacing.sm,
-  },
-  categoryName: {
-    fontSize: theme.fontSize.md,
-    fontWeight: '600',
-    color: theme.colors.text,
-  },
-  labelCount: {
-    fontSize: theme.fontSize.xs,
-    color: theme.colors.textSecondary,
-    marginTop: 2,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.sm,
   },
-  switchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  categoryName: {
+    ...theme.fonts.subtitle,
+    color: theme.colors.text,
+  },
+  publicBadge: {
+    backgroundColor: theme.colors.info + "20",
+    paddingHorizontal: theme.spacing.sm,
+    paddingVertical: theme.spacing.xs,
+    borderRadius: theme.borderRadius.sm,
+  },
+  publicText: {
+    ...theme.fonts.label,
+    color: theme.colors.info,
+  },
+  categoryDescription: {
+    ...theme.fonts.caption,
+    color: theme.colors.textSecondary,
+    marginBottom: theme.spacing.md,
+  },
+  categoryStats: {
+    flexDirection: "row",
+    gap: theme.spacing.lg,
+  },
+  stat: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: theme.spacing.xs,
   },
-  switchLabel: {
-    fontSize: theme.fontSize.sm,
+  statText: {
+    ...theme.fonts.label,
     color: theme.colors.textSecondary,
   },
   deleteButton: {
     padding: theme.spacing.xs,
   },
   expandedContent: {
-    paddingHorizontal: theme.spacing.md,
-    paddingBottom: theme.spacing.md,
+    paddingHorizontal: theme.spacing.lg,
+    paddingBottom: theme.spacing.lg,
+    paddingTop: theme.spacing.sm,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
   },
   labelsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: theme.spacing.sm,
     marginBottom: theme.spacing.md,
   },
   addLabelButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     paddingVertical: theme.spacing.sm,
     paddingHorizontal: theme.spacing.md,
-    backgroundColor: theme.colors.primary + '10',
+    backgroundColor: theme.colors.primary + "10",
     borderRadius: theme.borderRadius.md,
     borderWidth: 1,
-    borderColor: theme.colors.primary + '30',
-    borderStyle: 'dashed',
+    borderColor: theme.colors.primary + "30",
+    borderStyle: "dashed",
   },
   addLabelText: {
     marginLeft: theme.spacing.sm,
     fontSize: theme.fontSize.sm,
     color: theme.colors.primary,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   labelChip: {
-    backgroundColor: theme.colors.primary + '20',
+    backgroundColor: theme.colors.primary + "20",
     paddingHorizontal: theme.spacing.md,
     paddingVertical: theme.spacing.xs,
     borderRadius: theme.borderRadius.lg,
@@ -237,11 +302,11 @@ const styles = StyleSheet.create({
   labelText: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.primary,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   emptyText: {
     fontSize: theme.fontSize.sm,
     color: theme.colors.textSecondary,
-    fontStyle: 'italic',
+    fontStyle: "italic",
   },
 });

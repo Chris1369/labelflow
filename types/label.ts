@@ -3,6 +3,7 @@ export interface Label {
   _id?: string;
   name: string;
   ownerId: string;
+  subIds: string[];
   isPublic: boolean;
   createdAt: string;
   updatedAt: string;

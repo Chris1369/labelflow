@@ -133,6 +133,30 @@ class LabelAPI extends BaseAPI<Label, CreateLabelRequest, UpdateLabelRequest> {
       throw handleApiError(error);
     }
   }
+
+  async addSubId(labelId: string, value: string): Promise<Label> {
+    try {
+      const response = await axiosInstance.post(
+        `${this.basePath}/${labelId}/add-subid`,
+        { value }
+      );
+      return handleApiResponse<Label>(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
+
+  async removeSubId(labelId: string, value: string): Promise<Label> {
+    try {
+      const response = await axiosInstance.post(
+        `${this.basePath}/${labelId}/remove-subid`,
+        { value }
+      );
+      return handleApiResponse<Label>(response);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  }
 }
 
 export const labelAPI = new LabelAPI();

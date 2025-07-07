@@ -12,7 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { Input, HeaderPage } from '@/components/atoms';
 import { theme } from '@/types/theme';
 import { useLabelsStore } from './useStore';
-import { LabelItem } from './components/LabelItem';
+import { LabelCard } from './components/LabelCard';
 import { CreateLabelBottomSheet, CreateLabelBottomSheetRef } from './components/CreateLabelBottomSheet';
 import { useMyLabels } from '@/hooks/queries';
 import { useSettingsStore } from '../settings/useStore';
@@ -105,7 +105,7 @@ export const LabelsScreen: React.FC = () => {
           data={filteredLabels}
           keyExtractor={(item) => item._id || item.id}
           renderItem={({ item }) => (
-            <LabelItem
+            <LabelCard
               label={item}
               onDelete={() => deleteLabel(item.id)}
               onUpdate={() => refetch()}
@@ -118,6 +118,14 @@ export const LabelsScreen: React.FC = () => {
       )}
 
       <CreateLabelBottomSheet ref={bottomSheetRef} />
+      
+      <TouchableOpacity 
+        style={styles.floatingButton}
+        onPress={handleCreateLabel}
+        activeOpacity={0.8}
+      >
+        <Ionicons name='add' size={24} color={theme.colors.secondary} />
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -136,7 +144,26 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: theme.spacing.lg,
-    paddingBottom: theme.spacing.xl,
+    paddingBottom: 100,
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: theme.colors.primary,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: theme.colors.text,
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 6,
+    elevation: 8,
   },
   emptyContainer: {
     flex: 1,
