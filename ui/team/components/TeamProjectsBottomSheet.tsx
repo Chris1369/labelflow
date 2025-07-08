@@ -4,10 +4,11 @@ import { SimpleBottomSheet } from '@/components/molecules/SimpleBottomSheet';
 import { Input, Button } from '@/components/atoms';
 import { Ionicons } from '@expo/vector-icons';
 import { theme } from '@/types/theme';
-import { useMyProjects, useTeamProjects } from '@/hooks/queries';
+import { teamKeys, useMyProjects, useTeamProjects } from '@/hooks/queries';
 import { Project } from '@/types/project';
 import { teamAPI } from '@/api/team.api';
 import { useErrorHandler } from '@/hooks/useErrorHandler';
+import { invalidateQuery } from '@/helpers/invalidateQuery';
 
 export interface TeamProjectsBottomSheetRef {
   open: () => void;
@@ -27,7 +28,7 @@ export const TeamProjectsBottomSheet = forwardRef<
   const [selectedProjects, setSelectedProjects] = useState<string[]>([]);
   const [isUpdating, setIsUpdating] = useState(false);
   const { handleError, wrapAsync } = useErrorHandler('TeamProjectsBottomSheet');
-  
+
   const { projects: userProjects = [], isLoading: loadingUserProjects } = useMyProjects({});
   const { data: teamProjects = [], refetch: refetchTeamProjects, isLoading: loadingTeamProjects } = useTeamProjects(teamId);
 
@@ -61,7 +62,7 @@ export const TeamProjectsBottomSheet = forwardRef<
     try {
       // Get current team project IDs
       const currentProjectIds = teamProjects.map(p => p.id);
-      
+
       // Find projects to add and remove
       const projectsToAdd = selectedProjects.filter(id => !currentProjectIds.includes(id));
       const projectsToRemove = currentProjectIds.filter(id => !selectedProjects.includes(id));
@@ -70,12 +71,11 @@ export const TeamProjectsBottomSheet = forwardRef<
       if (projectsToAdd.length > 0) {
         await teamAPI.updateProjects(teamId, 'add', projectsToAdd);
       }
-      
+
       if (projectsToRemove.length > 0) {
         await teamAPI.updateProjects(teamId, 'remove', projectsToRemove);
       }
-
-      await refetchTeamProjects();
+      invalidateQuery(teamKeys.list({ my: true }));
       setVisible(false);
     } catch (error) {
       handleError(error);
@@ -86,7 +86,7 @@ export const TeamProjectsBottomSheet = forwardRef<
 
   const renderProjectItem = ({ item }: { item: Project }) => {
     const isSelected = selectedProjects.includes(item.id);
-    
+
     return (
       <TouchableOpacity
         style={styles.projectItem}
