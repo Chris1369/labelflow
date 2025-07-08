@@ -11,10 +11,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { Label } from "@/types/label";
 import { theme } from "@/types/theme";
 import { labelAPI } from "@/api/label.api";
-import {
-  ScannerBottomSheet,
-  ScannerBottomSheetRef,
-} from "./ScannerBottomSheet";
+import { ScannerBottomSheet } from "./ScannerBottomSheet";
+import type { ScannerBottomSheetRef } from "./ScannerBottomSheet/types";
 import {
   SubIdsBottomSheet,
   SubIdsBottomSheetRef,
