@@ -201,10 +201,10 @@ export const LabelBottomSheet = forwardRef<
 
         // First, add suggested labels
         for (const labelId of suggestedLabelIds) {
-          const found = userLabels.find((l) => (l._id || l.id) === labelId);
+          const found = userLabels.find((l) => ((l as any)._id || l.id) === labelId);
           if (found) {
             suggestedLabelObjects.push({
-              id: found.id || found._id || `suggested-${found.name}`,
+              id: found.id || (found as any)._id || `suggested-${found.name}`,
               name: found.name,
               category: "Suggestions",
               icon: "sparkles" as any,
@@ -715,8 +715,10 @@ const styles = StyleSheet.create({
     paddingTop: theme.spacing.sm,
   },
   title: {
-    ...theme.fonts.subtitle,
-    textAlign: "center",
+    fontSize: theme.fonts.subtitle.fontSize,
+    fontWeight: theme.fonts.subtitle.fontWeight as TextStyle["fontWeight"],
+    lineHeight: theme.fonts.subtitle.lineHeight,
+    textAlign: "center" as TextStyle["textAlign"],
   },
   closeButton: {
     position: "absolute",
@@ -756,7 +758,9 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.border,
   },
   addButtonText: {
-    ...theme.fonts.button,
+    fontSize: theme.fonts.button.fontSize,
+    fontWeight: theme.fonts.button.fontWeight as TextStyle["fontWeight"],
+    lineHeight: theme.fonts.button.lineHeight,
     marginLeft: theme.spacing.sm,
     color: theme.colors.primary,
   },
@@ -790,7 +794,9 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   categoryText: {
-    ...theme.fonts.caption,
+    fontSize: theme.fonts.caption.fontSize,
+    fontWeight: theme.fonts.caption.fontWeight as TextStyle["fontWeight"],
+    lineHeight: theme.fonts.caption.lineHeight,
     color: theme.colors.text,
   },
   categoryTextActive: {
@@ -824,7 +830,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   labelText: {
-    ...theme.fonts.body,
+    fontSize: theme.fonts.body.fontSize,
+    fontWeight: theme.fonts.body.fontWeight as TextStyle["fontWeight"],
+    lineHeight: theme.fonts.body.lineHeight,
     marginLeft: theme.spacing.xs,
   },
   labelRightContent: {
@@ -844,12 +852,15 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
   },
   counterText: {
-    ...theme.fonts.caption,
+    fontSize: theme.fonts.caption.fontSize,
+    fontWeight: "500" as TextStyle["fontWeight"],
+    lineHeight: theme.fonts.caption.lineHeight,
     color: theme.colors.textSecondary,
-    fontWeight: "500",
   },
   labelCategory: {
-    ...theme.fonts.caption,
+    fontSize: theme.fonts.caption.fontSize,
+    fontWeight: theme.fonts.caption.fontWeight as TextStyle["fontWeight"],
+    lineHeight: theme.fonts.caption.lineHeight,
     color: theme.colors.textSecondary,
   },
   recentLabelCategory: {
@@ -863,8 +874,10 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   emptyText: {
-    ...theme.fonts.body,
-    textAlign: "center",
+    fontSize: theme.fonts.body.fontSize,
+    fontWeight: theme.fonts.body.fontWeight as TextStyle["fontWeight"],
+    lineHeight: theme.fonts.body.lineHeight,
+    textAlign: "center" as TextStyle["textAlign"],
     color: theme.colors.textSecondary,
     marginTop: theme.spacing.xl,
   },
