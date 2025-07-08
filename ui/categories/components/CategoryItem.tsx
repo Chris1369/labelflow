@@ -5,14 +5,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  Switch,
+  TextStyle,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Category } from "@/types/category";
 import { Label } from "@/types/label";
 import { theme } from "@/types/theme";
 import { AddLabelsModal } from "./AddLabelsModal";
-import { categoryAPI } from "@/api/category.api";
+//import { categoryAPI } from "@/api/category.api";
 
 interface CategoryItemProps {
   category: Category;
@@ -50,28 +50,28 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
     );
   };
 
-  const handleTogglePublic = async (value: boolean) => {
-    try {
-      setIsUpdating(true);
-      setIsPublic(value);
+  // const handleTogglePublic = async (value: boolean) => {
+  //   try {
+  //     setIsUpdating(true);
+  //     setIsPublic(value);
 
-      const categoryId = category._id || category.id;
-      await categoryAPI.update(categoryId, { isPublic: value });
+  //     const categoryId = category._id || category.id;
+  //     await categoryAPI.update(categoryId, { isPublic: value });
 
-      if (onLabelsUpdated) {
-        onLabelsUpdated();
-      }
-    } catch (error) {
-      console.error("Error updating category visibility:", error);
-      setIsPublic(!value);
-      Alert.alert(
-        "Erreur",
-        "Impossible de modifier la visibilité de la catégorie"
-      );
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  //     if (onLabelsUpdated) {
+  //       onLabelsUpdated();
+  //     }
+  //   } catch (error) {
+  //     console.error("Error updating category visibility:", error);
+  //     setIsPublic(!value);
+  //     Alert.alert(
+  //       "Erreur",
+  //       "Impossible de modifier la visibilité de la catégorie"
+  //     );
+  //   } finally {
+  //     setIsUpdating(false);
+  //   }
+  // };
 
   return (
     <View style={styles.container}>
@@ -105,12 +105,6 @@ export const CategoryItem: React.FC<CategoryItemProps> = ({
             />
           </TouchableOpacity>
         </View>
-
-        {category.description && (
-          <Text style={styles.categoryDescription} numberOfLines={2}>
-            {category.description}
-          </Text>
-        )}
 
         <View style={styles.categoryStats}>
           <View style={styles.stat}>
@@ -230,7 +224,7 @@ const styles = StyleSheet.create({
   categoryName: {
     ...theme.fonts.subtitle,
     color: theme.colors.text,
-  },
+  } as TextStyle,
   publicBadge: {
     backgroundColor: theme.colors.info + "20",
     paddingHorizontal: theme.spacing.sm,
@@ -240,12 +234,7 @@ const styles = StyleSheet.create({
   publicText: {
     ...theme.fonts.label,
     color: theme.colors.info,
-  },
-  categoryDescription: {
-    ...theme.fonts.caption,
-    color: theme.colors.textSecondary,
-    marginBottom: theme.spacing.md,
-  },
+  } as TextStyle,
   categoryStats: {
     flexDirection: "row",
     gap: theme.spacing.lg,
@@ -258,7 +247,7 @@ const styles = StyleSheet.create({
   statText: {
     ...theme.fonts.label,
     color: theme.colors.textSecondary,
-  },
+  } as TextStyle,
   deleteButton: {
     padding: theme.spacing.xs,
   },

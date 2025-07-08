@@ -1,4 +1,4 @@
-import React, { forwardRef, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from "react";
 import {
   View,
   Text,
@@ -7,95 +7,96 @@ import {
   Switch,
   Alert,
   ScrollView,
-} from 'react-native';
-import { Input, Button } from '@/components/atoms';
-import { SimpleBottomSheet } from '@/components/molecules';
-import { theme } from '@/types/theme';
-import { labelAPI } from '@/api/label.api';
-import { useLabelsStore } from '../useStore';
+} from "react-native";
+import { Input, Button } from "@/components/atoms";
+import { SimpleBottomSheet } from "@/components/molecules";
+import { theme } from "@/types/theme";
+import { labelAPI } from "@/api/label.api";
+import { useLabelsStore } from "../useStore";
 
 export interface CreateLabelBottomSheetRef {
   open: () => void;
   close: () => void;
 }
 
-export const CreateLabelBottomSheet = forwardRef<CreateLabelBottomSheetRef>((_, ref) => {
-  const [isVisible, setIsVisible] = useState(false);
-  const [name, setName] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
+export const CreateLabelBottomSheet = forwardRef<CreateLabelBottomSheetRef>(
+  (_, ref) => {
+    const [isVisible, setIsVisible] = useState(false);
+    const [name, setName] = useState("");
+    const [isPublic, setIsPublic] = useState(false);
+    const [isCreating, setIsCreating] = useState(false);
 
-  useImperativeHandle(ref, () => ({
-    open: () => {
-      setIsVisible(true);
-      setName('');
-      setIsPublic(false);
-    },
-    close: () => setIsVisible(false),
-  }));
+    useImperativeHandle(ref, () => ({
+      open: () => {
+        setIsVisible(true);
+        setName("");
+        setIsPublic(false);
+      },
+      close: () => setIsVisible(false),
+    }));
 
-  const handleCreate = async () => {
-    if (!name.trim()) {
-      Alert.alert('Erreur', 'Veuillez entrer un nom pour le label');
-      return;
-    }
+    const handleCreate = async () => {
+      if (!name.trim()) {
+        Alert.alert("Erreur", "Veuillez entrer un nom pour le label");
+        return;
+      }
 
-    setIsCreating(true);
-    try {
-      await labelAPI.create({
-        name: name.trim(),
-        isPublic,
-      });
+      setIsCreating(true);
+      try {
+        await labelAPI.create({
+          name: name.trim(),
+          isPublic,
+        });
 
-      // Refresh labels list
-      await useLabelsStore.getState().refreshLabels?.();
+        // Refresh labels list
+        await useLabelsStore.getState().refreshLabels?.();
 
-      // Reset form and close
-      setName('');
-      setIsPublic(false);
-      setIsVisible(false);
+        // Reset form and close
+        setName("");
+        setIsPublic(false);
+        setIsVisible(false);
 
-      Alert.alert('Succès', 'Label créé avec succès');
-    } catch (error: any) {
-      Alert.alert('Erreur', error.message || 'Impossible de créer le label');
-    } finally {
-      setIsCreating(false);
-    }
-  };
+        Alert.alert("Succès", "Label créé avec succès");
+      } catch (error: any) {
+        Alert.alert("Erreur", error.message || "Impossible de créer le label");
+      } finally {
+        setIsCreating(false);
+      }
+    };
 
-  return (
-    <SimpleBottomSheet
-      visible={isVisible}
-      onClose={() => setIsVisible(false)}
-      height="60%"
-    >
-      <View style={styles.container}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.header}>
-            <Text style={styles.title}>Nouveau label</Text>
-            <Text style={styles.subtitle}>
-              Créez un label pour catégoriser vos éléments
-            </Text>
-          </View>
+    return (
+      <SimpleBottomSheet
+        visible={isVisible}
+        onClose={() => setIsVisible(false)}
+        height='60%'
+      >
+        <View style={styles.container}>
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps='handled'
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.header}>
+              <Text style={styles.title as any}>Nouveau label</Text>
+              <Text style={styles.subtitle}>
+                Créez un label pour catégoriser vos éléments
+              </Text>
+            </View>
 
-          <View style={styles.form}>
-            <Input
-              placeholder="Nom du label"
-              value={name}
-              onChangeText={setName}
-              containerStyle={styles.input}
-              autoFocus
-            />
+            <View style={styles.form}>
+              <Input
+                placeholder='Nom du label'
+                value={name}
+                onChangeText={setName}
+                containerStyle={styles.input}
+                autoFocus
+              />
 
-            <View style={styles.switchContainer}>
+              {/* <View style={styles.switchContainer}>
               <View style={styles.switchLabel}>
                 <Text style={styles.switchText}>Rendre public</Text>
-                <Text style={styles.switchDescription}>
+                <Text style={styles.switchDescription as any}>
                   Les autres utilisateurs pourront voir ce label
                 </Text>
               </View>
@@ -108,30 +109,31 @@ export const CreateLabelBottomSheet = forwardRef<CreateLabelBottomSheetRef>((_, 
                 }}
                 thumbColor={isPublic ? theme.colors.primary : theme.colors.backgroundSecondary}
               />
+            </View> */}
             </View>
+          </ScrollView>
+
+          <View style={styles.actions}>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setIsVisible(false)}
+              disabled={isCreating}
+            >
+              <Text style={styles.cancelText}>Annuler</Text>
+            </TouchableOpacity>
+
+            <Button
+              title={isCreating ? "Création..." : "Créer"}
+              onPress={handleCreate}
+              disabled={isCreating || !name.trim()}
+              style={styles.createButton}
+            />
           </View>
-        </ScrollView>
-
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => setIsVisible(false)}
-            disabled={isCreating}
-          >
-            <Text style={styles.cancelText}>Annuler</Text>
-          </TouchableOpacity>
-
-          <Button
-            title={isCreating ? 'Création...' : 'Créer'}
-            onPress={handleCreate}
-            disabled={isCreating || !name.trim()}
-            style={styles.createButton}
-          />
         </View>
-      </View>
-    </SimpleBottomSheet>
-  );
-});
+      </SimpleBottomSheet>
+    );
+  }
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -144,7 +146,7 @@ const styles = StyleSheet.create({
     paddingBottom: theme.spacing.lg,
   },
   header: {
-    alignItems: 'center',
+    alignItems: "center",
     paddingHorizontal: theme.spacing.lg,
     paddingVertical: theme.spacing.lg,
   },
@@ -154,10 +156,10 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: theme.fonts.caption.fontSize,
-    fontWeight: theme.fonts.caption.fontWeight as '400',
+    fontWeight: theme.fonts.caption.fontWeight as "400",
     lineHeight: theme.fonts.caption.lineHeight,
     color: theme.colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   form: {
     paddingHorizontal: theme.spacing.lg,
@@ -166,9 +168,9 @@ const styles = StyleSheet.create({
     marginBottom: theme.spacing.lg,
   },
   switchContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: theme.spacing.xl,
   },
   switchLabel: {
@@ -177,7 +179,7 @@ const styles = StyleSheet.create({
   },
   switchText: {
     ...theme.fonts.body,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   switchDescription: {
     ...theme.fonts.caption,
@@ -185,7 +187,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: theme.spacing.md,
     paddingHorizontal: theme.spacing.lg,
     paddingTop: theme.spacing.md,
@@ -197,11 +199,11 @@ const styles = StyleSheet.create({
   cancelButton: {
     flex: 1,
     padding: theme.spacing.md,
-    alignItems: 'center',
+    alignItems: "center",
   },
   cancelText: {
     fontSize: theme.fonts.button.fontSize,
-    fontWeight: theme.fonts.button.fontWeight as '600',
+    fontWeight: theme.fonts.button.fontWeight as "600",
     lineHeight: theme.fonts.button.lineHeight,
     color: theme.colors.textSecondary,
   },

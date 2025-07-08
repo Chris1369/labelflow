@@ -118,14 +118,6 @@ export const LabelsScreen: React.FC = () => {
       )}
 
       <CreateLabelBottomSheet ref={bottomSheetRef} />
-      
-      <TouchableOpacity 
-        style={styles.floatingButton}
-        onPress={handleCreateLabel}
-        activeOpacity={0.8}
-      >
-        <Ionicons name='add' size={24} color={theme.colors.secondary} />
-      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -144,26 +136,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: theme.spacing.lg,
-    paddingBottom: 100,
-  },
-  floatingButton: {
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: theme.colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: theme.colors.text,
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 8,
+    paddingBottom: theme.spacing.xl,
   },
   emptyContainer: {
     flex: 1,

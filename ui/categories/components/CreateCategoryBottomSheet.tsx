@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Switch,
   Alert,
+  TextStyle,
 } from 'react-native';
 import { Input, Button } from '@/components/atoms';
 import { SimpleBottomSheet } from '@/components/molecules';
@@ -141,12 +142,12 @@ const styles = StyleSheet.create({
   title: {
     ...theme.fonts.subtitle,
     marginBottom: theme.spacing.xs,
-  },
+  } as TextStyle,
   subtitle: {
     ...theme.fonts.caption,
     color: theme.colors.textSecondary,
     textAlign: 'center',
-  },
+  } as TextStyle,
   form: {
     flex: 1,
     paddingHorizontal: theme.spacing.lg,
@@ -166,13 +167,13 @@ const styles = StyleSheet.create({
   },
   switchText: {
     ...theme.fonts.body,
-    fontWeight: '600',
+    fontWeight: '600' as TextStyle['fontWeight'],
   },
   switchDescription: {
     ...theme.fonts.caption,
     color: theme.colors.textSecondary,
     marginTop: 2,
-  },
+  } as TextStyle,
   actions: {
     flexDirection: 'row',
     gap: theme.spacing.md,
@@ -191,7 +192,7 @@ const styles = StyleSheet.create({
   cancelText: {
     ...theme.fonts.button,
     color: theme.colors.textSecondary,
-  },
+  } as TextStyle,
   createButton: {
     flex: 1,
   },

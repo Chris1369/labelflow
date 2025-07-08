@@ -220,7 +220,9 @@ const styles = StyleSheet.create({
     gap: theme.spacing.sm,
   },
   labelName: {
-    ...theme.fonts.subtitle,
+    fontSize: theme.fonts.subtitle.fontSize,
+    fontWeight: theme.fonts.subtitle.fontWeight as '600',
+    lineHeight: theme.fonts.subtitle.lineHeight,
     color: theme.colors.text,
   },
   publicBadge: {
@@ -230,14 +232,18 @@ const styles = StyleSheet.create({
     borderRadius: theme.borderRadius.sm,
   },
   publicText: {
-    ...theme.fonts.label,
+    fontSize: theme.fonts.label.fontSize,
+    fontWeight: theme.fonts.label.fontWeight as '600',
+    lineHeight: theme.fonts.label.lineHeight,
     color: theme.colors.info,
   },
   deleteButton: {
     padding: theme.spacing.xs,
   },
   labelId: {
-    ...theme.fonts.caption,
+    fontSize: theme.fonts.caption.fontSize,
+    fontWeight: theme.fonts.caption.fontWeight as '400',
+    lineHeight: theme.fonts.caption.lineHeight,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.md,
     fontFamily: "monospace",
@@ -252,7 +258,9 @@ const styles = StyleSheet.create({
     gap: theme.spacing.xs,
   },
   statText: {
-    ...theme.fonts.label,
+    fontSize: theme.fonts.label.fontSize,
+    fontWeight: theme.fonts.label.fontWeight as '600',
+    lineHeight: theme.fonts.label.lineHeight,
     color: theme.colors.textSecondary,
   },
   subIdSection: {
@@ -262,7 +270,9 @@ const styles = StyleSheet.create({
     borderTopColor: theme.colors.border,
   },
   subIdTitle: {
-    ...theme.fonts.caption,
+    fontSize: theme.fonts.caption.fontSize,
+    fontWeight: theme.fonts.caption.fontWeight as '400',
+    lineHeight: theme.fonts.caption.lineHeight,
     color: theme.colors.textSecondary,
     marginBottom: theme.spacing.sm,
   },
@@ -283,9 +293,10 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.primary,
   },
   primaryButtonText: {
-    ...theme.fonts.button,
-    color: theme.colors.secondary,
     fontSize: theme.fontSize.sm,
+    fontWeight: theme.fonts.button.fontWeight as '600',
+    lineHeight: theme.fonts.button.lineHeight,
+    color: theme.colors.secondary,
   },
   secondaryButton: {
     backgroundColor: theme.colors.backgroundSecondary,
@@ -293,8 +304,9 @@ const styles = StyleSheet.create({
     borderColor: theme.colors.border,
   },
   secondaryButtonText: {
-    ...theme.fonts.button,
-    color: theme.colors.text,
     fontSize: theme.fontSize.sm,
+    fontWeight: theme.fonts.button.fontWeight as '600',
+    lineHeight: theme.fonts.button.lineHeight,
+    color: theme.colors.text,
   },
 });

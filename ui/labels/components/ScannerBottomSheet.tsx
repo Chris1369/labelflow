@@ -244,7 +244,7 @@ export const ScannerBottomSheet = forwardRef<ScannerBottomSheetRef, Props>(
                           color={theme.colors.primary}
                         />
                       </View>
-                      <Text style={styles.resultLabel}>Code scanné</Text>
+                      <Text style={styles.resultLabel as any}>Code scanné</Text>
                       <Text style={styles.resultValue} numberOfLines={2}>
                         {scannedData}
                       </Text>
