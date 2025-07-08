@@ -73,4 +73,13 @@ export const exportOptions: ExportOption[] = [
     tags: ["segmentation d'image", "détection d'objets"],
     enabled: true,
   },
+  {
+    id: "dataset-bundle",
+    title: "Dataset Bundle",
+    description:
+      "Archive ZIP contenant la structure brute du dataset (images/, labels/, metadata/). Aucun formatage supplémentaire : idéal comme source ou pour archivage.",
+    format: "ZIP",
+    tags: ["brut", "source", "archive"],
+    enabled: true,
+  },
 ];

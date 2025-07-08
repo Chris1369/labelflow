@@ -6,7 +6,8 @@ export type ExportFormat =
   | "csv"
   | "tsv"
   | "coco"
-  | "pascal-voc";
+  | "pascal-voc"
+  | "dataset-bundle";
 
 export interface ExportOption {
   id: ExportFormat;

@@ -22,11 +22,11 @@ export default function ExportScreen() {
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['left', 'right', 'bottom']}>
-      <HeaderPage 
-        title="Export de données" 
+      <HeaderPage
+        title="Export de données"
         subtitle="Choisissez un format d'export"
       />
-      
+
       <ScrollView contentContainerStyle={{ padding: theme.spacing.sm }}>
         <ExportSection
           title="Formats YOLO"
