@@ -174,25 +174,21 @@ class TeamAPI extends BaseAPI<Team, CreateTeamRequest, UpdateTeamRequest> {
       const response = await axiosInstance.get(
         `${this.basePath}/${teamId}/projects`
       );
-      // Gérer différentes structures de réponse possibles
-      if (Array.isArray(response.data)) {
-        return response.data;
-      } else if (response.data && Array.isArray(response.data.projects)) {
-        return response.data.projects;
-      } else if (
-        response.data &&
-        response.data.data &&
-        Array.isArray(response.data.data)
-      ) {
-        return response.data.data;
-      }
-
-      // Si aucune structure connue, retourner un tableau vide
-      console.warn(
-        "Unexpected response structure for team projects:",
-        response.data
-      );
-      return [];
+        // Si aucune structure connue, retourner un tableau vide
+        console.warn(
+          "Unexpected response structure for team projects:",
+          response.data
+        );
+      const result = handleApiResponse<{
+        projects: Project[];
+        total: number;
+        totalPage: number;
+        page: number;
+        limit: number;
+      }>(response);
+      
+      // Retourner le tableau de projets
+      return result.projects;
     } catch (error) {
       console.error("Error in getTeamProjects:", error);
       // En cas d'erreur 404, retourner un tableau vide plutôt qu'une erreur
