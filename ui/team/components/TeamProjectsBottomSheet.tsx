@@ -76,6 +76,7 @@ export const TeamProjectsBottomSheet = forwardRef<
         await teamAPI.updateProjects(teamId, 'remove', projectsToRemove);
       }
       invalidateQuery(teamKeys.list({ my: true }));
+      invalidateQuery(teamKeys.projects(teamId));
       setVisible(false);
     } catch (error) {
       handleError(error);
