@@ -29,8 +29,8 @@ export const TeamProjectsBottomSheet = forwardRef<
   const [isUpdating, setIsUpdating] = useState(false);
   const { handleError, wrapAsync } = useErrorHandler('TeamProjectsBottomSheet');
 
-  const { projects: userProjects = [], isLoading: loadingUserProjects } = useMyProjects({});
-  const { data: teamProjects = [], refetch: refetchTeamProjects, isLoading: loadingTeamProjects } = useTeamProjects(teamId);
+  const { projects: userProjects = [], isLoading: loadingUserProjects } = useMyProjects();
+  const { data: teamProjects = [], isLoading: loadingTeamProjects } = useTeamProjects(teamId);
 
   useEffect(() => {
     if (teamProjects.length > 0) {

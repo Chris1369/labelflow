@@ -52,10 +52,10 @@ export const useProjectDetails = (projectId: string, enabled = true) => {
 };
 
 // Hook to get user's own projects
-export const useMyProjects = ({includePublic, withTeamsProjects, searchQuery}: ProjectQueryParams) => {
+export const useMyProjects = (query?: ProjectQueryParams) => {
  const {data, error, isLoading, refetch} = useQuery<{projects: Project[], total: number}, Error>({
-    queryKey: projectKeys.list({ my: true, includePublic, withTeamsProjects, searchQuery }),
-    queryFn: async () =>await projectAPI.getMyProjects({includePublic, withTeamsProjects, searchQuery})
+    queryKey: projectKeys.list({ my: true, ...query }),
+    queryFn: async () =>await projectAPI.getMyProjects(query)
   });
 
   return {
