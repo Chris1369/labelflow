@@ -29,14 +29,14 @@ export const useLabelSearch = () => {
     []
   );
 
-  const triggerSearch = (searchQuery: string) => {
+  const triggerSearch = useCallback((searchQuery: string) => {
     if (searchQuery.trim().length >= 2) {
       searchLabels(searchQuery);
     } else {
       setSearchResults([]);
       setIsSearching(false);
     }
-  };
+  }, [searchLabels]);
 
   return {
     searchResults,

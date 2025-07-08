@@ -141,7 +141,8 @@ export const LabelBottomSheet = forwardRef<
     // Trigger search when query changes
     useEffect(() => {
       triggerSearch(searchQuery);
-    }, [searchQuery, triggerSearch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchQuery]);
 
     // Load category labels when a category is selected
     useEffect(() => {
@@ -151,7 +152,8 @@ export const LabelBottomSheet = forwardRef<
       ) {
         loadCategoryLabels(selectedCategory);
       }
-    }, [selectedCategory, userCategories, loadCategoryLabels]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [selectedCategory, userCategories]);
 
     const handleSelectLabel = async (label: ObjectLabel) => {
       // Add to recent labels
