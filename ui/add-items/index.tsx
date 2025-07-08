@@ -13,7 +13,6 @@ import { LabelBottomSheet, LabelBottomSheetRef } from "@/components/organisms";
 import { theme } from "@/types/theme";
 import { useAddItemsStore } from "./useStore";
 import { addItemsActions } from "./actions";
-import { useProjectStore } from "@/ui/project/useStore";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { HeaderPage } from "@/components/atoms";
 import {
