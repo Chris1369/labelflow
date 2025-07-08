@@ -15,7 +15,6 @@ interface CategoriesState {
 }
 
 interface CategoriesActions {
-  // loadCategories: () => Promise<void>;
   setSearchQuery: (query: string) => void;
   searchCategories: (query: string) => Promise<void>;
   toggleCategory: (categoryId: string) => void;

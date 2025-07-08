@@ -25,6 +25,6 @@ export interface ExportState {
 
 export interface ExportActions {
   setSelectedFormat: (format: ExportFormat | null) => void;
-  exportProject: (projectId: string, format: ExportFormat) => Promise<void>;
+  exportProject: (projectId: string, format: ExportFormat) => Promise<any>;
   resetState: () => void;
 }

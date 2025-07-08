@@ -5,10 +5,6 @@ import {
   Platform,
   ScrollView,
   View,
-  Text,
-  TouchableOpacity,
-  InteractionManager,
-  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { theme } from "@/types/theme";
@@ -53,7 +49,6 @@ export const CreateListScreen: React.FC<CreateListScreenProps> = ({
     processingProgress,
     currentProcessingImage,
     totalProcessingImages,
-    uploadProgress,
     selectedPredictionLabels,
     setSelectedPredictionLabels,
     reset,
