@@ -30,13 +30,19 @@ export const TeamProjectsBottomSheet = forwardRef<
   const { handleError, wrapAsync } = useErrorHandler('TeamProjectsBottomSheet');
 
   const { projects: userProjects = [], isLoading: loadingUserProjects } = useMyProjects();
-  const { data: teamProjects = [], isLoading: loadingTeamProjects } = useTeamProjects(teamId);
+  const { data: teamProjects = [], refetch: refetchTeamProjects, isLoading: loadingTeamProjects } = useTeamProjects(teamId);
 
   useEffect(() => {
     if (teamProjects.length > 0) {
       setSelectedProjects(teamProjects.map(p => p.id));
     }
   }, [teamProjects]);
+
+  useEffect(() => {
+    if (visible) {
+      refetchTeamProjects();
+    }
+  }, [visible]);
 
   const filteredProjects = userProjects.filter(project =>
     project.name.toLowerCase().includes(searchQuery.toLowerCase())
