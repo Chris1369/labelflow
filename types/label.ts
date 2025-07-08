@@ -5,6 +5,7 @@ export interface Label {
   ownerId: string;
   subIds: string[];
   isPublic: boolean;
+  classId?: number;
   createdAt: string;
   updatedAt: string;
   __v?: number;

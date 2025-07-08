@@ -26,6 +26,7 @@ export const useUserData = () => {
         name: label.name,
         category: "Mes labels",
         icon: "pricetag" as any,
+        classId: label.classId,
       }));
       setUserLabels(formattedLabels);
 
