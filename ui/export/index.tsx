@@ -17,7 +17,7 @@ export default function ExportScreen() {
     ["json", "json-min", "csv", "tsv"].includes(opt.id)
   );
   const otherOptions = exportOptions.filter((opt) =>
-    ["coco", "pascal-voc"].includes(opt.id)
+    ["coco", "pascal-voc", "dataset-bundle"].includes(opt.id)
   );
 
   return (
