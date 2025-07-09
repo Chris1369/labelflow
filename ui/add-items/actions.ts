@@ -235,46 +235,46 @@ export const addItemsActions = {
       await projectItemAPI.addProjectItems(formData);
 
       // Send annotations for training (fire and forget - don't wait for response)
-      try {
-        // Get project name from the project store
-        const projectName = currentProject?.name || "Unknown Project";
+      // try {
+      //   // Get project name from the project store
+      //   const projectName = currentProject?.name || "Unknown Project";
 
-        // Get image dimensions (we know it's 640x640 from resizing)
-        const imageWidth = 640;
-        const imageHeight = 640;
+      //   // Get image dimensions (we know it's 640x640 from resizing)
+      //   const imageWidth = 640;
+      //   const imageHeight = 640;
 
-        // Convert bounding boxes to training format
-        const annotations = trainingAnnotationAPI.convertBoundingBoxFormat(
-          completedBoxes.map((box) => ({
-            centerX: box.centerX,
-            centerY: box.centerY,
-            width: box.width,
-            height: box.height,
-            label: box.label || "unknown",
-          }))
-        );
+      //   // Convert bounding boxes to training format
+      //   const annotations = trainingAnnotationAPI.convertBoundingBoxFormat(
+      //     completedBoxes.map((box) => ({
+      //       centerX: box.centerX,
+      //       centerY: box.centerY,
+      //       width: box.width,
+      //       height: box.height,
+      //       label: box.label || "unknown",
+      //     }))
+      //   );
 
-        // Send annotations asynchronously (don't await)
-        trainingAnnotationAPI
-          .sendAnnotations(
-            capturedImageUri,
-            imageWidth,
-            imageHeight,
-            annotations,
-            projectName,
-            objectItemTrainingId as string
-          )
-          .then(() => {
-            console.log("Training annotations sent successfully");
-          })
-          .catch((error) => {
-            console.error("Failed to send training annotations:", error);
-            // Don't show error to user - training is optional
-          });
-      } catch (error) {
-        console.error("Error preparing training annotations:", error);
-        // Don't fail the save operation
-      }
+      //   // Send annotations asynchronously (don't await)
+      //   trainingAnnotationAPI
+      //     .sendAnnotations(
+      //       capturedImageUri,
+      //       imageWidth,
+      //       imageHeight,
+      //       annotations,
+      //       projectName,
+      //       objectItemTrainingId as string
+      //     )
+      //     .then(() => {
+      //       console.log("Training annotations sent successfully");
+      //     })
+      //     .catch((error) => {
+      //       console.error("Failed to send training annotations:", error);
+      //       // Don't show error to user - training is optional
+      //     });
+      // } catch (error) {
+      //   console.error("Error preparing training annotations:", error);
+      //   // Don't fail the save operation
+      // }
 
       // Reset saving state first
       setIsSaving(false);
@@ -490,55 +490,55 @@ export const addItemsActions = {
       // Check if validation was successful (response exists and no error)
       if (response && response.projectItem) {
         // Send training annotations (fire and forget - don't wait for response)
-        try {
-          // Get project name from the project store
-          const projectName = currentProject?.name || "Unknown Project";
+        // try {
+        //   // Get project name from the project store
+        //   const projectName = currentProject?.name || "Unknown Project";
 
-          // Get current image URL
-          const currentImageUrl = currentItem.fileUrl;
+        //   // Get current image URL
+        //   const currentImageUrl = currentItem.fileUrl;
 
-          if (currentImageUrl) {
-            // Get image dimensions (we know it's 640x640 from resizing)
-            const imageWidth = 640;
-            const imageHeight = 640;
+        //   if (currentImageUrl) {
+        //     // Get image dimensions (we know it's 640x640 from resizing)
+        //     const imageWidth = 640;
+        //     const imageHeight = 640;
 
-            // Convert bounding boxes to training format
-            const annotations = trainingAnnotationAPI.convertBoundingBoxFormat(
-              boundingBoxes
-                .filter((box) => box.isComplete && box.label)
-                .map((box) => ({
-                  centerX: box.centerX,
-                  centerY: box.centerY,
-                  width: box.width,
-                  height: box.height,
-                  label: box.label || "unknown",
-                }))
-            );
+        //     // Convert bounding boxes to training format
+        //     const annotations = trainingAnnotationAPI.convertBoundingBoxFormat(
+        //       boundingBoxes
+        //         .filter((box) => box.isComplete && box.label)
+        //         .map((box) => ({
+        //           centerX: box.centerX,
+        //           centerY: box.centerY,
+        //           width: box.width,
+        //           height: box.height,
+        //           label: box.label || "unknown",
+        //         }))
+        //     );
 
-            // Send annotations asynchronously (don't await)
-            trainingAnnotationAPI
-              .sendAnnotations(
-                currentImageUrl,
-                imageWidth,
-                imageHeight,
-                annotations,
-                projectName,
-                objectItemTrainingId as string
-              )
-              .then(() => {
-                console.log(
-                  "Training annotations sent successfully for validated item"
-                );
-              })
-              .catch((error) => {
-                console.error("Failed to send training annotations:", error);
-                // Don't show error to user - training is optional
-              });
-          }
-        } catch (error) {
-          console.error("Error preparing training annotations:", error);
-          // Don't fail the validation operation
-        }
+        //     // Send annotations asynchronously (don't await)
+        //     trainingAnnotationAPI
+        //       .sendAnnotations(
+        //         currentImageUrl,
+        //         imageWidth,
+        //         imageHeight,
+        //         annotations,
+        //         projectName,
+        //         objectItemTrainingId as string
+        //       )
+        //       .then(() => {
+        //         console.log(
+        //           "Training annotations sent successfully for validated item"
+        //         );
+        //       })
+        //       .catch((error) => {
+        //         console.error("Failed to send training annotations:", error);
+        //         // Don't show error to user - training is optional
+        //       });
+        //   }
+        // } catch (error) {
+        //   console.error("Error preparing training annotations:", error);
+        //   // Don't fail the validation operation
+        // }
 
         // Remove the validated item from the local list
         const updatedItems = [...unlabeledListItems];
